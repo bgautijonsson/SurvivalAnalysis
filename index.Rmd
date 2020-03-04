@@ -41,7 +41,7 @@ This is our base setup. Further packages will be loaded in the individual lectur
 
 ```{r setup, include=FALSE, echo = TRUE}
 knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE, 
-                      fig.width = 14, fig.asp = 0.62, out.width = "100%")
+                      fig.width = 8, fig.asp = 0.62, out.width = "100%")
 ```
 
 ```{r}

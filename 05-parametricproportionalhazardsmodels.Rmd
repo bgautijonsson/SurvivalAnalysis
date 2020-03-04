@@ -1,3 +1,611 @@
 # Parametric Proportional Hazards Models
 
-We have finished a nice book.
+```{r}
+library(muhaz)
+library(flexsurv)
+library(eha)
+library(mice) # for Nelson Aalen
+library(epitools)
+library(rms)
+library(bshazard)
+```
+
+
+```{r}
+data("wcgs")
+wcgs$age0q5 <- cut(wcgs$age0,breaks=quantile(wcgs$age0,seq(0,1,0.2)),include.lowest=T,right=FALSE)
+wcgs$behpat0f <- factor(wcgs$behpat0,levels=1:4,label=c("A1","A2","B1","B2"))
+wcgs$dibpat0f <- factor(wcgs$dibpat0,levels=0:1,label=c("B","A"))
+wcgs$smoker <- ifelse(wcgs$ncigs0>0,1,0)
+wcgs$smokerf <- factor(wcgs$smoker,levels=c(1,0),labels=c("Yes","No"))
+wcgs$smokerfny <- factor(wcgs$smoker,levels=c(0,1),labels=c("No","Yes"))
+wcgs$heightcm <- wcgs$height0*2.54
+wcgs$weightkg <- wcgs$weight0*0.45359237
+wcgs$bmi <- wcgs$weightkg / (wcgs$heightcm/100)^2
+wcgs$cholmmol = wcgs$chol/39
+wcgs$chd69f <- factor(wcgs$chd69,levels=c(1,0),labels=c("Yes","No"))
+wcgs$chd69fny <- factor(wcgs$chd69,levels=c(0,1),labels=c("No CHD","CHD"))
+wcgs$bmiq5 <- cut(wcgs$bmi,breaks=quantile(wcgs$bmi,seq(0,1,0.2)),include.lowest=T,right=FALSE)
+wcgs$time169y <- wcgs$time169/365.24
+# restricted followup to 5 years
+wcgs$time169y5 <- pmin(wcgs$time169y,5)
+wcgs$chd695 <- (wcgs$chd69==1 & wcgs$time169y <=5)
+
+wcgs$agec <- wcgs$age0 - 46
+wcgs$cholmmolc <- wcgs$cholmmol - 5.8
+wcgs$sbpc <- wcgs$sbp0 - 128
+
+```
+
+## Introduction
+We continue to use the *wcgs* data included with the *epitools* package.  WCGS stands for the Western Collaborative Group Study. 
+
+If the rate of events follow a Poisson distribution it can be shown that the time between events, or the time until next event, follow an *exponential distribution*.
+
+Overall incidence or hazard rate in the WCGS data was
+```{r}
+fut <- sum(wcgs$time169y)
+en <- sum(wcgs$chd69)
+fut
+en
+en/fut
+```
+
+For every 1000 person years:
+```{r}
+en/fut*1000
+```
+
+The incidence can also be estimated from the Poisson model using an *offset*. The term offset means that we standardize the number of outcomes by the time. We use log of time because the Poisson model has a log-link.
+
+```{r}
+fit0 <- glm(chd69 ~ 1 + offset(log(time169y)),family=poisson(),data=wcgs)
+exp(coef(fit0))*1000
+exp(confint.default(fit0))*1000
+```
+
+The cumulative incidence is then simply $\lambda t$ after observation length $T=t$.  This is an assumption that needs further inspection.
+
+## Exponential survival function for the survival time
+We'll begin by plotting the hazard function, which is the rate of events over a small time interval.  Given that time $t$ has passed, the probability an event will take place at time $T$ in the interval between $t$ and $t+\delta$ is P[t \le T < t + \delta|T \ge t].
+
+The hazard rate is this probability standardized by a small time interval, and then we get a rate when the interval goes to zero length:
+$$
+h(t) = \frac{P[t \le T < t + \delta|T \ge t]}{\delta}.
+$$
+
+Note that $h() \ge 0$.  
+
+The connection between the exponential distribution and the Poisson model is that if the Poisson model holds then the exponential model holds for the time and the hazard is constant:
+$$
+h(t) = \lambda
+$$
+
+We'll estimate the *hazard* using the *muhaz* function in  *R*.  The rate from the Poisson model, assuming constant hazard, is superimposed.
+
+```{r}
+fitm <- bshazard(Surv(time169y,chd69)~1,data=wcgs)
+haz.frame <- data.frame(x=fitm$time,y=fitm$hazard)
+ggplot(haz.frame,aes(x,y))+geom_line()+geom_hline(yintercept = exp(coef(fit0)),lty=2)+
+  xlab("t (years)") + ylab("h(t)")
+```
+
+It seems that the rate is increasing along with the duration of the follow up.  The cohort is getting older as time passes and there is no renewal of younger men into  the cohort.
+
+The survival function for an exponential distribution is
+$$
+S(t) = P[T>t] = \exp(-\lambda t).
+$$
+
+The cumulative hazard function $H$ is the integral of the hazard function or 
+$$
+H(t) = \int_0^t h(u) du =  \int_0^t \lambda \, du = \lambda t.
+$$
+
+Note that a general result from survival analysis says that 
+$$
+S(t) = \exp(-H(t))
+$$
+
+The *flexsurv* package can be used to get an estimate for $\lambda$ for the exponential distribution. Note that there are **two** different ways to present the exponential and the Weibull distributions in survival analysis. Either using the proportional hazards (PH) definition or the accelerated failure time (AFT) definition.  We'll consider the PH approach. It is possible to compute estimates from one approach to the other. 
+
+Recall the proportional hazards model:
+$$
+h(t) = h_0(t) \exp(\beta_1 x_1 + \cdots + \beta_p x_p)
+$$
+Equivalently
+$$
+\log h(t) = \log h_0(t) + \beta_1 x_1 + \cdots + \beta_p x_p
+$$
+
+
+Here $x_1,\ldots,x_p$ are covariates.
+
+Applying *flexsurvreg*, assuming the exponential distribution, with no covariates gives
+```{r}
+fit.e.ph  <- flexsurvreg(Surv(time169y,chd69)~1,dist="exponential",
+                         data=wcgs)
+fit.e.ph
+```
+
+We recognize the estimate of $\lambda$.  However, if we apply the coef() function we get
+```{r}
+coef(fit.e.ph)
+```
+and this is $\log(\lambda)$ or $\lambda=\exp(-4.501807)$.
+
+
+The fact that 
+$$
+S(t) = \exp(-H(t))
+$$
+shows that it is more natural to model the hazard or the cumulative hazard, and then estimate the survival.  The cumulative hazard function should be in the focus during the modeling process.  The survival function is then a by product.  This is the approach taken when using the non-parametric Nelson-Aalen estimator of survival.First the cumulative hazard is estimated and then the survival.
+
+Let's compare the non-parametric Nelson - Aalen estimate of the cumulative survival to the parametric exponential estimate.
+
+```{r}
+nelson.aalen.e.fit <- nelsonaalen(wcgs,time169y,chd69)
+na.e.frame <- data.frame(time=wcgs$time169y,H.na=nelson.aalen.e.fit,
+                         H.e = exp(coef(fit.e.ph))*wcgs$time169y)
+
+ggplot(na.e.frame,aes(x=time))+geom_line(aes(y=H.na,colour="blue"))+
+  geom_line(aes(y=H.e,colour="green")) +
+  xlab("Time (t)") +
+  ylab("Cumulative Hazard H(t)") +
+  scale_colour_manual("Estimate",values = c("blue","green"),labels=c("N-Aalen","Exponential"))
+```
+
+For completeness we also compare the survival curves based on the Nelson-Aalen estimate ($S(t)=exp(-H(t)$), the Kaplan Meier estimate, and the exponential estimate ($S(t)=exp(-\lambda t)$).
+
+```{r}
+kmfit <- survfit(Surv(time169y,chd69)~1,data=wcgs)
+km.frame <- as.data.frame(summary(kmfit)[2:10])
+
+ggplot(na.e.frame,aes(x=time))+geom_line(aes(y=exp(-H.na),colour="blue")) +
+  geom_line(aes(y=exp(-H.e),colour="green")) + geom_step(data=km.frame,aes(time,surv,color="red"),lty=2) + 
+  xlab("Time (t)") +
+  ylab("Survival S(t)") +
+  scale_colour_manual("Estimate",values = c("blue","green","red"),labels=c("N-Aalen","Exponential","K-M"))
+```
+
+## The Weibull survival function
+### Proportional hazards representation - PH
+
+A more flexible function for the hazard is based on the *Weibull* distribution.  The hazard is then a non-constant function of time and has the form:
+
+$$
+h(t) = \mu \alpha t ^ {\alpha - 1}
+$$
+The cumulative hazard is then
+
+$$
+H(t) = \mu  t ^ {\alpha }
+$$
+and the survival
+$$
+S(t)=\exp(-H(t))=\exp(- \mu t ^ \alpha)
+$$
+Note that $\mu$ and $\alpha$ are parameters and $t$ stands for time. We refer to $\alpha$ as the the shape and $\mu$ as the scale. Note that when $\alpha=1$ we have the exponential distribution.
+
+Please note that the parametric form differs between textbooks and statistical programs and even between packages within R. Read the help files carefully!
+
+### The accelerated failure time representation - AFT
+In **R** the convention is to use the same form as for the Weibull distribution functions, *dweibull* etc. This is called the
+the accelerated failure time (AFT) representation.
+
+The cumulative hazard is:
+$$
+H(t) = (t/b)^a = \frac{1}{b^a} t ^ a
+$$
+
+and the hazard is
+
+$$
+h(t) = \frac{a}{b^a} t ^ {a-1}
+$$
+Note that $a$ and $b$ are parameters and $t$ stands for time.  
+
+The parameters in *R* (and other programs) have special names:
+
+* $a$ is called *shape*
+* $b$ is called *scale*
+
+Note that $b$ *scales* the time and $a$ controls the *shape*.
+
+The role of the shape is similar for the PH and AFT representations.
+
+Let's try plotting the hazard and cumulative hazard for a given set of $a$ and $b$ in *R*.  You can experiment by changing the values for $a$ and $b$ and study how the functional form changes.  Note that we use $x$ instead of $t$ inside the function because $t$ is reserved in R. The cumulative hazard function corresponding is below the corresponding hazard function.
+
+```{r}
+a<-1
+b<-2
+x <- seq(0.1,10,0.1)
+h <- function(x) {a/b^a * x ^ (a-1)}
+H <- function(x) {(x/b)^a}
+
+par(mfcol=c(2,2))
+plot(x,h(x),type="l",xlab="t",ylab="h(t)=a/b^a * t ^ (a-1)")
+text(6,jitter(mean(h(x))),labels=paste("a =",a," b =",b))
+plot(x,H(x),type="l",xlab="t",ylab="H(t)=1/b^a * t ^ a")
+text(6,jitter(mean(H(x))),labels=paste("a =",a," b =",b))
+a <- 0.5
+b <- 1
+plot(x,h(x),type="l",xlab="t",ylab="h(t)=a/b^a * t ^ (a-1)")
+text(6,jitter(mean(h(x))),labels=paste("a =",a," b =",b))
+plot(x,H(x),type="l",xlab="t",ylab="H(t)=1/b^a * t ^ a")
+text(6,jitter(mean(H(x))),labels=paste("a =",a," b =",b))
+par(mfrow=c(1,1))
+```
+
+
+## Estimating the hazard function and survival
+### Exponential with flexsurv
+
+```{r}
+fit.e.ph  <- flexsurvreg(Surv(time169y,chd69)~1,data=wcgs,dist="exponential")
+fit.e.ph
+coef(fit.e.ph)
+```
+
+### Weibull PH with flexsurv
+We'll use  *flexsurvreg* to estimate $\mu$ and $\alpha$ for the *wcgs* data. Note the use of dist="weibullph".
+```{r}
+fit.w.ph  <- flexsurvreg(Surv(time169y,chd69)~1,data=wcgs,dist="weibullph")
+fit.w.ph
+coef(fit.w.ph)
+```
+
+This means that 
+$$
+H(t) = H_0(t) = \exp(-5.1141) t ^ {\exp(0.2622523)}
+$$
+
+Here we write $\mu=\exp(\beta_0)$ where $\beta_0$ is the log-scale from the *flexsurv* model.
+
+Let's draw the $h()$ from the exponential estimate (broken line) and the Weibull estimate (blue line).  We use $x$ for time because $t$ is a reserved function in *R*. R computes for for each value in  $x$ the value of $h(x)$ where we take $\mu$ and $\alpha$ from the estimation above.
+
+```{r}
+plot(fitm,ylim=c(0,0.03))
+x <- seq(0,9,0.1)
+alpha<-exp(coef(fit.w.ph)[1])
+mu<-exp(coef(fit.w.ph)[2])
+h <- function(x) {mu*alpha*x^(alpha-1)}
+lines(x,h(x),col="blue")
+abline(h=exp(coef(fit.e.ph)),lty=2,col="green")
+```
+
+It is easier to estimate the *cumulative hazard* or $H(t)$ because it is a smooth function.  The hazard function can be unstable when there are few events. Therefore it is more common to compare cumulative hazards function between models.
+
+We plot the *Nelons-Aalen* non-parametric estimate of the cumulative hazard.  Then we superimpose the Weibull estimate, and the exponential estimate.  Here the exponential is $H_E(t) = \lambda t$ and the Weibull is $H_W(t) = \mu  t ^ \alpha$.
+```{r}
+nelson.aalen <- nelsonaalen(wcgs,time169y,chd69)
+plot(wcgs$time169y,nelson.aalen,xlab="Time (t)",ylab="Cumulative Hazard H(t)")
+x <- seq(0,9,0.1)
+alpha<-exp(coef(fit.w.ph)[1])
+mu<-exp(coef(fit.w.ph)[2])
+H <- function(x) {mu*x^alpha}
+lines(x,H(x),col="green",lwd=2)
+lines(x,exp(coef(fit.e.ph))*x,lwd=2,lty=2,col="blue")
+```
+
+The Weibull version is much closer to the Nelson-Aalen estimate than the exponential. Note that the exponential is a special case of the Weibull when $\alpha=1$.
+
+Therefore if *log(shape)=0* or *shape=1*, then the Weibull becomes an exponential.  From the output we see the test for *log(shape)=0*.  We can also compare *log-likelihood* values, and show that below.
+
+We can use a likelihood ratio test to compare the Weibull and the exponential.  The difference is 1 parameter so we compare the 2 times difference in log likelihoods to the chi-square distribution with 1 degree of freedom.
+
+```{r}
+qchisq(0.95,1)
+```
+
+The difference is greater than the reference value from the chi-square distribution, and therefore we conclude that the Weibull model gives a better fit.
+```{r}
+-2*(fit.e.ph$loglik - fit.w.ph$loglik)
+```
+
+## Covariates and Hazard ratios
+
+Consider the difference in hazard between the behavior types A and B.  From a Poisson model we see that the rate ratio is 2.34.  
+
+```{r}
+futpb <- tapply(wcgs$time169y,wcgs$dibpat0f,sum)
+enpb <- tapply(wcgs$chd69,wcgs$dibpat0f,sum)
+```
+
+Number of events per 1000 person years by type:
+```{r}
+lambda<-enpb/futpb*1000
+lambda
+lambda[2]/lambda[1]
+```
+
+```{r}
+fitdb <- glm(chd69 ~ dibpat0f+offset(log(time169y)),data=wcgs,family=poisson())
+summary(fitdb)
+exp(coef(fitdb)[2])
+exp(confint.default(fitdb))[2,]
+```
+
+
+From the exponential ($\alpha=1$ or *shape=1*) we get:
+```{r}
+fit.w1.ph.m1  <- flexsurvreg(Surv(time169y,chd69)~dibpat0f,
+                             dist="exponential",data=wcgs)
+fit.w1.ph.m1
+```
+
+From the Weibull we get:
+```{r}
+fit.w.ph.m1  <- flexsurvreg(Surv(time169y,chd69)~dibpat0f,
+                            dist="weibullph",
+                            data=wcgs)
+fit.w.ph.m1
+```
+
+
+From the Weibull with age adjustment we get  (here agec=age0-46):
+```{r}
+fit.w.ph.m2  <- flexsurvreg(Surv(time169y,chd69)~dibpat0f+agec,
+                        dist="weibullph",
+                        data=wcgs)
+fit.w.ph.m2
+```
+
+
+Be sure to understand the parametric form of the *flexsurvreg* function.  In general we have
+$$
+h(t) = \mu \alpha t ^ {\alpha-1} \exp(\beta_1 x_1 + \cdots + \beta_p x_p),
+$$
+where  $x_1,\ldots,x_p$ are explanatory variables, and $h_0(t)=\mu \alpha t ^ {\alpha-1}$.
+
+Sometimes we write $\mu=exp(\beta_0)$ and then
+$$
+h(t) =\alpha t ^ {\alpha-1} \exp(\beta_0 +\beta_1 x_1 + \cdots + \beta_p x_p),
+$$
+
+Consider and example.  Let $x$ be a *dummy* explanatory variable for the behavior *A* or *B*.  Let $x_1=1$ if the type is *A* and  $x_1=0$ if the type is *B*. Let $x_2=0$ meaning that agem=0 or age0=46.
+
+For *B* of age 46 (the reference group) we get:
+$$
+h_B(t)=h_0(t) = \mu \alpha t ^ {a-1}.
+$$
+
+For *A* of age 46 we get
+$$
+h_A(t) =\mu \alpha t ^ {a-1} \exp(\beta_1).
+$$
+
+The hazard ratio (**H**azard **R**atio = HR) for *A* vs *B* is
+$$
+HR = h_A(t) / h_B(t) = \exp(\beta_1).
+$$
+
+Let's consider the effect of age, where $x_2$ is the age variable.  Then  $h(t)$ for *B* of age $k$ is
+$$
+h_B(t) = \mu \alpha t ^ {a-1} \exp(\beta_2  k),
+$$
+
+and $h(t)$ for an *A*-type, also of age $k$ units from 46, we get
+$$
+h_A(t) = \mu \alpha t ^ {a-1} \exp(\beta_1 + \beta_2  k).
+$$
+The cumulative hazard for A given age of k units from 46 is:
+$$
+H_A(t) = \mu  t ^ {a} \exp(\beta_1 + \beta_2  k).
+$$
+
+The adjusted hazard ratio for *A* vs *B* is:
+$$
+HR = h_A(t) / h_B(t) = \exp(\beta_1).
+$$
+
+The formula is the same, but the estimate of $\beta_1$ could be different if the hazard depends on age and there is an age difference between the groups (in other words, confounding is present).
+
+Recall that $exp(y)/exp(z) = exp(y-z)$.
+
+The age variable cancels in hazard ratio computations because we assume the effect of age is same for *A* and *B*. We could study that by introducing **interaction** between age and behavior.
+
+Let's plot the cumulative hazards for the A and B types.  We show the Nelson-Aalen and the Weibull, with and without age adjustment.
+
+We have to use the *order* function to sort the time values. Be sure to understand the the form of $H_W(t)$ for the A group.
+
+First we use the unadjusted Weibull model.
+
+```{r}
+wcgsA <- subset(wcgs,dibpat0f=="A")
+wcgsB <- subset(wcgs,dibpat0f=="B")
+nelson.aalenA <- nelsonaalen(wcgsA,time169y,chd69)
+nelson.aalenB <- nelsonaalen(wcgsB,time169y,chd69)
+oA <- order(wcgsA$time169y)
+oB <- order(wcgsB$time169y)
+plot(wcgsA$time169y[oA],nelson.aalenA[oA],xlab="Time",ylab="H(t)",type="l")
+lines(wcgsB$time169y[oB],nelson.aalenB[oB])
+
+x <- seq(0,9,0.1)
+#  H_0(t)
+mu <- exp(coef(fit.w.ph.m1)[2])
+alpha <- exp(coef(fit.w.ph.m1)[1])
+H0 <- function(x) {mu*x^alpha}
+lines(x,H0(x),col="blue",lwd=2)
+lines(x,H0(x) * exp(0.857),col="red",lwd=2)
+```
+
+Now use age adjustment (with respect to age 46).  Then agec=0.
+```{r}
+wcgsA <- subset(wcgs,dibpat0f=="A")
+wcgsB <- subset(wcgs,dibpat0f=="B")
+nelson.aalenA <- nelsonaalen(wcgsA,time169y,chd69)
+nelson.aalenB <- nelsonaalen(wcgsB,time169y,chd69)
+oA <- order(wcgsA$time169y)
+oB <- order(wcgsB$time169y)
+plot(wcgsA$time169y[oA],nelson.aalenA[oA],xlab="Time",ylab="H(t)",type="l")
+lines(wcgsB$time169y[oB],nelson.aalenB[oB])
+
+x <- seq(0,9,0.1)
+mu <- exp(coef(fit.w.ph.m2)[2])
+alpha <- exp(coef(fit.w.ph.m2)[1])
+H0 <- function(x) {mu*x^alpha}
+lines(x,H0(x) ,col="blue",lwd=2)
+lines(x,H0(x) * exp(0.795),col="red",lwd=2)
+```
+
+Note that the red line is below the un-adjusted estimate. This is the effect of the age adjustment.  The A group was slightly older.  The difference between the groups has now been adjusted for age.
+
+Mean age of the *A* and *B* types:
+```{r}
+tapply(wcgs$age0,wcgs$dibpat0f,mean)
+```
+
+Let's inspect age adjustment to age 50.  Then agec=4.
+```{r}
+wcgsA <- subset(wcgs,dibpat0f=="A")
+wcgsB <- subset(wcgs,dibpat0f=="B")
+nelson.aalenA <- nelsonaalen(wcgsA,time169y,chd69)
+nelson.aalenB <- nelsonaalen(wcgsB,time169y,chd69)
+oA <- order(wcgsA$time169y)
+oB <- order(wcgsB$time169y)
+plot(wcgsA$time169y[oA],nelson.aalenA[oA],xlab="Time",ylab="H(t)",type="l")
+lines(wcgsB$time169y[oB],nelson.aalenB[oB])
+
+x <- seq(0,9,0.1)
+#  H_W(t)
+lines(x,H0(x) * exp(0.066*4),col="blue",lwd=2)
+lines(x,H0(x) * exp(0.795 + 0.066*4),col="red",lwd=2)
+```
+
+The lines are now above the un-adjusted lines.
+
+These are so called model based survival curves. We prefer conditional or standardized survival curves. However, this has not been implemented for *flexsurvreg*.
+
+## Test of interaction using flexurvreg
+Is there an interaction between age and type?
+
+```{r}
+
+fit.w.ph.m3  <- flexsurvreg(Surv(time169y,chd69)~dibpat0f+agec+dibpat0f:agec,dist="weibull",data=wcgs)
+fit.w.ph.m3
+```
+
+The difference in -2 times likelihood is
+```{r}
+ll <- -2*(logLik(fit.w.ph.m2) - logLik(fit.w.ph.m3))
+ll
+```
+
+The p-value is
+```{r}
+1-pchisq(ll,1)
+```
+
+The interaction term is not statistically significant. Therefore we do not have evidence for an interaction, so the effect of age does not depend on the behavior type. We drop the term *dibpat0f:agem* from the model.
+
+## Comparison with a Cox model
+```{r}
+fit.cox.ph.m3  <- coxph(Surv(time169y,chd69)~dibpat0f+agec+dibpat0f:agec,
+                        data=wcgs)
+fit.cox.ph.m3
+```
+
+The interaction is not signficant. The reduced model is
+
+```{r}
+fit.cox.ph.m2 <- update(fit.cox.ph.m3,.~.-dibpat0f:agec)
+fit.cox.ph.m2 
+```
+
+Comparing the HRs
+```{r}
+data.frame(cox=exp(coef(fit.cox.ph.m2)),weibull=exp(coef(fit.w.ph.m2)[3:4]))
+```
+
+Add the Cox estimates
+```{r}
+wcgsA <- subset(wcgs,dibpat0f=="A")
+wcgsB <- subset(wcgs,dibpat0f=="B")
+nelson.aalenA <- nelsonaalen(wcgsA,time169y,chd69)
+nelson.aalenB <- nelsonaalen(wcgsB,time169y,chd69)
+oA <- order(wcgsA$time169y)
+oB <- order(wcgsB$time169y)
+plot(wcgsA$time169y[oA],nelson.aalenA[oA],xlab="Time",ylab="H(t)",type="l")
+lines(wcgsB$time169y[oB],nelson.aalenB[oB])
+
+x <- seq(0,9,0.1)
+mu <- exp(coef(fit.w.ph.m2)[2])
+alpha <- exp(coef(fit.w.ph.m2)[1])
+H0 <- function(x) {mu*x^alpha}
+lines(x,H0(x) ,col="blue",lwd=2)
+lines(x,H0(x) * exp(0.795),col="red",lwd=2)
+# Baseline Cox
+coxB <- survfit(fit.cox.ph.m2,newdata = data.frame(agec=0,dibpat0f="B"))
+lines(coxB$time,coxB$cumhaz,col="green")
+lines(coxB$time,coxB$cumhaz*exp(coef(fit.cox.ph.m2)[1]),col="orange")
+```
+
+
+## Estimating risk
+What is the 5 year risk of CHD for type A who is 49 years of age?
+
+First we define the risk function.
+
+```{r}
+chd.risk <- function(t,wfit,vars)
+{
+  mu <- exp(coef(wfit)[2])
+  alpha <- exp(coef(wfit)[1])
+  H0 <- function(x) {mu*x^alpha}
+  S0 <- function(x) {exp(-H0(x))}
+  H <- H0(t) * exp(sum(vars*coef(wfit)[-c(1:2)]))
+  1-S0(t)^exp(sum(vars*coef(wfit)[-c(1:2)]))
+}
+```
+
+Then we have to supply the appropriate covariate values. Note that 0 means type B and 1 means type A.
+
+According to the Weibull model we have for type A of age 46.8 and 49 (49-46=3):
+```{r}
+chd.risk(5,fit.w.ph.m2,c(1,0.8))
+chd.risk(5,fit.w.ph.m2,c(1,3))
+```
+
+According to the Weibull model we have for type B of age 45.8 and 49 (49-46=3):
+
+```{r}
+chd.risk(5,fit.w.ph.m2,c(0,-.2))
+chd.risk(5,fit.w.ph.m2,c(0,3))
+```
+
+From a Kaplan Meier model we get the unadjusted values for each type as:
+
+```{r}
+km.fit <- survfit(Surv(time169y,chd69)~dibpat0f,data=wcgs)
+1-summary(km.fit,times=5)$surv
+```
+
+We can also create the risk function for the Cox model using basehaz. We use approxfun to build a function based on the results from basehaz.
+
+```{r}
+chd.risk.cox <- function(t,cfit,vars)
+{
+  bs.cox <- basehaz(cfit,centered = FALSE)
+  H0 <- approxfun(bs.cox$time,bs.cox$hazard)
+  S0 <- function(t) {exp(-H0(t))}
+  1-S0(t) ^ exp(sum(vars*coef(cfit)))
+}
+```
+
+According to the Cox model we have for type B of age 45.8 and 49 (49-46=3):
+
+```{r}
+chd.risk.cox(5,fit.cox.ph.m2,c(0,-.2))
+chd.risk.cox(5,fit.cox.ph.m2,c(0,3))
+```
+
+All 2-way interactions
+```{r}
+fit.cox.all2 <- coxph(Surv(time169y,chd69)~(age0+sbp0+smoker+dibpat0f)^2,data=wcgs)
+drop1(fit.cox.all2,test="Chisq")
+```
+
+We do not have any statistically signficant interactions here.
+
+
