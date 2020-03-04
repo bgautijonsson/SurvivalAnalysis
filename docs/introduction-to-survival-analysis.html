@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+<head>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>Chapter 2 Introduction to Survival Analysis | Lecture Notes on Survival Analysis</title>
+  <meta name="description" content="This is a collection of lectures notes from the course at University of Iceland" />
+  <meta name="generator" content="bookdown 0.17.2 and GitBook 2.6.7" />
+
+  <meta property="og:title" content="Chapter 2 Introduction to Survival Analysis | Lecture Notes on Survival Analysis" />
+  <meta property="og:type" content="book" />
+  
+  
+  <meta property="og:description" content="This is a collection of lectures notes from the course at University of Iceland" />
+  
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Chapter 2 Introduction to Survival Analysis | Lecture Notes on Survival Analysis" />
+  
+  <meta name="twitter:description" content="This is a collection of lectures notes from the course at University of Iceland" />
+  
+
+<meta name="author" content="Thor Aspelund" />
+<meta name="author" content="Brynjólfur Gauti Jónsson" />
+
+
+<meta name="date" content="2020-03-04" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  
+  
+<link rel="prev" href="index.html"/>
+<link rel="next" href="some-non-parametric-procedures.html"/>
+<script src="libs/jquery-2.2.3/jquery.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-clipboard.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+
+
+
+<style type="text/css">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+<link rel="stylesheet" href="style.css" type="text/css" />
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li><a href="./">University of Iceland</a></li>
+
+<li class="divider"></li>
+<li class="chapter" data-level="1" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i><b>1</b> Preface</a>
+<ul>
+<li class="chapter" data-level="1.1" data-path="index.html"><a href="index.html#the-book"><i class="fa fa-check"></i><b>1.1</b> The Book</a></li>
+<li class="chapter" data-level="1.2" data-path="index.html"><a href="index.html#theory"><i class="fa fa-check"></i><b>1.2</b> Theory</a></li>
+<li class="chapter" data-level="1.3" data-path="index.html"><a href="index.html#software"><i class="fa fa-check"></i><b>1.3</b> Software</a></li>
+<li class="chapter" data-level="1.4" data-path="index.html"><a href="index.html#setup-in-rstudio"><i class="fa fa-check"></i><b>1.4</b> Setup in RStudio</a></li>
+</ul></li>
+<li class="chapter" data-level="2" data-path="introduction-to-survival-analysis.html"><a href="introduction-to-survival-analysis.html"><i class="fa fa-check"></i><b>2</b> Introduction to Survival Analysis</a>
+<ul>
+<li class="chapter" data-level="2.1" data-path="introduction-to-survival-analysis.html"><a href="introduction-to-survival-analysis.html#inngangur"><i class="fa fa-check"></i><b>2.1</b> Inngangur</a></li>
+<li class="chapter" data-level="2.2" data-path="introduction-to-survival-analysis.html"><a href="introduction-to-survival-analysis.html#skerðing-censoring"><i class="fa fa-check"></i><b>2.2</b> Skerðing (censoring)</a></li>
+<li class="chapter" data-level="2.3" data-path="introduction-to-survival-analysis.html"><a href="introduction-to-survival-analysis.html#kaplan-meier-metillinn"><i class="fa fa-check"></i><b>2.3</b> Kaplan Meier metillinn</a></li>
+<li class="chapter" data-level="2.4" data-path="introduction-to-survival-analysis.html"><a href="introduction-to-survival-analysis.html#kaplan-meier-gröf"><i class="fa fa-check"></i><b>2.4</b> Kaplan Meier gröf</a></li>
+<li class="chapter" data-level="2.5" data-path="introduction-to-survival-analysis.html"><a href="introduction-to-survival-analysis.html#kaplan-meier-gröf-eftir-hópum"><i class="fa fa-check"></i><b>2.5</b> Kaplan Meier gröf eftir hópum</a></li>
+<li class="chapter" data-level="2.6" data-path="introduction-to-survival-analysis.html"><a href="introduction-to-survival-analysis.html#miðgildi-lifunar-og-logrank-próf"><i class="fa fa-check"></i><b>2.6</b> Miðgildi lifunar og logrank próf</a></li>
+<li class="chapter" data-level="2.7" data-path="introduction-to-survival-analysis.html"><a href="introduction-to-survival-analysis.html#víti-að-varast-og-breyting-á-tímaskala"><i class="fa fa-check"></i><b>2.7</b> Víti að varast og breyting á tímaskala</a></li>
+</ul></li>
+<li class="chapter" data-level="3" data-path="some-non-parametric-procedures.html"><a href="some-non-parametric-procedures.html"><i class="fa fa-check"></i><b>3</b> Some Non-Parametric Procedures</a></li>
+<li class="chapter" data-level="4" data-path="the-cox-regression-model.html"><a href="the-cox-regression-model.html"><i class="fa fa-check"></i><b>4</b> The Cox Regression Model</a></li>
+<li class="chapter" data-level="5" data-path="model-checking-in-the-cox-regression-model.html"><a href="model-checking-in-the-cox-regression-model.html"><i class="fa fa-check"></i><b>5</b> Model Checking in the Cox Regression Model</a>
+<ul>
+<li class="chapter" data-level="5.1" data-path="model-checking-in-the-cox-regression-model.html"><a href="model-checking-in-the-cox-regression-model.html#example-one"><i class="fa fa-check"></i><b>5.1</b> Example one</a></li>
+<li class="chapter" data-level="5.2" data-path="model-checking-in-the-cox-regression-model.html"><a href="model-checking-in-the-cox-regression-model.html#example-two"><i class="fa fa-check"></i><b>5.2</b> Example two</a></li>
+</ul></li>
+<li class="chapter" data-level="6" data-path="parametric-proportional-hazards-models.html"><a href="parametric-proportional-hazards-models.html"><i class="fa fa-check"></i><b>6</b> Parametric Proportional Hazards Models</a></li>
+<li class="chapter" data-level="7" data-path="time-dependent-variables-and-covariates.html"><a href="time-dependent-variables-and-covariates.html"><i class="fa fa-check"></i><b>7</b> Time-Dependent Variables and Covariates</a></li>
+<li class="chapter" data-level="8" data-path="competing-risks.html"><a href="competing-risks.html"><i class="fa fa-check"></i><b>8</b> Competing Risks</a></li>
+<li class="divider"></li>
+<li><a href="https://github.com/rstudio/bookdown" target="blank">Published with bookdown</a></li>
+
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">Lecture Notes on Survival Analysis</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="introduction-to-survival-analysis" class="section level1">
+<h1><span class="header-section-number">Chapter 2</span> Introduction to Survival Analysis</h1>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="introduction-to-survival-analysis.html#cb2-1"></a><span class="kw">library</span>(survival)</span>
+<span id="cb2-2"><a href="introduction-to-survival-analysis.html#cb2-2"></a><span class="kw">library</span>(tidyverse)</span>
+<span id="cb2-3"><a href="introduction-to-survival-analysis.html#cb2-3"></a><span class="kw">library</span>(epitools)</span>
+<span id="cb2-4"><a href="introduction-to-survival-analysis.html#cb2-4"></a><span class="kw">library</span>(survminer)</span></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="introduction-to-survival-analysis.html#cb3-1"></a><span class="co"># Gögnin fylgja með epitools pakkanum. Þá er nóg að virkja gögnin með data() skipun.</span></span>
+<span id="cb3-2"><a href="introduction-to-survival-analysis.html#cb3-2"></a><span class="kw">data</span>(wcgs)</span>
+<span id="cb3-3"><a href="introduction-to-survival-analysis.html#cb3-3"></a>wcgs<span class="op">$</span>behpat0f &lt;-<span class="st"> </span><span class="kw">factor</span>(wcgs<span class="op">$</span>behpat0,<span class="dt">levels=</span><span class="dv">1</span><span class="op">:</span><span class="dv">4</span>,<span class="dt">label=</span><span class="kw">c</span>(<span class="st">&quot;A1&quot;</span>,<span class="st">&quot;A2&quot;</span>,<span class="st">&quot;B1&quot;</span>,<span class="st">&quot;B2&quot;</span>))</span>
+<span id="cb3-4"><a href="introduction-to-survival-analysis.html#cb3-4"></a>wcgs<span class="op">$</span>dibpat0f &lt;-<span class="st"> </span><span class="kw">factor</span>(wcgs<span class="op">$</span>dibpat0,<span class="dt">levels=</span><span class="dv">0</span><span class="op">:</span><span class="dv">1</span>,<span class="dt">label=</span><span class="kw">c</span>(<span class="st">&quot;B&quot;</span>,<span class="st">&quot;A&quot;</span>))</span>
+<span id="cb3-5"><a href="introduction-to-survival-analysis.html#cb3-5"></a>wcgs<span class="op">$</span>smoker &lt;-<span class="st"> </span><span class="kw">ifelse</span>(wcgs<span class="op">$</span>ncigs0<span class="op">&gt;</span><span class="dv">0</span>,<span class="dv">1</span>,<span class="dv">0</span>)</span>
+<span id="cb3-6"><a href="introduction-to-survival-analysis.html#cb3-6"></a>wcgs<span class="op">$</span>smokerf &lt;-<span class="st"> </span><span class="kw">factor</span>(wcgs<span class="op">$</span>smoker,<span class="dt">levels=</span><span class="kw">c</span>(<span class="dv">0</span>,<span class="dv">1</span>),<span class="dt">labels=</span><span class="kw">c</span>(<span class="st">&quot;No&quot;</span>,<span class="st">&quot;Yes&quot;</span>))</span>
+<span id="cb3-7"><a href="introduction-to-survival-analysis.html#cb3-7"></a>wcgs<span class="op">$</span>heightcm &lt;-<span class="st"> </span>wcgs<span class="op">$</span>height0<span class="op">*</span><span class="fl">2.54</span></span>
+<span id="cb3-8"><a href="introduction-to-survival-analysis.html#cb3-8"></a>wcgs<span class="op">$</span>weightkg &lt;-<span class="st"> </span>wcgs<span class="op">$</span>weight0<span class="op">*</span><span class="fl">0.45359237</span></span>
+<span id="cb3-9"><a href="introduction-to-survival-analysis.html#cb3-9"></a>wcgs<span class="op">$</span>bmi &lt;-<span class="st"> </span>wcgs<span class="op">$</span>weightkg <span class="op">/</span><span class="st"> </span>(wcgs<span class="op">$</span>heightcm<span class="op">/</span><span class="dv">100</span>)<span class="op">^</span><span class="dv">2</span></span>
+<span id="cb3-10"><a href="introduction-to-survival-analysis.html#cb3-10"></a>wcgs<span class="op">$</span>cholmmol =<span class="st"> </span>wcgs<span class="op">$</span>chol<span class="op">/</span><span class="dv">39</span></span>
+<span id="cb3-11"><a href="introduction-to-survival-analysis.html#cb3-11"></a>wcgs<span class="op">$</span>time169y &lt;-<span class="st"> </span>wcgs<span class="op">$</span>time169<span class="op">/</span><span class="fl">365.24</span></span>
+<span id="cb3-12"><a href="introduction-to-survival-analysis.html#cb3-12"></a><span class="co"># restricted followup to 5 years</span></span>
+<span id="cb3-13"><a href="introduction-to-survival-analysis.html#cb3-13"></a>wcgs<span class="op">$</span>time169y5 &lt;-<span class="st"> </span><span class="kw">pmin</span>(wcgs<span class="op">$</span>time169y,<span class="dv">5</span>)</span>
+<span id="cb3-14"><a href="introduction-to-survival-analysis.html#cb3-14"></a>wcgs<span class="op">$</span>chd695 &lt;-<span class="st"> </span>(wcgs<span class="op">$</span>chd69<span class="op">==</span><span class="dv">1</span> <span class="op">&amp;</span><span class="st"> </span>wcgs<span class="op">$</span>time169y <span class="op">&lt;=</span><span class="dv">5</span>)</span></code></pre></div>
+<div id="inngangur" class="section level2">
+<h2><span class="header-section-number">2.1</span> Inngangur</h2>
+<p>Efni dagsins í dag er myndræn framsetning i lifunargreiningu. Við munum skipta umfjölluninni í þrennt. Fyrst fjöllum við um skerðingu (e. censoring) af hverju hún stafar og hvernig við vinnum með hana. Því næst fjöllum við um Kaplan Meier metlinn, teiknum Kaplan Meier ferla og lærum að túlka þá og meta. Að lokum skoðum við hvernig meta má miðgildi lifunar (e. median survival) og skoðum tölfræðipróf til að kanna mun á lifunarferlum.</p>
+<p>Við notum gagnasafnið <em>wcgs</em> sem fylgir t.d. með <em>epitools</em> pakkanum. WCGS stendur fyrir Western Collaborative Group Study. Nánari umfjöllun má sjá á <a href="http://clinicaltrials.gov/show/NCT00005174">ClincialTrials.gov</a>.</p>
+<p>Í stuttu máli var 3154 karlmönnum á aldrinum 39 til 59 fylgt eftir í allt að 10 ár þangað til þeir fengu hjartasjúkdóm, eða létust, eða þeir urðu 70 ára eða eftirfylgni lauk af öðrum ástæðum.</p>
+</div>
+<div id="skerðing-censoring" class="section level2">
+<h2><span class="header-section-number">2.2</span> Skerðing (censoring)</h2>
+<p>Meginmarkmið WCGS rannsóknarinnar var að skoða áhættuþætti fyrir hjartasjúkdómum og því eru hjartasjúkdómar aðalútkomubreytan okkar. Breytan <em>chd69</em> segir til um hvort karlmennirnir fengu hjartasjúkdóm eða ekki.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="introduction-to-survival-analysis.html#cb4-1"></a><span class="kw">table</span>(wcgs<span class="op">$</span>chd69)</span></code></pre></div>
+<pre><code>## 
+##    0    1 
+## 2897  257</code></pre>
+<p>Við sjáum að alls fengu 257 karlmenn fengu hjartasjúkdóm á meðan rannsókninni stóð. Í lógistískri aðhvarfsgreiningu hefði okkur nægt að líta á þessa breytu sem útkomubreytuna okkar og látið þar við sitja. En fleiri upplýsingar er að finna i gögnunum okkar og því getum við gert betur.</p>
+<p>Í fyrsta lagi höfum við upplýsingar um nákvæman dagafjölda frá því að eftirfylgdin hófst og þangað til maðurinn fékk hjartasjúkdóm og við getum tekið tillit til þess tíma í líkönunum okkar. Þannig getum við til dæmis skoðað þá sem fengu hjartasjúkdóm innan mjög skamms tíma.</p>
+<p>Í öðru lagi er meginþorri gagnanna okkar <strong>skertur</strong> (e. censored), þ.e.a.s. eftirfylgdin stóð einungis yfir í takmarkaðan tíma og því höfum við ekki upplýsingar um hvort sumir mannanna hefðu mögulega þróað með sér hjartasjúkdóm eftir að eftirfylgdinni lauk. Skerðing getur verið af ýmsum ástæðum, maðurinn neitaði áframhaldandi þátttöku, rannsókninni lauk eða þá að hann dó af öðrum orsökum og hafði því ekki möguleika á að þróa með sér hjartasjúkdóm í framhaldinu. Til eru aðferðir til að skoða margs konar útkomur samtímis (t.d. bæði hjartaáföll og dauða) og er þá talað um <em>samkeppni áhættu</em> (e. competing risk). Þær aðferðir eru utan efni þessa námskeiðs.</p>
+<p>Skerðing getur verið frá vinstri (þ.e.a.s. eftirfylgni hófst ekki fyrr en á ákveðnum tímapunkti) eða frá hægri (eftirfylgni lauk á ákveðnum tímapunkti) eða á bili (eftirfylgni var eingöngu á ákveðnu tímabili). Í langflestum tilvikum er unnið með skerðingu frá hægri og því munum við bara fjalla um hana hér.</p>
+<p>Á sama hátt og viðbótarupplýsingar eru fólgnar í því hversu fljótt einstaklingur fékk hjartasjúkdóm eru einnig heilmiklar upplýsingar fólgnar i því hversu lengi honum var fylgt eftir <em>án þess</em> að hann fengi hjartasjúkdóm. Því skiptir tími fram að skerðingu jafn miklu máli og tími fram að hjartasjúkdómi.</p>
+<p>Í R tvinnum við saman þessar upplýsingar með því að búa til breytu af gerðinni <strong>lifunarhlutur</strong> (e. survival object). Við búum hann til með skipuninni <em>Surv</em> sem er í pakkanum <em>survival</em> og mötum á tveimur breytum:</p>
+<ol style="list-style-type: decimal">
+<li>Hve langur tími leið fram að atburði/þangað til eftirfylgd lauk</li>
+<li>Hvort atburður eða skerðing átti sér stað á þeim tímapunkti.</li>
+</ol>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="introduction-to-survival-analysis.html#cb6-1"></a>lifunar.hlutur &lt;-<span class="st"> </span><span class="kw">Surv</span>(wcgs<span class="op">$</span>time169, wcgs<span class="op">$</span>chd69)</span></code></pre></div>
+<p>Skoðum nánar fyrstu sex mælingarnar í lifunarhlutnum:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="introduction-to-survival-analysis.html#cb7-1"></a><span class="kw">head</span>(lifunar.hlutur)</span></code></pre></div>
+<pre><code>## [1] 1664+ 3071+ 3071+ 3064+ 1885  3102+</code></pre>
+<p>Fyrsta mælingin er 1664, 0. Plúsinn gefur til kynna að honum var fylgt eftir í 1664 daga án þess að til atburðar kæmi og því er mælingin skert. Fimmta mælinginin, 1885, 1 hefur hins vegar engan plús sem gefur til kynna að maðurinn fékk hjartasjúkdóm eftir 1885, 1 daga.</p>
+</div>
+<div id="kaplan-meier-metillinn" class="section level2">
+<h2><span class="header-section-number">2.3</span> Kaplan Meier metillinn</h2>
+<p>Kaplan Meier metilinn er ein langmest notaða tölfræðiaðferðin þegar framkvæmd er lifunargreining, meðal annars vegna þess að á honum byggja svo kölluð Kaplan-Meier gröf sem eru ein algengasta leiðin til að lýsa lifunargögnum. Okkur þykir því ástæða til að skoða hann í kjölinn.</p>
+<p>Fyrst skulum við kynna til sögunnar svokallað <strong>lifunarfall</strong> (e. survival curve). Lifunarfallið er yfirleitt táknað með <span class="math inline">\(S(t)\)</span> og túlkun fallsins er svohljóðandi</p>
+<p><span class="math display">\[ 
+S(t) = \text{Líkur þess að einstaklingur fá ekki atburð fram að tíma $t$.}
+\]</span></p>
+<p>Lifunarfallið miðar alltaf við einhvern tiltekinn atburð. Oft er sá atburður dauði, en hann er einnig mjög oft eitthvað annað eins og til dæmis greining á sjúkdómi. Í því tilviki er stundum talað um “sjúkdómslausa lifun” eða “atburðarlausa lifun” til að skerpa á að lifunin eigi ekki við um líf og dauða, heldur lifun án þess að hafa fengið tiltekinn atburð, sem í þessu tilviki er greining á sjúkdóm. Lifunarfallið gefur okkur þá líkurnar á því að hafa ekki fengið sjúkdóm innan tiltekins tíma.</p>
+<p>Í okkar tilfelli væri <span class="math inline">\(S(365)\)</span> líkur þess að einstaklingur fái ekki hjartasjúkdóm innan 365 daga. Ef ekki væri fyrir skerðingu væri lítill vandi að meta hvert það gildi væri, sem við samkvæmt venju köllum <span class="math inline">\(\hat S(365)\)</span>. Besta matið á <span class="math inline">\(\hat S(365)\)</span> væri einfaldlega fjöldi þeirra sem fengu hjartasjúkdóm innan 365 daga af allri heildinni. En skerðingarinnar vegna vandast málin.</p>
+<p>Kaplan Meier metilinn er stærðfræðileg regla til að meta <span class="math inline">\(\hat S(t)\)</span>. Hann er metinn á sérhverjum tímapunkti þegar <em>atburður</em> á sér stað (en ekki skerðing). Í gögnunum okkar fengu 257 karlmenn hjartasjúkdóm svo þessir tímapunktar eru að hámarki 257. Við nánari athugun reynast stundum fleiri en einn karlmaður fá hjartasjúkdóm eftir jafnlangan tíma svo tímapunktarnir eru alls 248. Ef við gefum þeim heiti eftir stærðarröð þeirra, <span class="math inline">\(t_1, \ldots , t_{248}\)</span>, þá væri:</p>
+<ul>
+<li><span class="math inline">\(t_1 =\)</span> 18, sem er sá tímapunktur þegar fyrsti maðurinn fékk hjartasjúkdóm,</li>
+<li><span class="math inline">\(t_2 =\)</span> 21 væri sá tímapunktur þegar næsti maður fékk hjartasjúkdóm</li>
+<li><span class="math inline">\(t_{248} =\)</span> 3229, væri að lokum sá tímapunktur þegar síðasti maðurinn fékk hjartasjúkdóm.</li>
+</ul>
+<p>Kaplan Meier metilinn er metinn á sérhverjum þessara 248 tímapunkta. Formúla metilsins er</p>
+<p><span class="math display">\[ \hat S(t) = \Pi_{i=1}^k \left( 1- \frac{d_i}{n_i} \right)\]</span></p>
+<p>þar sem <span class="math inline">\(d_i\)</span> táknar fjölda þeirra sem fengu atburðinn á tímapunkti <span class="math inline">\(i\)</span> en <span class="math inline">\(n_i\)</span> er fjöldi þeirra sem er <em>enn í áhættu</em> að fá atburðinn á tímapunkti <span class="math inline">\(i\)</span>, þ.e.a.s. hafa hvorki fengið atburðinn, né verið skertir.</p>
+<p>Í fyrsta tímapunktinum er Kaplan Meier metillinn hreinlega hlutfall þeirra sem ekki var kominn með hjartasjúkdóm af þeim sem ekki voru orðnir skertir á þeim tímapunkti (þ.e.a.s. af þeim sem voru enn í eftirfylgd). Fyrir næsta tímapunkt þarf að reikna einn mínus hlutfall fjölda þeirra sem fékk hjartasjúkdóm <em>á þeim tímapunkti</em> af þeim sem enn voru í eftirfylgd á þeim tímapunkti og margfalda það gildi við síðasta reiknaða Kaplan-Meier gildið. Þannig er haldið áfram koll af kolli fyrir alla tímapunktana.</p>
+<p>Skoðum nú fyrstu gildin handvirkt. Fyrir fyrsta tímapunktinn, <span class="math inline">\(t_1\)</span>, sem var <span class="math inline">\(t=18\)</span>, skoðum við hversu margir eru enn í eftirfylgd á þeim tímapunkti:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="introduction-to-survival-analysis.html#cb9-1"></a><span class="kw">sum</span>(wcgs<span class="op">$</span>time169<span class="op">&gt;=</span><span class="dv">18</span>) </span></code></pre></div>
+<pre><code>## [1] 3154</code></pre>
+<p>og hversu margir þeirra höfðu ekki fengið hjartasjúkdóm á þeim tímapunkti</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="introduction-to-survival-analysis.html#cb11-1"></a><span class="kw">sum</span>(wcgs<span class="op">$</span>time169<span class="op">&gt;=</span><span class="dv">18</span>) <span class="op">-</span><span class="st"> </span><span class="kw">sum</span>(wcgs<span class="op">$</span>time169<span class="op">&lt;=</span><span class="dv">18</span><span class="op">&amp;</span>wcgs<span class="op">$</span>chd69<span class="op">==</span><span class="dv">1</span>)</span></code></pre></div>
+<pre><code>## [1] 3153</code></pre>
+<p>Kaplan-Meier matið á tímapunkti <span class="math inline">\(t=18\)</span>, er því hlutfall þessara tveggja talna, eða <span class="math inline">\(3153/3154\)</span> sem er 99.97 prósent.</p>
+<p>Fyrir næsta tímapunktinn, <span class="math inline">\(t_2\)</span>, sem var <span class="math inline">\(t=21\)</span>, skoðum við hversu margir eru enn í eftirfylgd á þeim tímapunkti</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="introduction-to-survival-analysis.html#cb13-1"></a><span class="kw">sum</span>(wcgs<span class="op">$</span>time169<span class="op">&gt;=</span><span class="dv">21</span>) </span></code></pre></div>
+<pre><code>## [1] 3153</code></pre>
+<p>og hversu margir þeirra fengu hjartasjúkdóm á þeim tímapunkti</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="introduction-to-survival-analysis.html#cb15-1"></a><span class="kw">sum</span>(wcgs<span class="op">$</span>time169<span class="op">==</span><span class="dv">21</span><span class="op">&amp;</span>wcgs<span class="op">$</span>chd69<span class="op">==</span><span class="dv">1</span>)</span></code></pre></div>
+<pre><code>## [1] 1</code></pre>
+<p>Hlutfallið á tímapunkti <span class="math inline">\(t_2\)</span> er því</p>
+<p><span class="math inline">\(1 - d_2/n_2 = 1 - 1/3153 = 3152/3153\)</span></p>
+<p>Kaplan Meier gildið á tímapunkti <span class="math inline">\(t_2\)</span> er þá það gildi, margfaldað með síðasta reiknaða gildi eða <span class="math inline">\(3152/3153 \cdot 3153/3154 = 3152/3154\)</span> sem er 99.94 prósent.</p>
+<p>Svona er haldið áfram koll af kolli fyrir alla 248 tímapunktana.</p>
+<p>Kaplan Meier matið er eingöngu metið á þeim tímapunktum þegar atburður á sér stað. Ef við viljum meta lifunarfallið á tímapunktum sem lenda á milli þessara gilda notum við Kaplan-Meier matið fyrir næsta tímapunkt á undan.</p>
+</div>
+<div id="kaplan-meier-gröf" class="section level2">
+<h2><span class="header-section-number">2.4</span> Kaplan Meier gröf</h2>
+<p>Kaplan Meier gröf eru langalgengasta myndræna framsetningin á lifunargögnum. Þau eru leið til að lýsa lifunarfallinu myndrænt, þ.e.a.s. hversu hátt hlutfall þátttakanda hefur ekki fengið atburð eftir því sem tíminn líður. Gröfin teikna Kaplan Meier matið í sérhverjum tímapunkti og flatar línur milli punktanna. Gröfin eru látin “falla” á þeim tímapunktum sem atburðir eiga sér stað í samræmi við það hvernig matið er reiknað.</p>
+<p>Fyrst um sinn skulum við skoða Kaplan-Meier graf fyrir fyrstu 100 dagana. Það má sjá hér fyrir neðan. Notum tímann í árum <em>time169y</em>:</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="introduction-to-survival-analysis.html#cb17-1"></a>kmfit &lt;-<span class="st"> </span><span class="kw">survfit</span>(<span class="kw">Surv</span>(time169,chd69)<span class="op">~</span><span class="dv">1</span>,<span class="dt">data=</span>wcgs)</span>
+<span id="cb17-2"><a href="introduction-to-survival-analysis.html#cb17-2"></a>km.plot &lt;-<span class="st"> </span><span class="kw">ggsurvplot</span>(kmfit,<span class="dt">risk.table =</span> T,<span class="dt">break.time.by=</span><span class="dv">10</span>,<span class="dt">xlim=</span><span class="kw">c</span>(<span class="dv">0</span>,<span class="dv">110</span>),</span>
+<span id="cb17-3"><a href="introduction-to-survival-analysis.html#cb17-3"></a>                      <span class="dt">ylim=</span><span class="kw">c</span>(<span class="fl">0.99</span>,<span class="dv">1</span>)) </span>
+<span id="cb17-4"><a href="introduction-to-survival-analysis.html#cb17-4"></a>km.plot </span></code></pre></div>
+<p><img src="Survival_Analysis_files/figure-html/unnamed-chunk-11-1.png" width="100%" /></p>
+<p>Grafið byrjar í <span class="math inline">\(y=1.00\)</span>, þegar <span class="math inline">\(t=0\)</span>, enda hefur enginn fengið hjartasjúkdóm við byrjun rannsóknarinnar. Inn á grafið er ég búin að teikna punktalínur þar sem fyrsta “fallið” verður. En það er einmitt við <span class="math inline">\(t=18\)</span> þegar fyrsti maðurinn fékk hjartasjúkdóm. Þar dettur línan úr 1.00 í 0.9997 eins og við vorum búin að reikna. Næsta “fall” verður við <span class="math inline">\(t=21\)</span> þegar næsti maður fékk hjartaáfall og svo koll af kolli.</p>
+<p>Stækkum nú tímarammann okkar og skoðum Kaplan-Meier graf fyrir fyrstu 365 dagana:</p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="introduction-to-survival-analysis.html#cb18-1"></a>kmfit &lt;-<span class="st"> </span><span class="kw">survfit</span>(<span class="kw">Surv</span>(time169,chd69)<span class="op">~</span><span class="dv">1</span>,<span class="dt">data=</span>wcgs)</span>
+<span id="cb18-2"><a href="introduction-to-survival-analysis.html#cb18-2"></a>km.plot &lt;-<span class="st"> </span><span class="kw">ggsurvplot</span>(kmfit,<span class="dt">risk.table =</span> T,<span class="dt">break.time.by=</span><span class="dv">30</span>,<span class="dt">xlim=</span><span class="kw">c</span>(<span class="dv">0</span>,<span class="dv">365</span>),</span>
+<span id="cb18-3"><a href="introduction-to-survival-analysis.html#cb18-3"></a>                      <span class="dt">ylim=</span><span class="kw">c</span>(<span class="fl">0.99</span>,<span class="dv">1</span>)) </span>
+<span id="cb18-4"><a href="introduction-to-survival-analysis.html#cb18-4"></a>km.plot </span></code></pre></div>
+<p><img src="Survival_Analysis_files/figure-html/unnamed-chunk-12-1.png" width="100%" /></p>
+<p>Núna hafa nokkur lóðrétt strik bæst við (sem eru í raun plúsar ef nána er að gáð). Þær merkingar eru þar sem skerðingar eiga sér stað, á þeim tímapunktum hefur einhver þátttakandi hætt í eftirfylgd af einhverjum ástæðum. Munið að Kaplan-Meier metilinn er bara metinn á þeim tímapunktum sem atburðir eiga sér stað, sem í þessu tilfelli eru hjartasjúkdómar, svo grafið breytist ekki á þeim tímapunkti, plúsarnir bætast bara við. Sum tímarit kjósa að fá Kaplan-Meier gröf með slíkum merkingum þegar skerðingar eru en önnur ekki. Það er ætíð hægt að stilla til í R.</p>
+<p>Skipunin <strong>survfit</strong> metur Kaplan Meier metilinn fyrir okkur. Við mötum hana með lifunarhlut til vinstri en hægra megin koma flokkarnir sem við skiptum gögnunum eftir. Til að byrja með höfum við enga skiptingu á gögnunum og setjum þess vegna bara 1 hægra megin i skipunina.</p>
+<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="introduction-to-survival-analysis.html#cb19-1"></a>kmfit &lt;-<span class="st"> </span><span class="kw">survfit</span>(<span class="kw">Surv</span>(time169,chd69)<span class="op">~</span><span class="dv">1</span>,<span class="dt">data=</span>wcgs)</span></code></pre></div>
+</div>
+<div id="kaplan-meier-gröf-eftir-hópum" class="section level2">
+<h2><span class="header-section-number">2.5</span> Kaplan Meier gröf eftir hópum</h2>
+<p>Kaplan Meier gröf eru kjörin til að sýna mun á lifunarfallinu eftir hópum. Hér liggur beint við að skoða mun á lifun án hjartasjúkdóms eftir persónuleikagerð. Þá setjum við nafnið á þeirri breytu hægra megin í survfit skipunina þar sem 1 var áður fyrr.</p>
+<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="introduction-to-survival-analysis.html#cb20-1"></a>kmfit<span class="fl">.2</span> &lt;-<span class="st"> </span><span class="kw">survfit</span>(<span class="kw">Surv</span>(time169,chd69)<span class="op">~</span>dibpat0f,<span class="dt">data=</span>wcgs)</span></code></pre></div>
+<p>Hér breytum við skalanum í ár og skoðum tíma að hjartasjúkdómi eftir persónuleika A og B.</p>
+<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="introduction-to-survival-analysis.html#cb21-1"></a>km.plot<span class="fl">.2</span> &lt;-<span class="st"> </span><span class="kw">ggsurvplot</span>(kmfit<span class="fl">.2</span>,<span class="dt">risk.table =</span> T,<span class="dt">xscale=</span><span class="fl">365.35</span>,</span>
+<span id="cb21-2"><a href="introduction-to-survival-analysis.html#cb21-2"></a>                        <span class="dt">break.time.by=</span><span class="fl">365.25</span>,<span class="dt">ylim=</span><span class="kw">c</span>(<span class="fl">0.8</span>,<span class="dv">1</span>),<span class="dt">tables.height=</span><span class="fl">0.3</span>) </span>
+<span id="cb21-3"><a href="introduction-to-survival-analysis.html#cb21-3"></a>km.plot<span class="fl">.2</span> </span></code></pre></div>
+<p><img src="Survival_Analysis_files/figure-html/unnamed-chunk-15-1.png" width="100%" /></p>
+<p>Á þessari mynd virðist vera mikill munur á tíðni hjartasjúkdóma eftir persónuleikagerð. Blái ferillinn, sem táknar persónuleikagerð A, er allur fyrir neðan rauða ferilinn sem táknar persónuleikagerð B. Þar af leiðandi metum við að lifunarfallið sé lægra, þ.e. að líkur þess að vera <strong>án</strong> hjartasjúkdóms eru minni, sem þýðir að líkurnar á því að <strong>fá</strong> hjartasjúkdóm eru hærri. Næst munum við sjá leið til að prófa hvort sá munur sé tölfræðilega marktækur.</p>
+</div>
+<div id="miðgildi-lifunar-og-logrank-próf" class="section level2">
+<h2><span class="header-section-number">2.6</span> Miðgildi lifunar og logrank próf</h2>
+<p>Algeng leið til að lýsa lifun er svokallað <strong>miðgildi lifunar</strong> (median survival). Það er sú tímalengd <span class="math inline">\(T\)</span> þar sem <span class="math inline">\(S(T)\)</span> verður minna en 50%. Með orðum er það sá tímapunktur þegar helmingur þátttakandanna ættu að hafa fengið atburðinn. Með því að skrifa út nafnið á lifunarhlutnum okkar fæst mat á miðgildi lifunar ásamt 95% öryggisbili.</p>
+<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="introduction-to-survival-analysis.html#cb22-1"></a>kmfit<span class="fl">.2</span></span></code></pre></div>
+<pre><code>## Call: survfit(formula = Surv(time169, chd69) ~ dibpat0f, data = wcgs)
+## 
+##               n events median 0.95LCL 0.95UCL
+## dibpat0f=B 1565     79     NA      NA      NA
+## dibpat0f=A 1589    178     NA      NA      NA</code></pre>
+<p>Hér vandast málið! Við sjáum bara NA. Ástæða þess er sú að karlmönnunum i WCGS rannsókninni var ekki fylgt eftir svo lengi að helmingur þeirra hefði þróað með sér hjartasjúkdóm. Í slíkum tilvikum er ekki við hæfi að lýsa lifunarfallinu með miðgildi lifunar, heldur er oft miðað við eins árs, eða fimm ára lifun, svo dæmi séu tekin. Með eins árs lifun er átt við matinu á lifunarfallinu þegar ár er liðið. Þegar lifun er mæld í dögum eins og hjá okkur er það þá <span class="math inline">\(\hat S(365.25)\)</span>. Að sama skapi væri matið á fimm ára lifun <span class="math inline">\(\hat S(1826.25)\)</span>. (Ath 5*365.25=18625.)</p>
+<p>Það er auðvelt að biðja R um mat á lifunarfallinu fyrir hvaða tímapunkt sem er. Það er gert með skipuninni <em>summary()</em> sem er mötuð með <em>times()</em> þar sem tímapunktarnir eru skilgreindir.</p>
+<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb24-1"><a href="introduction-to-survival-analysis.html#cb24-1"></a><span class="kw">summary</span>(kmfit<span class="fl">.2</span>, <span class="dt">times=</span><span class="kw">c</span>(<span class="fl">365.25</span>,<span class="dv">5</span><span class="op">*</span><span class="fl">365.25</span>))</span></code></pre></div>
+<pre><code>## Call: survfit(formula = Surv(time169, chd69) ~ dibpat0f, data = wcgs)
+## 
+##                 dibpat0f=B 
+##  time n.risk n.event survival  std.err lower 95% CI upper 95% CI
+##   365   1561       2    0.999 0.000904        0.997        1.000
+##  1826   1433      36    0.975 0.004026        0.967        0.983
+## 
+##                 dibpat0f=A 
+##  time n.risk n.event survival std.err lower 95% CI upper 95% CI
+##   365   1574      13    0.992 0.00226        0.987        0.996
+##  1826   1348      88    0.934 0.00635        0.922        0.947</code></pre>
+<p>Við sjáum að matið á 365 daga (1 árs) lifun fyrir persónuleikagerð B er 0.99 með 95% ÖB (0.997-1.00) en matið á 365 daga lifun fyrir persónuleikagerð A er 0.992 með 95% ÖB (0.987-0.996). Í neðri línunum sjáum við matið á 1825 (5 ára) lifun. Það er 0.975 (0.967-0.983) fyrir persónuleikagerð B en 0.934 (0.922-0.947) fyrir persónuleikagerð A.</p>
+<p>Allt að ofan bendir til þess að það sé munur í tíðni hjartasjúkdóma eftir persónuleikagerðum. Ein leið til að prófa þann mun er með <strong>logrank prófi</strong> en það prófar hvort munur sé á tveimur lifunarföllum. Skipunin er einfaldlega <em>survdiff</em> og rithátturinn er nákvæmlega sá sami og fyrir <em>surffit</em></p>
+<div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb26-1"><a href="introduction-to-survival-analysis.html#cb26-1"></a><span class="kw">survdiff</span>(<span class="kw">Surv</span>(time169,chd69)<span class="op">~</span>dibpat0f,<span class="dt">data=</span>wcgs)</span></code></pre></div>
+<pre><code>## Call:
+## survdiff(formula = Surv(time169, chd69) ~ dibpat0f, data = wcgs)
+## 
+##               N Observed Expected (O-E)^2/E (O-E)^2/V
+## dibpat0f=B 1565       79      131      20.5      41.8
+## dibpat0f=A 1589      178      126      21.3      41.8
+## 
+##  Chisq= 41.8  on 1 degrees of freedom, p= 1e-10</code></pre>
+<p>Og mikið rétt! Munurinn reyndist marktækur, p-gildið er <span class="math inline">\(1 \cdot 10^{-10}\)</span>. Logrank prófið er líka hægt að nota þegar hóparnir eru fleiri en tveir og prófa það þá núlltilgátuna hvort allir ferlarnir séu eins.</p>
+<p>Núlltilgátan er að atburðir séu jafn tíðir milli hópanna. Taflan sýnir <em>Expected</em> eða væntanlegan fjölda miðað við þá tilgátu. En gögnin sýna (<em>Observed</em>) að atburðir eru færri í B hóp og fleiri í A hóp en búast mætti við ef tilgátan væri sönn. Við höfnum þeirri tilgátu og drögum þá ályktun að tíðni atburða sé meiri í A hóp.</p>
+</div>
+<div id="víti-að-varast-og-breyting-á-tímaskala" class="section level2">
+<h2><span class="header-section-number">2.7</span> Víti að varast og breyting á tímaskala</h2>
+<p>Algeng en alvarleg mistök sem geta gerst er að ruglast á því hvort atburður eða skerðing eigi að vera táknuð með 0 eða 1. Það er þó auðvelt að bera kennsl á þvi mistök því þá stefna ferlarnir í Kaplan Meier gröfunum beinustu leið niður undir restina og enda alltaf í núlli. Hér er dæmi um slíkt.</p>
+<p>Hvað gerist ef ruglast er á atburði og skerðingu!</p>
+<div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb28-1"><a href="introduction-to-survival-analysis.html#cb28-1"></a>km.fit<span class="fl">.3</span> &lt;-<span class="st"> </span><span class="kw">survfit</span>(<span class="kw">Surv</span>(time169,chd69<span class="op">==</span><span class="dv">0</span>)<span class="op">~</span>dibpat0f,<span class="dt">data=</span>wcgs)</span>
+<span id="cb28-2"><a href="introduction-to-survival-analysis.html#cb28-2"></a><span class="kw">ggsurvplot</span>(km.fit<span class="fl">.3</span>) </span></code></pre></div>
+<p><img src="Survival_Analysis_files/figure-html/unnamed-chunk-19-1.png" width="100%" /></p>
+<p>Að lokum langar okkur að sýna ykkur einfalda leið til að breyta tímaskalanum svo hann sé í árum en ekki dögum. Það er einfaldlega með því að deila í dagafjöldann með 365 þegar lifun skilgreindur. Annað hvort með því að búa til nýja breytu eins og time169y fyrir ofan eða inní survfit.</p>
+<div class="sourceCode" id="cb29"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb29-1"><a href="introduction-to-survival-analysis.html#cb29-1"></a>km.fit<span class="fl">.4</span> &lt;-<span class="st"> </span><span class="kw">survfit</span>(<span class="kw">Surv</span>(time169<span class="op">/</span><span class="fl">365.25</span>,chd69) <span class="op">~</span><span class="st"> </span>dibpat0f,<span class="dt">data=</span>wcgs)</span>
+<span id="cb29-2"><a href="introduction-to-survival-analysis.html#cb29-2"></a><span class="kw">ggsurvplot</span>(km.fit<span class="fl">.4</span>,<span class="dt">ylim=</span><span class="kw">c</span>(<span class="fl">0.8</span>,<span class="dv">1</span>))  </span></code></pre></div>
+<p><img src="Survival_Analysis_files/figure-html/unnamed-chunk-20-1.png" width="100%" /></p>
+
+</div>
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="index.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="some-non-parametric-procedures.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+    </div>
+  </div>
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/lunr.js"></script>
+<script src="libs/gitbook-2.6.7/js/clipboard.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-clipboard.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+"sharing": {
+"github": false,
+"facebook": true,
+"twitter": true,
+"linkedin": false,
+"weibo": false,
+"instapaper": false,
+"vk": false,
+"all": ["facebook", "twitter", "linkedin", "weibo", "instapaper"]
+},
+"fontsettings": {
+"theme": "white",
+"family": "sans",
+"size": 2
+},
+"edit": {
+"link": null,
+"text": null
+},
+"history": {
+"link": null,
+"text": null
+},
+"view": {
+"link": null,
+"text": null
+},
+"download": ["Survival_Analysis.pdf", "Survival_Analysis.epub"],
+"toc": {
+"collapse": "subsection"
+},
+"code_folding": "hide"
+});
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    var src = "true";
+    if (src === "" || src === "true") src = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML";
+    if (location.protocol !== "file:")
+      if (/^https?:/.test(src))
+        src = src.replace(/^https?:/, '');
+    script.src = src;
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+</body>
+
+</html>
