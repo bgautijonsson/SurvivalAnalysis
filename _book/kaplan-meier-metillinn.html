@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+<head>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>Chapter 5 Kaplan Meier metillinn | Lecture Notes on Survival Analysis</title>
+  <meta name="description" content="This is a collection of lectures notes from the course at University of Iceland" />
+  <meta name="generator" content="bookdown 0.17 and GitBook 2.6.7" />
+
+  <meta property="og:title" content="Chapter 5 Kaplan Meier metillinn | Lecture Notes on Survival Analysis" />
+  <meta property="og:type" content="book" />
+  
+  
+  <meta property="og:description" content="This is a collection of lectures notes from the course at University of Iceland" />
+  
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Chapter 5 Kaplan Meier metillinn | Lecture Notes on Survival Analysis" />
+  
+  <meta name="twitter:description" content="This is a collection of lectures notes from the course at University of Iceland" />
+  
+
+<meta name="author" content="Thor Aspelund" />
+<meta name="author" content="Brynjólfur Gauti Jónsson" />
+
+
+<meta name="date" content="2020-03-04" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  
+  
+<link rel="prev" href="skerðing-censoring.html"/>
+<link rel="next" href="kaplan-meier-gröf.html"/>
+<script src="libs/jquery-2.2.3/jquery.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-clipboard.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+
+
+
+<style type="text/css">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+<link rel="stylesheet" href="style.css" type="text/css" />
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li><a href="./">University of Iceland</a></li>
+
+<li class="divider"></li>
+<li class="chapter" data-level="1" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i><b>1</b> Preface</a>
+<ul>
+<li class="chapter" data-level="1.1" data-path="index.html"><a href="index.html#the-book"><i class="fa fa-check"></i><b>1.1</b> The Book</a></li>
+<li class="chapter" data-level="1.2" data-path="index.html"><a href="index.html#theory"><i class="fa fa-check"></i><b>1.2</b> Theory</a></li>
+<li class="chapter" data-level="1.3" data-path="index.html"><a href="index.html#software"><i class="fa fa-check"></i><b>1.3</b> Software</a></li>
+<li class="chapter" data-level="1.4" data-path="index.html"><a href="index.html#setup-in-rstudio"><i class="fa fa-check"></i><b>1.4</b> Setup in RStudio</a></li>
+</ul></li>
+<li class="chapter" data-level="2" data-path="introduction-to-survival-analysis.html"><a href="introduction-to-survival-analysis.html"><i class="fa fa-check"></i><b>2</b> Introduction to Survival Analysis</a></li>
+<li class="chapter" data-level="3" data-path="inngangur.html"><a href="inngangur.html"><i class="fa fa-check"></i><b>3</b> Inngangur</a></li>
+<li class="chapter" data-level="4" data-path="skerðing-censoring.html"><a href="skerðing-censoring.html"><i class="fa fa-check"></i><b>4</b> Skerðing (censoring)</a></li>
+<li class="chapter" data-level="5" data-path="kaplan-meier-metillinn.html"><a href="kaplan-meier-metillinn.html"><i class="fa fa-check"></i><b>5</b> Kaplan Meier metillinn</a></li>
+<li class="chapter" data-level="6" data-path="kaplan-meier-gröf.html"><a href="kaplan-meier-gröf.html"><i class="fa fa-check"></i><b>6</b> Kaplan Meier gröf</a></li>
+<li class="chapter" data-level="7" data-path="kaplan-meier-gröf-eftir-hópum.html"><a href="kaplan-meier-gröf-eftir-hópum.html"><i class="fa fa-check"></i><b>7</b> Kaplan Meier gröf eftir hópum</a></li>
+<li class="chapter" data-level="8" data-path="miðgildi-lifunar-og-logrank-próf.html"><a href="miðgildi-lifunar-og-logrank-próf.html"><i class="fa fa-check"></i><b>8</b> Miðgildi lifunar og logrank próf</a></li>
+<li class="chapter" data-level="9" data-path="víti-að-varast-og-breyting-á-tímaskala.html"><a href="víti-að-varast-og-breyting-á-tímaskala.html"><i class="fa fa-check"></i><b>9</b> Víti að varast og breyting á tímaskala</a></li>
+<li class="chapter" data-level="10" data-path="some-non-parametric-procedures.html"><a href="some-non-parametric-procedures.html"><i class="fa fa-check"></i><b>10</b> Some Non-Parametric Procedures</a></li>
+<li class="chapter" data-level="11" data-path="the-cox-regression-model.html"><a href="the-cox-regression-model.html"><i class="fa fa-check"></i><b>11</b> The Cox Regression Model</a></li>
+<li class="chapter" data-level="12" data-path="model-checking-in-the-cox-regression-model.html"><a href="model-checking-in-the-cox-regression-model.html"><i class="fa fa-check"></i><b>12</b> Model Checking in the Cox Regression Model</a>
+<ul>
+<li class="chapter" data-level="12.1" data-path="model-checking-in-the-cox-regression-model.html"><a href="model-checking-in-the-cox-regression-model.html#example-one"><i class="fa fa-check"></i><b>12.1</b> Example one</a></li>
+<li class="chapter" data-level="12.2" data-path="model-checking-in-the-cox-regression-model.html"><a href="model-checking-in-the-cox-regression-model.html#example-two"><i class="fa fa-check"></i><b>12.2</b> Example two</a></li>
+</ul></li>
+<li class="chapter" data-level="13" data-path="parametric-proportional-hazards-models.html"><a href="parametric-proportional-hazards-models.html"><i class="fa fa-check"></i><b>13</b> Parametric Proportional Hazards Models</a></li>
+<li class="chapter" data-level="14" data-path="time-dependent-variables-and-covariates.html"><a href="time-dependent-variables-and-covariates.html"><i class="fa fa-check"></i><b>14</b> Time-Dependent Variables and Covariates</a></li>
+<li class="chapter" data-level="15" data-path="competing-risks.html"><a href="competing-risks.html"><i class="fa fa-check"></i><b>15</b> Competing Risks</a></li>
+<li class="divider"></li>
+<li><a href="https://github.com/rstudio/bookdown" target="blank">Published with bookdown</a></li>
+
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">Lecture Notes on Survival Analysis</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="kaplan-meier-metillinn" class="section level1">
+<h1><span class="header-section-number">Chapter 5</span> Kaplan Meier metillinn</h1>
+<p>Kaplan Meier metilinn er ein langmest notaða tölfræðiaðferðin þegar framkvæmd er lifunargreining, meðal annars vegna þess að á honum byggja svo kölluð Kaplan-Meier gröf sem eru ein algengasta leiðin til að lýsa lifunargögnum. Okkur þykir því ástæða til að skoða hann í kjölinn.</p>
+<p>Fyrst skulum við kynna til sögunnar svokallað <strong>lifunarfall</strong> (e. survival curve). Lifunarfallið er yfirleitt táknað með <span class="math inline">\(S(t)\)</span> og túlkun fallsins er svohljóðandi</p>
+<p><span class="math display">\[ 
+S(t) = \text{Líkur þess að einstaklingur fá ekki atburð fram að tíma $t$.}
+\]</span></p>
+<p>Lifunarfallið miðar alltaf við einhvern tiltekinn atburð. Oft er sá atburður dauði, en hann er einnig mjög oft eitthvað annað eins og til dæmis greining á sjúkdómi. Í því tilviki er stundum talað um “sjúkdómslausa lifun” eða “atburðarlausa lifun” til að skerpa á að lifunin eigi ekki við um líf og dauða, heldur lifun án þess að hafa fengið tiltekinn atburð, sem í þessu tilviki er greining á sjúkdóm. Lifunarfallið gefur okkur þá líkurnar á því að hafa ekki fengið sjúkdóm innan tiltekins tíma.</p>
+<p>Í okkar tilfelli væri <span class="math inline">\(S(365)\)</span> líkur þess að einstaklingur fái ekki hjartasjúkdóm innan 365 daga. Ef ekki væri fyrir skerðingu væri lítill vandi að meta hvert það gildi væri, sem við samkvæmt venju köllum <span class="math inline">\(\hat S(365)\)</span>. Besta matið á <span class="math inline">\(\hat S(365)\)</span> væri einfaldlega fjöldi þeirra sem fengu hjartasjúkdóm innan 365 daga af allri heildinni. En skerðingarinnar vegna vandast málin.</p>
+<p>Kaplan Meier metilinn er stærðfræðileg regla til að meta <span class="math inline">\(\hat S(t)\)</span>. Hann er metinn á sérhverjum tímapunkti þegar <em>atburður</em> á sér stað (en ekki skerðing). Í gögnunum okkar fengu 257 karlmenn hjartasjúkdóm svo þessir tímapunktar eru að hámarki 257. Við nánari athugun reynast stundum fleiri en einn karlmaður fá hjartasjúkdóm eftir jafnlangan tíma svo tímapunktarnir eru alls 248. Ef við gefum þeim heiti eftir stærðarröð þeirra, <span class="math inline">\(t_1, \ldots , t_{248}\)</span>, þá væri:</p>
+<ul>
+<li><span class="math inline">\(t_1 =\)</span> 18, sem er sá tímapunktur þegar fyrsti maðurinn fékk hjartasjúkdóm,</li>
+<li><span class="math inline">\(t_2 =\)</span> 21 væri sá tímapunktur þegar næsti maður fékk hjartasjúkdóm</li>
+<li><span class="math inline">\(t_{248} =\)</span> 3229, væri að lokum sá tímapunktur þegar síðasti maðurinn fékk hjartasjúkdóm.</li>
+</ul>
+<p>Kaplan Meier metilinn er metinn á sérhverjum þessara 248 tímapunkta. Formúla metilsins er</p>
+<p><span class="math display">\[ \hat S(t) = \Pi_{i=1}^k \left( 1- \frac{d_i}{n_i} \right)\]</span></p>
+<p>þar sem <span class="math inline">\(d_i\)</span> táknar fjölda þeirra sem fengu atburðinn á tímapunkti <span class="math inline">\(i\)</span> en <span class="math inline">\(n_i\)</span> er fjöldi þeirra sem er <em>enn í áhættu</em> að fá atburðinn á tímapunkti <span class="math inline">\(i\)</span>, þ.e.a.s. hafa hvorki fengið atburðinn, né verið skertir.</p>
+<p>Í fyrsta tímapunktinum er Kaplan Meier metillinn hreinlega hlutfall þeirra sem ekki var kominn með hjartasjúkdóm af þeim sem ekki voru orðnir skertir á þeim tímapunkti (þ.e.a.s. af þeim sem voru enn í eftirfylgd). Fyrir næsta tímapunkt þarf að reikna einn mínus hlutfall fjölda þeirra sem fékk hjartasjúkdóm <em>á þeim tímapunkti</em> af þeim sem enn voru í eftirfylgd á þeim tímapunkti og margfalda það gildi við síðasta reiknaða Kaplan-Meier gildið. Þannig er haldið áfram koll af kolli fyrir alla tímapunktana.</p>
+<p>Skoðum nú fyrstu gildin handvirkt. Fyrir fyrsta tímapunktinn, <span class="math inline">\(t_1\)</span>, sem var <span class="math inline">\(t=18\)</span>, skoðum við hversu margir eru enn í eftirfylgd á þeim tímapunkti:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="kaplan-meier-metillinn.html#cb9-1"></a><span class="kw">sum</span>(wcgs<span class="op">$</span>time169<span class="op">&gt;=</span><span class="dv">18</span>) </span></code></pre></div>
+<pre><code>## [1] 3154</code></pre>
+<p>og hversu margir þeirra höfðu ekki fengið hjartasjúkdóm á þeim tímapunkti</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="kaplan-meier-metillinn.html#cb11-1"></a><span class="kw">sum</span>(wcgs<span class="op">$</span>time169<span class="op">&gt;=</span><span class="dv">18</span>) <span class="op">-</span><span class="st"> </span><span class="kw">sum</span>(wcgs<span class="op">$</span>time169<span class="op">&lt;=</span><span class="dv">18</span><span class="op">&amp;</span>wcgs<span class="op">$</span>chd69<span class="op">==</span><span class="dv">1</span>)</span></code></pre></div>
+<pre><code>## [1] 3153</code></pre>
+<p>Kaplan-Meier matið á tímapunkti <span class="math inline">\(t=18\)</span>, er því hlutfall þessara tveggja talna, eða <span class="math inline">\(3153/3154\)</span> sem er 99.97 prósent.</p>
+<p>Fyrir næsta tímapunktinn, <span class="math inline">\(t_2\)</span>, sem var <span class="math inline">\(t=21\)</span>, skoðum við hversu margir eru enn í eftirfylgd á þeim tímapunkti</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="kaplan-meier-metillinn.html#cb13-1"></a><span class="kw">sum</span>(wcgs<span class="op">$</span>time169<span class="op">&gt;=</span><span class="dv">21</span>) </span></code></pre></div>
+<pre><code>## [1] 3153</code></pre>
+<p>og hversu margir þeirra fengu hjartasjúkdóm á þeim tímapunkti</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="kaplan-meier-metillinn.html#cb15-1"></a><span class="kw">sum</span>(wcgs<span class="op">$</span>time169<span class="op">==</span><span class="dv">21</span><span class="op">&amp;</span>wcgs<span class="op">$</span>chd69<span class="op">==</span><span class="dv">1</span>)</span></code></pre></div>
+<pre><code>## [1] 1</code></pre>
+<p>Hlutfallið á tímapunkti <span class="math inline">\(t_2\)</span> er því</p>
+<p><span class="math inline">\(1 - d_2/n_2 = 1 - 1/3153 = 3152/3153\)</span></p>
+<p>Kaplan Meier gildið á tímapunkti <span class="math inline">\(t_2\)</span> er þá það gildi, margfaldað með síðasta reiknaða gildi eða <span class="math inline">\(3152/3153 \cdot 3153/3154 = 3152/3154\)</span> sem er 99.94 prósent.</p>
+<p>Svona er haldið áfram koll af kolli fyrir alla 248 tímapunktana.</p>
+<p>Kaplan Meier matið er eingöngu metið á þeim tímapunktum þegar atburður á sér stað. Ef við viljum meta lifunarfallið á tímapunktum sem lenda á milli þessara gilda notum við Kaplan-Meier matið fyrir næsta tímapunkt á undan.</p>
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="skerðing-censoring.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="kaplan-meier-gröf.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+    </div>
+  </div>
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/lunr.js"></script>
+<script src="libs/gitbook-2.6.7/js/clipboard.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-clipboard.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+"sharing": {
+"github": false,
+"facebook": true,
+"twitter": true,
+"linkedin": false,
+"weibo": false,
+"instapaper": false,
+"vk": false,
+"all": ["facebook", "twitter", "linkedin", "weibo", "instapaper"]
+},
+"fontsettings": {
+"theme": "white",
+"family": "sans",
+"size": 2
+},
+"edit": {
+"link": null,
+"text": null
+},
+"history": {
+"link": null,
+"text": null
+},
+"view": {
+"link": null,
+"text": null
+},
+"download": ["Survival_Analysis.pdf", "Survival_Analysis.epub"],
+"toc": {
+"collapse": "subsection"
+},
+"code_folding": "hide"
+});
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    var src = "true";
+    if (src === "" || src === "true") src = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML";
+    if (location.protocol !== "file:")
+      if (/^https?:/.test(src))
+        src = src.replace(/^https?:/, '');
+    script.src = src;
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+</body>
+
+</html>

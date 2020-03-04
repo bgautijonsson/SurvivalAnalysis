@@ -1,0 +1,228 @@
+# Introduction to Survival Analysis
+
+```{r}
+library(survival)
+library(tidyverse)
+library(epitools)
+library(survminer)
+```
+
+```{r}
+# Gögnin fylgja með epitools pakkanum. Þá er nóg að virkja gögnin með data() skipun.
+data(wcgs)
+wcgs$behpat0f <- factor(wcgs$behpat0,levels=1:4,label=c("A1","A2","B1","B2"))
+wcgs$dibpat0f <- factor(wcgs$dibpat0,levels=0:1,label=c("B","A"))
+wcgs$smoker <- ifelse(wcgs$ncigs0>0,1,0)
+wcgs$smokerf <- factor(wcgs$smoker,levels=c(0,1),labels=c("No","Yes"))
+wcgs$heightcm <- wcgs$height0*2.54
+wcgs$weightkg <- wcgs$weight0*0.45359237
+wcgs$bmi <- wcgs$weightkg / (wcgs$heightcm/100)^2
+wcgs$cholmmol = wcgs$chol/39
+wcgs$time169y <- wcgs$time169/365.24
+# restricted followup to 5 years
+wcgs$time169y5 <- pmin(wcgs$time169y,5)
+wcgs$chd695 <- (wcgs$chd69==1 & wcgs$time169y <=5)
+```
+
+## Inngangur
+Efni dagsins í dag er myndræn framsetning i lifunargreiningu. Við munum skipta umfjölluninni í þrennt. Fyrst fjöllum við um skerðingu (e. censoring) af hverju hún stafar og hvernig við vinnum með hana. Því næst fjöllum við um Kaplan Meier metlinn,  teiknum Kaplan Meier ferla og lærum að túlka þá og meta. Að lokum skoðum við hvernig meta má miðgildi lifunar (e. median survival) og skoðum tölfræðipróf til að kanna mun á lifunarferlum.
+
+Við notum gagnasafnið *wcgs* sem fylgir t.d. með *epitools* pakkanum.  WCGS stendur fyrir Western Collaborative Group Study. Nánari umfjöllun má sjá á [ClincialTrials.gov](http://clinicaltrials.gov/show/NCT00005174). 
+
+Í stuttu máli var `r nrow(wcgs)` karlmönnum á aldrinum `r min(wcgs$age0)` til `r max(wcgs$age0)` fylgt eftir í allt að 10 ár þangað til þeir fengu hjartasjúkdóm, eða létust, eða þeir urðu 70 ára eða eftirfylgni lauk af öðrum ástæðum. 
+
+## Skerðing (censoring)
+Meginmarkmið WCGS rannsóknarinnar var að skoða áhættuþætti fyrir hjartasjúkdómum og því eru hjartasjúkdómar aðalútkomubreytan okkar. Breytan *chd69* segir til um hvort karlmennirnir fengu hjartasjúkdóm eða ekki. 
+
+```{r}
+table(wcgs$chd69)
+```
+
+Við sjáum að alls fengu `r sum(wcgs$chd69==1)` karlmenn fengu hjartasjúkdóm á meðan rannsókninni stóð. Í lógistískri aðhvarfsgreiningu hefði okkur nægt að líta á þessa breytu sem útkomubreytuna okkar og látið þar við sitja. En fleiri upplýsingar er að finna i gögnunum okkar og því getum við gert betur. 
+
+Í fyrsta lagi höfum við upplýsingar um nákvæman dagafjölda frá því að eftirfylgdin hófst og þangað til maðurinn fékk hjartasjúkdóm og við getum tekið tillit til þess tíma í líkönunum okkar. Þannig getum við til dæmis skoðað þá sem fengu hjartasjúkdóm innan mjög skamms tíma.
+
+Í öðru lagi er meginþorri gagnanna okkar **skertur** (e. censored), þ.e.a.s. eftirfylgdin stóð einungis yfir í takmarkaðan tíma og því höfum við ekki upplýsingar um hvort sumir mannanna hefðu mögulega þróað með sér hjartasjúkdóm eftir að eftirfylgdinni lauk. Skerðing getur verið af ýmsum ástæðum, maðurinn neitaði áframhaldandi þátttöku, rannsókninni lauk eða þá að hann dó af öðrum orsökum og hafði því ekki möguleika á að þróa með sér hjartasjúkdóm í framhaldinu. Til eru aðferðir til að skoða margs konar útkomur samtímis (t.d. bæði hjartaáföll og dauða) og er þá talað um *samkeppni áhættu* (e. competing risk). Þær aðferðir eru utan efni þessa námskeiðs.
+
+Skerðing getur verið frá vinstri (þ.e.a.s. eftirfylgni hófst ekki fyrr en á ákveðnum tímapunkti) eða frá hægri (eftirfylgni lauk á ákveðnum tímapunkti) eða á bili (eftirfylgni var eingöngu á ákveðnu tímabili). Í langflestum tilvikum er unnið með skerðingu frá hægri og því munum við bara fjalla um hana hér.
+
+Á sama hátt og viðbótarupplýsingar eru fólgnar í því hversu fljótt einstaklingur fékk hjartasjúkdóm eru einnig heilmiklar upplýsingar fólgnar i því hversu lengi honum var fylgt eftir *án þess* að hann fengi hjartasjúkdóm. Því skiptir tími fram að skerðingu jafn miklu máli og tími fram að hjartasjúkdómi.
+
+Í R tvinnum við saman þessar upplýsingar með því að búa til breytu af gerðinni **lifunarhlutur** (e. survival object). Við búum hann til með skipuninni *Surv* sem er í pakkanum *survival* og mötum á tveimur breytum: 
+
+1. Hve langur tími leið fram að atburði/þangað til eftirfylgd lauk
+2. Hvort atburður eða skerðing átti sér stað á þeim tímapunkti.
+
+```{r,echo=TRUE}
+lifunar.hlutur <- Surv(wcgs$time169, wcgs$chd69)
+```
+
+Skoðum nánar fyrstu sex mælingarnar í lifunarhlutnum:
+
+```{r,echo=TRUE}
+head(lifunar.hlutur)
+```
+
+Fyrsta mælingin er `r lifunar.hlutur[1]`. Plúsinn gefur til kynna að honum var fylgt eftir í 1664 daga án þess að til atburðar kæmi og því er mælingin skert. Fimmta mælinginin, `r lifunar.hlutur[5]` hefur hins vegar engan plús sem gefur til kynna að maðurinn fékk hjartasjúkdóm eftir `r lifunar.hlutur[5]` daga.
+
+## Kaplan Meier metillinn
+
+Kaplan Meier metilinn er ein langmest notaða tölfræðiaðferðin þegar framkvæmd er lifunargreining, meðal annars vegna þess að á honum byggja svo kölluð Kaplan-Meier gröf sem eru ein algengasta leiðin til að lýsa lifunargögnum. Okkur þykir því ástæða til að skoða hann í kjölinn.
+
+Fyrst skulum við kynna til sögunnar svokallað **lifunarfall** (e. survival curve). Lifunarfallið er yfirleitt táknað með $S(t)$ og túlkun fallsins er svohljóðandi
+
+$$ 
+S(t) = \text{Líkur þess að einstaklingur fá ekki atburð fram að tíma $t$.}
+$$
+
+Lifunarfallið miðar alltaf við einhvern tiltekinn atburð. Oft er sá atburður dauði, en hann er einnig mjög oft eitthvað annað eins og til dæmis greining á sjúkdómi. Í því tilviki er stundum talað um "sjúkdómslausa lifun" eða "atburðarlausa lifun" til að skerpa á að lifunin eigi ekki við um líf og dauða, heldur lifun án þess að hafa fengið tiltekinn atburð, sem í þessu tilviki er greining á sjúkdóm. Lifunarfallið gefur okkur þá líkurnar á því að hafa ekki fengið sjúkdóm innan tiltekins tíma.
+
+Í okkar tilfelli væri $S(365)$ líkur þess að einstaklingur fái ekki hjartasjúkdóm innan 365 daga. Ef ekki væri fyrir skerðingu væri lítill vandi að meta hvert það gildi væri, sem við samkvæmt venju köllum $\hat S(365)$. Besta matið á $\hat S(365)$ væri einfaldlega fjöldi þeirra sem fengu hjartasjúkdóm innan 365 daga af allri heildinni. En skerðingarinnar vegna vandast málin.
+
+Kaplan Meier metilinn er stærðfræðileg regla til að meta $\hat S(t)$. Hann er metinn á sérhverjum tímapunkti þegar *atburður* á sér stað (en ekki skerðing). Í gögnunum okkar fengu 257 karlmenn hjartasjúkdóm svo þessir tímapunktar eru að hámarki 257. Við nánari athugun reynast stundum fleiri en einn karlmaður fá hjartasjúkdóm eftir jafnlangan tíma svo tímapunktarnir eru alls `r length(unique(wcgs$time169[wcgs$chd69==1]))`. Ef við gefum þeim heiti eftir stærðarröð þeirra, $t_1, \ldots , t_{248}$, þá væri:
+
+* $t_1 =$ `r min(wcgs$time169[wcgs$chd69==1])`, sem er sá tímapunktur þegar fyrsti maðurinn fékk hjartasjúkdóm, 
+* $t_2 =$ `r sort(wcgs$time169[wcgs$chd69==1])[2]` væri sá tímapunktur þegar næsti maður fékk hjartasjúkdóm
+* $t_{248} =$ `r max(wcgs$time169[wcgs$chd69==1])`, væri að lokum sá tímapunktur þegar síðasti maðurinn fékk hjartasjúkdóm.
+
+Kaplan Meier metilinn er metinn á sérhverjum þessara 248 tímapunkta. Formúla metilsins er
+
+$$ \hat S(t) = \Pi_{i=1}^k \left( 1- \frac{d_i}{n_i} \right)$$
+
+þar sem $d_i$ táknar fjölda þeirra sem fengu atburðinn á tímapunkti $i$ en $n_i$ er fjöldi þeirra sem er *enn í áhættu* að fá atburðinn á tímapunkti $i$, þ.e.a.s. hafa hvorki fengið atburðinn, né verið skertir.
+
+Í fyrsta tímapunktinum er Kaplan Meier metillinn hreinlega hlutfall þeirra sem ekki var kominn með hjartasjúkdóm af þeim sem ekki voru orðnir skertir á þeim tímapunkti (þ.e.a.s. af þeim sem voru enn í eftirfylgd). Fyrir næsta tímapunkt þarf að reikna einn mínus hlutfall fjölda þeirra sem fékk hjartasjúkdóm *á þeim tímapunkti* af þeim sem enn voru í eftirfylgd á þeim tímapunkti og margfalda það gildi við síðasta reiknaða Kaplan-Meier gildið. Þannig er haldið áfram koll af kolli fyrir alla tímapunktana.
+
+Skoðum nú fyrstu gildin handvirkt. Fyrir fyrsta tímapunktinn, $t_1$, sem var $t=18$, skoðum við hversu margir eru enn í eftirfylgd á þeim tímapunkti:
+
+```{r,echo=TRUE}
+sum(wcgs$time169>=18) 
+```
+
+og hversu margir þeirra höfðu ekki fengið hjartasjúkdóm á þeim tímapunkti
+
+```{r,echo=TRUE}
+sum(wcgs$time169>=18) - sum(wcgs$time169<=18&wcgs$chd69==1)
+```
+
+Kaplan-Meier matið á tímapunkti $t=18$, er því hlutfall þessara tveggja talna, eða $3153/3154$ sem er `r 100*round(3153/3154,4)` prósent. 
+
+Fyrir næsta tímapunktinn, $t_2$, sem var $t=21$, skoðum við hversu margir eru enn í eftirfylgd á þeim tímapunkti
+
+
+```{r,echo=TRUE}
+sum(wcgs$time169>=21) 
+```
+
+og hversu margir þeirra fengu hjartasjúkdóm á þeim tímapunkti
+
+```{r,echo=TRUE}
+sum(wcgs$time169==21&wcgs$chd69==1)
+```
+
+
+Hlutfallið á tímapunkti $t_2$ er því
+
+$1 - d_2/n_2 = 1 - 1/3153 = 3152/3153$
+
+Kaplan Meier gildið á tímapunkti $t_2$ er þá það gildi, margfaldað með síðasta reiknaða gildi eða $3152/3153 \cdot 3153/3154 = 3152/3154$ sem er `r 100*round(3152/3154,4)` prósent. 
+
+Svona er haldið áfram koll af kolli fyrir alla 248 tímapunktana. 
+
+Kaplan Meier matið er eingöngu metið á þeim tímapunktum þegar atburður á sér stað. Ef við viljum meta lifunarfallið á tímapunktum sem lenda á milli þessara gilda notum við Kaplan-Meier matið fyrir næsta tímapunkt á undan.
+
+## Kaplan Meier gröf
+
+Kaplan Meier gröf eru langalgengasta myndræna framsetningin á lifunargögnum. Þau eru leið til að lýsa lifunarfallinu myndrænt, þ.e.a.s. hversu hátt hlutfall þátttakanda hefur ekki fengið atburð eftir því sem tíminn líður. Gröfin teikna Kaplan Meier matið í sérhverjum tímapunkti og flatar línur milli punktanna. Gröfin eru látin "falla" á þeim tímapunktum sem atburðir eiga sér stað í samræmi við það hvernig matið er reiknað. 
+
+Fyrst um sinn skulum við skoða Kaplan-Meier graf fyrir fyrstu 100 dagana. Það má sjá hér fyrir neðan. Notum tímann í árum *time169y*:
+
+```{r,warning=FALSE,message=FALSE}
+kmfit <- survfit(Surv(time169,chd69)~1,data=wcgs)
+km.plot <- ggsurvplot(kmfit,risk.table = T,break.time.by=10,xlim=c(0,110),
+                      ylim=c(0.99,1)) 
+km.plot 
+```
+
+Grafið byrjar í $y=1.00$, þegar $t=0$, enda hefur enginn fengið hjartasjúkdóm við byrjun rannsóknarinnar. Inn á grafið er ég búin að teikna punktalínur þar sem fyrsta "fallið" verður. En það er einmitt við $t=18$ þegar fyrsti maðurinn fékk hjartasjúkdóm. Þar dettur línan úr 1.00 í 0.9997 eins og við vorum búin að reikna. Næsta "fall" verður við $t=21$ þegar næsti maður fékk hjartaáfall og svo koll af kolli.
+
+Stækkum nú tímarammann okkar og skoðum Kaplan-Meier graf fyrir fyrstu 365 dagana:
+
+
+```{r,warning=FALSE,message=FALSE}
+kmfit <- survfit(Surv(time169,chd69)~1,data=wcgs)
+km.plot <- ggsurvplot(kmfit,risk.table = T,break.time.by=30,xlim=c(0,365),
+                      ylim=c(0.99,1)) 
+km.plot 
+```
+
+Núna hafa nokkur lóðrétt strik bæst við (sem eru í raun plúsar ef nána er að gáð). Þær merkingar eru þar sem skerðingar eiga sér stað, á þeim tímapunktum hefur einhver þátttakandi hætt í eftirfylgd af einhverjum ástæðum. Munið að Kaplan-Meier metilinn er bara metinn á þeim tímapunktum sem atburðir eiga sér stað, sem í þessu tilfelli eru hjartasjúkdómar, svo grafið breytist ekki á þeim tímapunkti, plúsarnir bætast bara við. Sum tímarit kjósa að fá Kaplan-Meier gröf með slíkum merkingum þegar skerðingar eru en önnur ekki. Það er ætíð hægt að stilla til í R.
+
+Skipunin **survfit** metur Kaplan Meier metilinn fyrir okkur. Við mötum hana með lifunarhlut til vinstri en hægra megin koma flokkarnir sem við skiptum gögnunum eftir. Til að byrja með höfum við enga skiptingu á gögnunum og setjum þess vegna bara 1 hægra megin i skipunina.
+
+```{r,echo=TRUE, warning=FALSE, message=FALSE}
+kmfit <- survfit(Surv(time169,chd69)~1,data=wcgs)
+```
+
+
+## Kaplan Meier gröf eftir hópum
+Kaplan Meier gröf eru kjörin til að sýna mun á lifunarfallinu eftir hópum. Hér liggur beint við að skoða mun á lifun án hjartasjúkdóms eftir persónuleikagerð. Þá setjum við nafnið á þeirri breytu hægra megin í survfit skipunina þar sem 1 var áður fyrr.
+
+```{r,echo=TRUE, warning=FALSE, message=FALSE}
+kmfit.2 <- survfit(Surv(time169,chd69)~dibpat0f,data=wcgs)
+```
+
+Hér breytum við skalanum í ár og skoðum tíma að hjartasjúkdómi eftir persónuleika A og B.
+
+```{r,warning=FALSE,message=FALSE}
+km.plot.2 <- ggsurvplot(kmfit.2,risk.table = T,xscale=365.35,
+                        break.time.by=365.25,ylim=c(0.8,1),tables.height=0.3) 
+km.plot.2 
+``` 
+
+Á þessari mynd virðist vera mikill munur á tíðni hjartasjúkdóma eftir persónuleikagerð. Blái ferillinn, sem táknar persónuleikagerð A, er allur fyrir neðan rauða ferilinn sem táknar persónuleikagerð B. Þar af leiðandi metum við að lifunarfallið sé lægra, þ.e. að líkur þess að vera **án** hjartasjúkdóms eru minni, sem þýðir að líkurnar á því að **fá** hjartasjúkdóm eru hærri. Næst munum við sjá leið til að prófa hvort sá munur sé tölfræðilega marktækur.
+
+## Miðgildi lifunar og logrank próf
+
+Algeng leið til að lýsa lifun er svokallað **miðgildi lifunar** (median survival). Það er sú tímalengd $T$ þar sem $S(T)$ verður minna en 50%. Með orðum er það sá tímapunktur þegar helmingur þátttakandanna ættu að hafa fengið atburðinn. Með því að skrifa út nafnið á lifunarhlutnum okkar fæst mat á miðgildi lifunar ásamt 95% öryggisbili.
+
+```{r,echo=TRUE, warning=FALSE, message=FALSE}
+kmfit.2
+```
+
+Hér vandast málið! Við sjáum bara NA. Ástæða þess er sú að karlmönnunum i WCGS rannsókninni var ekki fylgt eftir svo lengi að helmingur þeirra hefði þróað með sér hjartasjúkdóm. Í slíkum tilvikum er ekki við hæfi að lýsa lifunarfallinu með miðgildi lifunar, heldur er oft miðað við eins árs, eða fimm ára lifun, svo dæmi séu tekin. Með eins árs lifun er átt við matinu á lifunarfallinu þegar ár er liðið. Þegar lifun er mæld í dögum eins og hjá okkur er það þá $\hat S(365.25)$. Að sama skapi væri matið á fimm ára lifun $\hat S(1826.25)$. (Ath 5*365.25=18625.)
+
+Það er auðvelt að biðja R um mat á lifunarfallinu fyrir hvaða tímapunkt sem er. Það er gert með skipuninni *summary()* sem er mötuð með *times()* þar sem tímapunktarnir eru skilgreindir.
+
+```{r,echo=TRUE, warning=FALSE, message=FALSE}
+summary(kmfit.2, times=c(365.25,5*365.25))
+```
+
+Við sjáum að matið á 365 daga (1 árs) lifun fyrir persónuleikagerð B er 0.99 með 95% ÖB (0.997-1.00) en matið á 365 daga lifun fyrir persónuleikagerð A er 0.992 með 95% ÖB (0.987-0.996). Í neðri línunum sjáum við matið á 1825 (5 ára) lifun. Það er 0.975 (0.967-0.983) fyrir persónuleikagerð B en 0.934 (0.922-0.947) fyrir persónuleikagerð A.
+
+Allt að ofan bendir til þess að það sé munur í tíðni hjartasjúkdóma eftir persónuleikagerðum. Ein leið til að prófa þann mun er með **logrank prófi** en það prófar hvort munur sé á tveimur lifunarföllum. Skipunin er einfaldlega *survdiff* og rithátturinn er nákvæmlega sá sami og fyrir *surffit*
+
+```{r,echo=TRUE, warning=FALSE, message=FALSE}
+survdiff(Surv(time169,chd69)~dibpat0f,data=wcgs)
+```
+
+Og mikið rétt! Munurinn reyndist marktækur, p-gildið er $1 \cdot 10^{-10}$. Logrank prófið er líka hægt að nota þegar hóparnir eru fleiri en tveir og prófa það þá núlltilgátuna hvort allir ferlarnir séu eins.
+
+Núlltilgátan er að atburðir séu jafn tíðir milli hópanna. Taflan sýnir *Expected* eða væntanlegan fjölda miðað við þá tilgátu. En gögnin sýna (*Observed*) að atburðir eru færri í B hóp og fleiri í A hóp en búast mætti við ef tilgátan væri sönn. Við höfnum þeirri tilgátu og drögum þá ályktun að tíðni atburða sé meiri í A hóp.
+
+## Víti að varast og breyting á tímaskala
+
+Algeng en alvarleg mistök sem geta gerst er að ruglast á því hvort atburður eða skerðing eigi að vera táknuð með 0 eða 1. Það er þó auðvelt að bera kennsl á þvi mistök því þá stefna ferlarnir í Kaplan Meier gröfunum beinustu leið niður undir restina og enda alltaf í núlli. Hér er dæmi um slíkt.
+
+Hvað gerist ef ruglast er á atburði og skerðingu!
+```{r,echo=TRUE, warning=FALSE, message=FALSE}
+km.fit.3 <- survfit(Surv(time169,chd69==0)~dibpat0f,data=wcgs)
+ggsurvplot(km.fit.3) 
+```
+
+Að lokum langar okkur að sýna ykkur einfalda leið til að breyta tímaskalanum svo hann sé í árum en ekki dögum. Það er einfaldlega með því að deila í dagafjöldann með 365 þegar lifun skilgreindur. Annað hvort með því að búa til nýja breytu eins og time169y fyrir ofan eða inní survfit.
+
+```{r,echo=TRUE, warning=FALSE, message=FALSE}
+km.fit.4 <- survfit(Surv(time169/365.25,chd69) ~ dibpat0f,data=wcgs)
+ggsurvplot(km.fit.4,ylim=c(0.8,1))  
+```

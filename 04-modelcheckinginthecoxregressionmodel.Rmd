@@ -1,0 +1,7 @@
+# Model Checking in the Cox Regression Model
+
+Some _significant_ applications are demonstrated in this chapter.
+
+## Example one
+
+## Example two
