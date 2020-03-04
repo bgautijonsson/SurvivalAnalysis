@@ -131,7 +131,7 @@ Svona er haldið áfram koll af kolli fyrir alla 248 tímapunktana.
 
 Kaplan Meier matið er eingöngu metið á þeim tímapunktum þegar atburður á sér stað. Ef við viljum meta lifunarfallið á tímapunktum sem lenda á milli þessara gilda notum við Kaplan-Meier matið fyrir næsta tímapunkt á undan.
 
-## Kaplan Meier gröf
+### Kaplan Meier gröf
 
 Kaplan Meier gröf eru langalgengasta myndræna framsetningin á lifunargögnum. Þau eru leið til að lýsa lifunarfallinu myndrænt, þ.e.a.s. hversu hátt hlutfall þátttakanda hefur ekki fengið atburð eftir því sem tíminn líður. Gröfin teikna Kaplan Meier matið í sérhverjum tímapunkti og flatar línur milli punktanna. Gröfin eru látin "falla" á þeim tímapunktum sem atburðir eiga sér stað í samræmi við það hvernig matið er reiknað. 
 
@@ -165,7 +165,7 @@ kmfit <- survfit(Surv(time169,chd69)~1,data=wcgs)
 ```
 
 
-## Kaplan Meier gröf eftir hópum
+### Kaplan Meier gröf eftir hópum
 Kaplan Meier gröf eru kjörin til að sýna mun á lifunarfallinu eftir hópum. Hér liggur beint við að skoða mun á lifun án hjartasjúkdóms eftir persónuleikagerð. Þá setjum við nafnið á þeirri breytu hægra megin í survfit skipunina þar sem 1 var áður fyrr.
 
 ```{r,echo=TRUE, warning=FALSE, message=FALSE}
