@@ -1,7 +1,167 @@
 # Model Checking in the Cox Regression Model
 
-Some _significant_ applications are demonstrated in this chapter.
+```{r,warning=FALSE,message=FALSE}
+library(survival)
+library(tidyverse)
+library(flexsurv)
+library(rms)
+library(skimr)
+library(stdReg)
+library(survminer)
+```
 
-## Example one
 
-## Example two
+
+```{r}
+Survival_of_multiple_myeloma_patients <- read.table("./data/Survival of multiple myeloma patients.dat",
+                                                    header=T)
+d_1_3 <- Survival_of_multiple_myeloma_patients
+d_1_3$sexf <- factor(d_1_3$sex)
+d_1_3$proteinf <- factor(d_1_3$protein)
+head(d_1_3)
+```
+
+## Einfalt Kaplan Meier
+
+```{r}
+m1 <- survfit(Surv(time, status) ~ 1, data = d_1_3)
+```
+
+
+```{r}
+plot(m1)
+```
+
+```{r}
+total_time <- sum(d_1_3$time)
+num_events <- sum(d_1_3$status)
+lambda <- num_events / total_time
+lambda
+```
+
+Tími á milli atburða er 1 / lambda
+
+```{r}
+1 / lambda
+```
+
+## Veldislifunarfallið
+
+```{r}
+s <- function(t) exp(-lambda * t)
+s(20)
+```
+
+```{r}
+t <- seq(0, 90)
+plot(t, s(t), type = "l")
+```
+
+```{r}
+plot(m1)
+lines(x = t, y = s(t), col = "blue")
+```
+
+$$
+S(t) = e^{-\lambda t}
+$$
+
+
+$$
+H(t) = -\log S(t) = -\log (e^{-\lambda t}) = -(-\lambda t) = \lambda t
+$$
+
+$$
+H(t) = \int_0^t h(t)dt = \sum_{i=1}^n h(t)(t_{i + 1} - t_i)
+$$
+
+```{r}
+plot(m1, fun = "cumhaz")
+lines(t, lambda * t, col = "blue")
+```
+
+## Leifar í Cox
+
+```{r}
+head(d_1_3)
+```
+
+```{r}
+m_4_5 <- coxph(Surv(time, status) ~ hb + bun, data = d_1_3)
+m_4_5
+```
+
+Cox-Snell residuals eiga að hegða sér eins og lifunargögn úr veldisdreifingu með $\lambda = 1$.
+
+```{r}
+resid_martingale <- residuals(m_4_5, type = "martingale")
+d_1_3$coxsnell <- d_1_3$status - resid_martingale
+```
+
+```{r}
+m_coxsnell <- survfit(Surv(coxsnell, status) ~ 1, data = d_1_3)
+```
+
+```{r}
+total_coxsnell <- sum(d_1_3$coxsnell)
+lambda_coxsnell <- num_events / total_coxsnell
+lambda_coxsnell
+```
+
+
+```{r}
+plot(m_coxsnell, fun = "cumhaz")
+abline(a = 0, b = 1, col = "blue")
+```
+
+## Survminer
+
+```{r}
+ggcoxdiagnostics(m_4_5)
+```
+
+
+```{r}
+ggcoxfunctional(m_4_5)
+```
+
+```{r}
+m_null <- coxph(Surv(time, status) ~ 1, data = d_1_3)
+resid_martin <- residuals(m_null, type = "martingale")
+d_1_3$resid_martin <- resid_martin
+
+ggplot(data = d_1_3, aes(bun, resid_martin)) +
+  geom_point() +
+  geom_smooth(method = "loess") +
+  scale_x_log10()
+```
+
+```{r}
+d_1_3 %>% 
+  mutate(log_bun = log(bun)) %>% 
+  gather(variable, value, log_bun, bun, hb) %>% 
+  ggplot(aes(value, resid_martin)) +
+  geom_point() +
+  geom_smooth() +
+  facet_wrap("variable", scales = "free")
+```
+
+
+### Deviance residuals
+
+```{r}
+ggcoxdiagnostics(m_4_5, type = "deviance")
+```
+
+### dfbeta
+
+```{r}
+ggcoxdiagnostics(m_4_5, type = "dfbeta")
+```
+
+
+
+
+
+
+

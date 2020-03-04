@@ -13,17 +13,17 @@ link-citations: yes
 description: "This is a collection of lectures notes from the course at University of Iceland"
 ---
 
-# Preface
+# Preface {-}
 
 ***
 
-## The Book
+## The Book {-}
 
 These lecture notes are based on the book [Modelling Survival Data in Medical Research by David Collett](https://www.crcpress.com/Modelling-Survival-Data-in-Medical-Research/Collett/p/book/9781439856789)
 
 ![](https://images.tandf.co.uk/common/jackets/amazon/978143985/9781439856789.jpg)
 
-## Theory
+## Theory {-}
 
 Before you start you should be familiar with:
 
@@ -31,11 +31,11 @@ Before you start you should be familiar with:
 * Etc
 * Etc
 
-## Software
+## Software {-}
 
 We will primarily be writing R code using the RStudio GUI.
 
-## Setup in RStudio
+## Setup in RStudio {-}
 
 This is our base setup. Further packages will be loaded in the individual lectures respectively.
 

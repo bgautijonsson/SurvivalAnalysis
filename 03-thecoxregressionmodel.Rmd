@@ -1,3 +1,234 @@
 # The Cox Regression Model
 
-We describe our methods in this chapter.
+```{r,warning=FALSE,message=FALSE}
+library(survival)
+library(tidyverse)
+library(flexsurv)
+library(rms)
+library(skimr)
+```
+
+## Inngangur
+Þessi kafli fjallar um Cox líkanið sem er aðhvarfsgreiningarlíkan. Við viljum færa okkur yfir í afhvarfsgreiningu til að meta áhrifsstærðir og til að geta leiðrétt fyrir skýribreytum (*explanatory variables*). Aðhvarfsgreining hefur þá möguleika umfram einföld próf til að bera saman hópa.
+
+Log-rank prófið segir okkur bara að munur sé á lifun milli hópa en ekki hve mikill hann er. Hægt er að leiðrétta með því að gera *stratified* próf. En ekki hægt að leiðrétta fyrir samfelldum breytum.
+
+## Modeling the hazard function
+
+Markmiðið er að búa til líkan fyrir hættuföllin þ.e. *hazard* föllin og lýsa hvernig bakgrunnsreytur hafa áhrif á þau. Tökum dæmi úr sýnidæmi 1.3 sem fjallar um lifun sjúklinga með *multiple myeloma*
+
+```{r}
+Survival_of_multiple_myeloma_patients <- read.table("Data/Survival of multiple myeloma patients.dat",
+                                                    header=T)
+d_1_3 <- Survival_of_multiple_myeloma_patients
+```
+
+Skýribreyturnar þar eru:
+```{r}
+names(d_1_3)[-c(1:3)]
+```
+
+Fyrstu línur eru:
+```{r}
+head(d_1_3)
+```
+
+Í sýnidæmi 1.4 er borin saman lifun sjúklinga með blöðruhálskirtilskrabbamein eftir meðferð.
+
+```{r}
+Comparison_of_two_treatments_for_prostatic_cancer <- read.table("Data/Comparison of two treatments for prostatic cancer.dat",header=T)
+d_1_4 <- Comparison_of_two_treatments_for_prostatic_cancer
+d_1_4 <- d_1_4 %>% mutate(treatmentf=factor(treatment))
+```
+
+Meðferðin er *treatment* dálkurinn og fyrstu línur eru:
+```{r}
+head(d_1_4)
+```
+
+### A model for comparison of two groups
+
+Byrjum á að bera saman tvo hópa og notum gögnin úr sýnidæmi 1.4. Meðferðirnar eru tvær:
+
+```{r}
+table(d_1_4$treatmentf)
+```
+
+Við eigum alltaf að byrja á að meta fjölda atburða, eftirfylgnitíma og tíðni atburða á tímaeiningu.
+
+```{r}
+r0 <- d_1_4 %>% summarise(n=n(),d=sum(status),
+                                            V=sum(time),lambda=d/V,se.lambda=sqrt(d)/V)
+r0
+
+r <- d_1_4 %>% group_by(treatmentf) %>% summarise(n=n(),
+                                            d=sum(status),
+                                            V=sum(time),lambda=d/V,se.lambda=sqrt(d)/V)
+r
+```
+
+Við sjáum að tíðni atburða er lægri fyrir meðferð tvö og hættuhlutfallið er
+
+```{r}
+exp(diff(log(r$lambda)))
+```
+
+Reyndar er þetta mat það sama og ef við miðum við veldisdreifingu á lifunartímanum. Einfalt er að meta hættuhlutfallið með *flexurvreg* fallinu í *flexurv* pakkanum:
+
+```{r}
+f0 <- flexsurvreg(Surv(time,status) ~ 1,data=d_1_4,dist="exponential")
+f0
+f1 <- flexsurvreg(Surv(time,status) ~ treatmentf,data=d_1_4,dist="exponential")
+f1
+```
+Í fyrsta *líkaninu* er engin skýribreyta og fæst þá tíðnin fyrir allan hópinn. Berið saman við r0 að ofan.
+
+Í seinna líkaninu býr flexurvreg til *dummy* breytu þannig að ef treatment er 1 fær dummy breytan gildið 0 en ef treatment er 2 fær dummy breytan gildið 1. Grunnhættufallið sem flexurvreg metur er fyrir öll gildi á skýribreytum sem 0. Hér er bara ein skýribreyta og þegar hún er 0 gildið að treatment er 1.
+
+Að ofan gefur línan *rate* þá matið á *lambda* í veldisdreifingunni þegar treatment er 1. Síðan gefur línan treatmentf2 mismuninn á log-rate á treatment=2 miðað við treatment=1.
+
+```{r}
+beta <- diff(log(r$lambda))
+beta
+```
+
+Hættuhlutfallið er 
+
+```{r}
+exp(beta)
+```
+
+Öryggisbilið er vítt og inniheldur 1. Það næst ekki að sýna fram á tölfræðilega marktækan mun hér með Wald prófinu.
+```{r}
+exp(confint(f1))[2,]
+```
+
+Log-likelihood prófið er aflmeira og rétt nær að sýna fram á martkækan mun
+```{r}
+ll <- -2*(logLik(f0)-logLik(f1))
+ll
+1-pchisq(ll,1)
+```
+
+Athugið að hættuhlutfallið er um 85% lægra í treatment=1 miðað við treatment=2! Það væri til mikils að rannsaka þetta betur með stærra þýði.
+
+Hér getum við skrifað $h_0(t) = \lambda$ fyrir treatment=1 og $h_1(t) = \exp(\beta) h_0(t)$ fyrir treatment=2.
+
+Þetta er einfaldasta *proportional hazards* líkanið.
+
+Við getum valið annað form á $h_0(t)$ (t.d. Weibull) eða haft óstikað mat á $h_0(t)$ og erum við þá komin með líkan Cox.
+
+Við höfum þegar kynnst **alveg** óstikuðu mati á lifunartíma. Við skulum rifja það upp og teikna stikaða matið með óstikaða matinu úr aðferð Kaplan-Meier.
+
+Við höfum að $h_0(t) =   \lambda$. Þá er $H_0(t) = \lambda t$ og $S_0(t) = \exp(-\lambda t)$. Svo er $h_1(t) = \exp(\beta) h_0(t)$ og þá $H_1(t) = \exp(\beta) \lambda t$ og $S_1(t) =\exp(-\exp(\beta) \lambda t) = \exp(-\lambda t)  ^ {\exp(\beta)}  = S_0(t) ^{\exp(\beta)}$.
+
+```{r}
+s1 <- survfit(Surv(time,status) ~ treatmentf,data=d_1_4)
+plot(s1)
+t <- 0:70
+lines(t,exp(-0.00609 * t),col="blue")
+lines(t,exp(-0.00609 * t) ^ exp( -1.87339 ),col="red")
+```
+
+
+Óstikað próf á mun má milli meðferða væri gert með log rank:
+
+```{r}
+survdiff(Surv(time,status) ~ treatmentf,data=d_1_4)
+```
+
+Hér fæst marktækt lægri tíðni atburða í treatment 2 miðað við treatment 1.
+
+Til að undirbúa okkur fyrir Cox líkanið skulum við skoða niðurstöðuna úr því líkani með *coxph*. Hér er $h_0(t)$ óstikað og við fáum bara hlutfallið $\exp(\beta)$ á milli $h_1(t)$ og $h_0(t)$.
+
+```{r}
+coxph(Surv(time,status) ~ treatmentf,data=d_1_4,ties = "breslow")
+```
+
+Niðurstöðurnar eru líkar niðurstöðunni að ofan úr veldisdreifingunni, en ekki alveg eins. Við lærum seinna hvernig við náum í matið á $h_0(t)$ úr Cox líkaninu.
+
+### The general proportional hazards model
+
+Almennt skrifum við *proportional hazards* líkanið svona
+
+
+$$
+h(t) = h_0(t) \exp(\beta_1 x_1 + \cdots + \beta_p x_p).
+$$
+
+Með því að deila með $h_0(t)$ og taka logra fæst:
+
+
+$$
+\log \left( \frac{h(t)}{h_0(t)} \right) = \beta_1 x_1 + \cdots + \beta_p x_p.
+$$
+
+Með öðrum orðum er logrinn af áhættuhlutfallinu línuleg samantekt af skýribreytunum.
+
+Farið er með skýribreytur alveg eins í öðrum línulegum líkönum eins og aðhvarfsgreiningu og tvíkosta aðhvarfsgreiningu.
+
+## Fitting the Cox regression model
+
+Hér er stuttlega sýnt hvernig eitt hættuhlutfall er fengið með Cox líkaninu.
+
+
+```{r}
+Prognosis_for_women_with_breast_cancer <- read.table("Data/Prognosis for women with breast cancer.dat",
+                                                    header=T)
+d_1_2 <- Prognosis_for_women_with_breast_cancer
+d_1_2 <- d_1_2 %>% mutate(stainf = factor(stain))
+```
+
+En fyrst alltaf að skoða tíðni atburða:
+```{r}
+r <- d_1_2 %>% group_by(stainf) %>% summarise(n=n(),
+                                            d=sum(status),
+                                            V=sum(time),lambda=d/V,se.lambda=sqrt(d)/V)
+r
+```
+
+```{r}
+r$lambda
+diff(log(r$lambda))
+exp(diff(log(r$lambda)))
+```
+
+Svo Cox líkanið:
+```{r}
+f2 <- coxph(Surv(time, status) ~ stainf,data=d_1_2,ties = "breslow")
+f2
+```
+
+```{r}
+exp(coef(f2))
+exp(confint(f2))
+```
+
+Næst skoðum við fjölbreytulíkan úr *multiple myaloma* gögnunum.
+```{r}
+skim(d_1_3)
+```
+
+Hér setjum við allar breytur inn. En hugsanlea mundum við laga þær til. Breyta í factor og miðja en það kemur síðar:
+
+```{r}
+f4 <- coxph(Surv(time,status) ~ age + sex + bun + ca + hb  + pcells + protein,data = d_1_3,ties="breslow" )
+f4
+```
+
+Frank Harrell er líka með fall fyrir Cox likanið. Það gefur meiri upplýsingar t.d. R2 og Dxy sem er skylt concordance index C þannig að $C = 0.5(Dxy+1)$
+
+
+```{r}
+f5 <- cph(Surv(time,status) ~ age + sex + bun + ca + hb  + pcells + protein,data = d_1_3,ties="breslow" )
+f5
+```
+
+Svo er mjög gagnlegt að bera saman spágetu breytanna út frá kí-kvaðrat gildum og bera saman.
+
+Hér sést í fljótu bragði að *bun*, *hb* og e.t.v. *protein* skipta mestu máli.
+
+```{r}
+plot(anova(f5))
+```
+

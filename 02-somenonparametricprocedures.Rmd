@@ -1,3 +1,223 @@
 # Some Non-Parametric Procedures
 
-Here is a review of existing methods.
+```{r,message=FALSE,warning=FALSE}
+library(tidyverse)
+library(survival)
+library(readxl)
+library(muhaz)
+library(rms)
+library(bshazard)
+```
+
+
+Look at the methods at the following pate to estimate S(t) using the actuarial method and the Kaplan Meier method:
+
+http://sphweb.bumc.bu.edu/otlt/MPH-Modules/BS/BS704_Survival/BS704_Survival_print.html
+
+## 2.1.2
+
+The Kaplan Meier estimator of a survival curve is a step function, continuous from the right. At $t_0=0$ we have $S(t_0)=1$. Let the first survival time be $t_1$ and assume $d_1$ events where $n_1$ were at risk. This means that $d_1$ individuals had survival time equal to $t_1$. 
+
+Then the event probability is estimated as $\hat{q}_1 = d_1/n_1$ and the survival probability as $\hat{p}_1=1-\hat{q}_1 = 1-d_1/n_1$. Then
+$$
+\hat{S}(t_1)=(1-\hat{q}_1)=\left(1-\frac{d_1}{n_1}\right).
+$$
+Assume $d_2$ events at time $t_2>t_1$ where $n_2$ are at risk.Since $S(t_2)=P[T > t_2] = P[T > t_2|T>t_1] P[T>t_1]$, it is natural to continue with $\hat{S}(t_2)= (1-\hat{q}_2)\hat{S}(t_1)$. In other words:
+
+$$
+\hat{S}(t_2)=(1-\hat{q}_2)(1-\hat{q}_1)=\left(1-\frac{d_2}{n_2}\right)\left(1-\frac{d_1}{n_1}\right).
+$$
+
+Then similarly for $t_3$, $t_4$ etc so that for any $t$
+$$
+\hat{S}(t) = \prod_{t_i \le t} (1-\hat{q_î}) = \prod_{t_i \le t} \left(1-\frac{d_i}{n_i}\right).
+$$
+
+Recall that $P[A | B] = P[A \cap B]/P(B)$ and note that $P[T > t_2]=P[T > t_2 \cap T > t_1]$, for $t_2>t_1$.
+
+There is only a change in $\hat{S}(t)$ when $t$ is a time of an event. It does not change when $t$ is a censored time. However, the number at risk changes.
+
+## 2.1.3 Nelson - Aalen
+
+In an interval from $t_{i-1}$ to $t_i$ it is natural to estimate the hazard with the number of events in that interval divided by the person years in that interval.
+
+$$
+h(t_i) = \frac{d_i}{n_i (t_i-t_{i-1})}.
+$$
+
+
+The cumulative hazard can then be estimated by numerical integration:
+$$
+H(t) = \sum_{t_i \le t}  \frac{d_i}{n_i (t_i-t_{i-1})} (t_i-t_{i-1})
+$$
+so that
+
+$$
+H(t) = \sum_{t_i \le t}  \frac{d_i}{n_i}.
+$$
+
+From $\exp(a+b) = \exp(a)\exp(b)$ we get the Nelson-Aalen estimator of $S(t)$ as
+
+$$
+S(t) = \exp(-H(t)) = \prod_{j=1}^{k} \exp(-d_i/n_i)
+$$
+where $t_k$ is the largest time less than $t$.
+
+## 2.2 
+
+We can use the status method to estimate the sampling error in $\hat{S}(t)$. The **status method** is used to estimate the variance of a function of a random variable. Let $f$ be differentiable. It says that if $E(X)=\mu$ then
+
+$$
+\mathrm{Var}(f(X)) \approx \mathrm{Var(X)}\left(f^\prime(\mu)\right)^2
+$$
+
+In particular
+$$
+\mathrm{Var}(\log(X)) \approx \mathrm{Var(X)}(1/\mu)^2 
+$$
+and
+$$
+\mathrm{Var}(\exp(X)) \approx \mathrm{Var(X)}(\exp(\mu))^2.
+$$
+
+For example,
+
+$$
+\mathrm{var}(\log(1-\hat{q}))=\mathrm{var}(\log(\hat{p}))) \approx \mathrm{var}(\hat{p})\left(1/{p}\right)^2=\frac{\hat{p}(1-\hat{p})}{n{p}^2},
+$$
+which we estimate by
+$$
+\frac{\hat{p}(1-\hat{p})}{n\hat{p}^2}
+$$
+
+
+Simplifying further leads to:
+$$
+\mathrm{var}(\log(1-\hat{q})) \approx \frac{1-\hat{p}}{n \hat{p}} = \frac{\hat{q}}{n(1-\hat{q})} = \frac{d/n}{n(1-d/n)}=\frac{d}{n(n-d)}.
+$$
+
+Therefore 
+$$
+\mathrm{Var}(\log(\hat{S}(t))) = \sum_{t_i\le t} \frac{d_i}{n_i(n_i-d_i)} 
+$$
+
+Then we can write $\hat{S}(t)=\exp(\log(\hat{S}(t)))$ and use the status-method on the random variable $\log(\hat{S}(t))$ with the function $f(u)=\exp(u)$.
+
+$$
+\mathrm{Var}(\hat{S}(t)) = \mathrm{Var}(\exp(\log(\hat{S}(t)))) = \mathrm{Var}(\log(\hat{S}(t))) \left(\hat{S}(t)) \right)^2.
+$$
+
+In other words, using the results above, 
+$$
+\mathrm{Var}(\hat{S}(t)) =  \left(\hat{S}(t)) \right)^2 \sum_{t_i\le t} \frac{d_i}{n_i(n_i-d_i)}.
+$$
+
+Further details can be found in the [Appendix](http://onlinelibrary.wiley.com/doi/10.1002/9780470258019.app1/pdf) of the survival book by Hosmer, Lemeshow, and May.
+
+
+## 2.2 Estimating the hazard function
+
+We learn a lot about the data by studying the hazard functions.
+
+
+But first, let's look at the survival. We use the data from example 1.3.
+
+
+```{r}
+Survival_of_multiple_myeloma_patients <- read.table("Data/Survival of multiple myeloma patients.dat", header = T)
+d <- Survival_of_multiple_myeloma_patients %>% as_tibble
+```
+
+
+```{r}
+result.km <- survfit(Surv(time, status) ~ 1,conf.type="log-log",data=d)
+
+result.na <- survfit(Surv(time, status) ~ 1,conf.type="log-log",type="fh",data=d)
+```
+
+Kaplan Meier
+```{r}
+plot(result.km)
+result.km
+summary(result.km)
+```
+
+Nelson-Aalen
+```{r}
+plot(result.na)
+result.na
+summary(result.na)
+```
+
+
+In R we have the *muhaz* and *pehaz* functions to estimate the hazard.
+
+```{r}
+attach(d)
+result.pe12 <- pehaz(time, status, width=12)
+result.smooth <- muhaz(time, status)
+detach(d)
+```
+
+
+The output from *pehaz*:
+```{r}
+result.pe12
+```
+
+The hazard in interval $i$ is estimated with $d_i / \mathrm{Follow-up}_i$ where $\mathrm{Follow-up}$ is the Total Follow-up Time  $i$.  
+
+If we take 12 months as a fixed time interval, we get on one hand from $d_i/n_i$ 
+
+```{r}
+result.pe12$Events/(result.pe12$At.Risk*12)
+```
+
+and on the other hand the correct result.
+```{r}
+result.pe12$Hazard
+result.pe12$Events/result.pe12$F.U.Time
+```
+
+Note that using number at risk times 12 leads to overestimate in the person-years and therefore underestimate in the hazard.
+
+This difference gets smaller with smaller intervals. 
+
+Graphical comparison
+```{r}
+attach(d)
+result.pe6 <- pehaz(time, status, width=6)
+detach(d)
+
+plot(result.pe6,xlim=c(0,80),ylim=c(0,0.1))
+lines(result.pe12)
+points(result.pe6$Cuts[-1],result.pe6$Hazard)
+lines(result.smooth$est.grid,result.smooth$haz.est,col="blue")
+```
+
+This is a comparison of the Nelson Aalen estimator (line) with the result from *pehaz*. 
+
+Note $H(t)=-\log(S)$ is on the y-axis.
+
+```{r}
+plot(result.na$time,-log(result.na$surv))
+lines(result.pe6$Cuts[-1],cumsum(result.pe6$Hazard)*6)
+```
+
+Comparison using the Kaplan-Meier results and transformations based pehaz (blue line).
+```{r}
+plot(result.km,xlim=c(0,90))
+lines(result.pe6$Cuts[-1],exp(-cumsum(result.pe6$Hazard)*6),col="blue")
+```
+
+Results from the *rms* package
+```{r}
+rms1 <- npsurv(Surv(time, status) ~ 1,data=d)
+```
+
+```{r}
+survplot(rms1,what=c("survival"),n.risk = T)
+```
+
+
+
