@@ -221,3 +221,115 @@ survplot(rms1,what=c("survival"),n.risk = T)
 
 
 
+---
+title: "Kaplan-Meier and Nelson-Aalen"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    theme: journal
+    code_folding: show
+---
+
+```{r}
+library(tidyverse)
+library(cowplot)
+theme_set(theme_cowplot() +  
+              background_grid(major = "xy", 
+                              minor = "xy",
+                              size.major = 0.25,
+                              size.minor = 0.1) +
+              theme(legend.position = "top",
+                    plot.margin = margin(10, 10, 10, 10)))
+```
+
+## An Application to Cat Adoptions
+
+### Data
+
+We'll work with the `AustinCats` data from the `rethinking` package, the companion package to the book *Statistical Rethinking* by Richard McElreath.
+
+```{r}
+data("AustinCats", package = "rethinking")
+d <- AustinCats %>% 
+  as_tibble %>% 
+  filter(out_event %in% c("Adoption", "Censored")) %>% 
+  select(days_to_event, out_event)
+rm(AustinCats)
+```
+
+### Kaplan-Meier
+
+In the *Kaplan-Meier* estimate, the survivor function is estimated and then transformed to the hazard function.
+
+```{r, fig.asp = 0.621}
+km <- d %>% 
+  mutate(n = n()) %>% 
+  group_by(days_to_event, n) %>% 
+  summarise(events = sum(out_event == "Adoption"),
+            censored = n() - events,
+            lost = events + censored) %>% 
+  ungroup %>% 
+  mutate(total_lost = cumsum(lost),
+         n = n - lag(total_lost, default = 0),
+         conditional_survival = (n - events) / n,
+         surv = cumprod(conditional_survival),
+         cumulative_hazard = -log(surv),
+         hazard = cumulative_hazard - lag(cumulative_hazard, default = 0)) %>% 
+  rename(Hazard = hazard, "Cumulative Hazard" = cumulative_hazard, "Survival" = surv) %>% 
+  pivot_longer(c(Hazard, "Cumulative Hazard", Survival)) %>% 
+  mutate(type = "Kaplan-Meier") 
+
+km %>% 
+  ggplot(aes(days_to_event, value)) +
+  geom_step() +
+  facet_wrap("name", scales = "free") +
+  labs(x = "Time (days)",
+       title = "Kaplan-Meier estimates for cat adoptions") +
+  theme(axis.title.y = element_blank())
+```
+
+### Nelson-Aalen
+
+In the *Nelson-Aalen* estimate, the hazard function is estimated and then transformed to the survivor function.
+
+```{r, fig.asp = 0.621}
+na <- d %>% 
+  mutate(n = n()) %>% 
+  group_by(days_to_event, n) %>% 
+  summarise(events = sum(out_event == "Adoption"),
+            censored = n() - events,
+            lost = events + censored) %>% 
+  ungroup %>% 
+  mutate(total_lost = cumsum(lost),
+         n = n - lag(total_lost, default = 0),
+         hazard = events / n,
+         cumulative_hazard = cumsum(hazard),
+         surv = exp(-cumulative_hazard)) %>% 
+  rename(Hazard = hazard, "Cumulative Hazard" = cumulative_hazard, "Survival" = surv) %>% 
+  pivot_longer(c(Hazard, "Cumulative Hazard", Survival)) %>% 
+  mutate(type = "Nelson-Aalen")
+
+na %>%   
+  ggplot(aes(days_to_event, value)) +
+  geom_step() +
+  facet_wrap("name", scales = "free") +
+  labs(x = "Time (days)",
+       title = "Nelson-Aalen estimates for cat adoptions") +
+  theme(axis.title.y = element_blank())
+```
+
+### Compare
+
+```{r, fig.asp = 1}
+km %>% 
+  bind_rows(na) %>% 
+  ggplot(aes(days_to_event, value)) +
+  geom_step() +
+  facet_grid(name ~ type, scales = "free") +
+  labs(x = "Time (days)",
+       title = "Comparison of Kaplan-Meier and Nelson-Aalen estimates",
+       subtitle = "Based on cat adoption data from Statistical Rethinking by Richard McElreath") +
+  theme(axis.title.y = element_blank())
+```
+

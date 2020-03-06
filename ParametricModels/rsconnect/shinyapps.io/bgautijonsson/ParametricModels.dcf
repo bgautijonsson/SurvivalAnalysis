@@ -1,0 +1,12 @@
+name: ParametricModels
+title: ParametricModels
+username:
+account: bgautijonsson
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 1911112
+bundleId: 2855552
+url: https://bgautijonsson.shinyapps.io/ParametricModels/
+when: 1583452396.11463
+asMultiple: FALSE
+asStatic: FALSE
