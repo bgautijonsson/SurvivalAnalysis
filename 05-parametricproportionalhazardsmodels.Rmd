@@ -10,6 +10,11 @@ library(rms)
 library(bshazard)
 ```
 
+```{r}
+knitr::include_app("https://bgautijonsson.shinyapps.io/ParametricModels/", height = "800px")
+```
+
+
 
 ```{r}
 data("wcgs")
