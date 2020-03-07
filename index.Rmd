@@ -62,7 +62,7 @@ P(X=0) &= 1 - p, \quad \text{where } 0 < p < 1.
 \end{aligned}
 $$
 
-We write this as $X \sim \mathrm{Bern}(p)$. All random variables whose possible values are $0$ and $1$ have a this distribution. 
+We write this as $X \sim \mathrm{Bern}(p)$. All random variables whose possible values are $0$ and $1$ follow this distribution. 
 
 ```{r}
 p <- 0.3
@@ -100,11 +100,11 @@ tibble(outcome = possible_outcomes,
 
 #### Geometric {-}
 
-Conside a sequence of independent Bernoulli trials, each with th same success probability, $p$, and imagine performing trials untill a success occurs. Let $X$ be the number of *failures* before the first successful trial. Then $X$ has the *Geometric distribution* with parameter $p$, denoted by $X \sim \mathrm{Geom}(p)$.
+Consider a sequence of independent Bernoulli trials, each with the same success probability, $p$, and imagine performing trials until a success occurs. Let $X$ be the number of *failures* before the first successful trial. Then $X$ has the *Geometric distribution* with parameter $p$, denoted by $X \sim \mathrm{Geom}(p)$.
 
-This is an important distribution for survival analysis. Imagine that on each day there is a probability, $p$, which remains constant. Then the number of days before the event have a $\mathrm{Geom}(p)$ distribution.
+This is an important distribution for survival analysis. Imagine that on each day there is a constant probability, $p$, that some event happens. Then the number of days before the event happens follows a $\mathrm{Geom}(p)$ distribution. Note that the *Geometric* distribution only models whole numbers, so we cannot wait for $4.5$ days when working with this distribution.
 
-Textbooks and statistical software differ in whether the *Geometric distribution* models the trials *before* the success or the number of trials *including* the success. The number of trials *including* the success is sometimes called the *First Success distribution*.
+Textbooks and statistical software differ in whether the *Geometric distribution* models the number trials *before* the success or the number of trials *including* the success. The number of trials *including* the success is sometimes called the *First Success distribution*.
 
 ```{r}
 risk <- 0.10
@@ -124,25 +124,27 @@ tibble(time = possible_times,
 
 ### Continuous {-}
 
-For continuous variables it makes no sense to ask *what is the probability that X will be equal to x?* since that probabity, $P(X = x)$ is always $0$. Consider the probabity that the temperature outside is 23 degrees celsius. This probability is $0$ since the temperature outside is never exactly 23 degrees, rather it might be 23.01231 or 22.999923, but it is never exactly 23. Instead of the probability of a value we talk of the *density* of a value.
+For continuous variables it makes no sense to ask *what is the probability that X will be equal to x?* since that probability, $P(X = x)$ is always $0$. Consider the probability that the temperature outside is 23 degrees celsius. This probability is $0$ since the temperature outside is never exactly 23 degrees, rather it might be 23.01231 or 22.999923, but it is never exactly 23. Instead of the probability that a continuous random variable equals some value we talk of the *density* of the distribution at that value.
 
-On the other hand we *can* talk about the probability that $X$ is less than or equal to $x$ or $P(X \leq x)$. Thus we can ask *what is the probability that the temporature outside is less than 24?* or $P(\mathrm{Temp} \leq 23)$.
+On the other hand we *can* talk about the probability that a continuous random variable, $X$, is less than or equal to $x$ or $P(X \leq x)$. Thus we can ask *what is the probability that the temporature outside is less than  or equall to 23?* or $P(\mathrm{Temp} \leq 23)$.
 
 #### Exponential {-}
 
-The Exponential distribution is the continuous counterpart to the Geometric distribution. Instead of waiting for events in discrete days we are now waiting in continuous time for successes that occurs with rate $\lambda$ per unit of time. The average number of successes in a time inteval of length $t$ is $\lambda t$, though the actual number of successes varies. If $X$ has an *Exponential distribution* we write $X \sim \mathrm{Expo}(\lambda)$, and the probability that an event occures within $x$ units of time is
+*The Exponential distribution* is the continuous counterpart to the Geometric distribution. Instead of waiting for events in discrete days we are now waiting in continuous time for a success that occurs with rate $\lambda$ per unit of time. The average number of successes in a time interval of length $t$ is $\lambda t$, though the actual number of successes varies.
+
+If $X$ has an *Exponential distribution* we write $X \sim \mathrm{Expo}(\lambda)$, and the probability that an event occurs within $x$ units of time is equal to the probability that $X$ is less than or equal to $x$, or
 
 $$
 P(X \leq x) =F(x) = 1 - e^{-\lambda x}.
 $$
 
-In survival snalysis this is often called the *risk function*. The *survivor function* is the probability that an event has *not occurred* within $x$ units of time, and for an *Exponential random variable* it is written
+In survival analysis this is often called the *risk function*. The *survivor function* is the probability that an event has *not occurred* within $x$ units of time, and for an *Exponential random variable* it is written
 
 $$
 P(X > x) = S(x) = 1 - (1 - e^{-\lambda x}) = e^{-\lambda x}.
 $$
 
-The *Exponential distribution* is unique in that it is *memoryless*. This means that the time untill an event occurs is independent of how long you have been waiting for it to happen. It is obvious that the time untill your bus arrives is not *exponentially* distributed since the waiting time is not the same whether you have waited $0$, $5$ or $15$ minutes *(although sometimes it may feel that way!)*. Waiting times that are not memoryless are better modeled with other distributions.
+The *Exponential distribution* is unique in that it is *memoryless*. This means that the time until an event occurs is independent of how long you have been waiting for it to happen. It is obvious that the time until your bus arrives is not *exponentially* distributed since the waiting time is not the same whether you have waited $0$, $5$ or $15$ minutes *(although sometimes it may feel that way!)*. Waiting times that are not memoryless are better modeled with other distributions.
 
 ```{r}
 rate <- 0.1
@@ -190,7 +192,13 @@ tibble(time = possible_times,
 
 ### Weibull {-}
 
-Remarkably, simply raising an exponential random variable to a power dramatically improves the flexibility and applicability of the distribution. Let $X \sim \mathrm{Expo}(\lambda)$ and $T = X^{1\gamma}$ with $\lambda > 0$, $\gamma > 0$. The distribution of $T$ is called the *Weibull distribution* and we denote this by $T \sim \mathrm{Weib}(\lambda, \gamma)$. We see that if $\gamma = 1$ then $T\sim \mathrm{Weib}(\lambda, 1) = \mathrm{Expo}(\lambda)$. The *risk function* for a *Weibull* random variable is
+Remarkably, simply raising an exponential random variable to a power dramatically improves the flexibility and applicability of the distribution. Let $X \sim \mathrm{Expo}(\lambda)$ and $T = X^{1/\gamma}$ with $\lambda > 0$, $\gamma > 0$. 
+
+The distribution of $T$ is called the *Weibull distribution* and we denote this by $T \sim \mathrm{Weib}(\lambda, \gamma)$. We see that if $\gamma = 1$ then $T\sim \mathrm{Weib}(\lambda, 1) = \mathrm{Expo}(\lambda)$. 
+
+It is interesting to note that if $T = X^{1/\gamma}$ then $X = T^{\gamma}$. Thus, if you have a random variable $T\sim \mathrm{Weib}(\lambda, \gamma)$, then $T^\gamma \sim \mathrm{Expo}(\lambda)$, and so $T^\gamma$ is memoryless,  which can be used to examine whether $T$ is actually *Weibull* distributed.
+
+The *risk function* for a *Weibull* random variable is
 
 $$
 P(T \leq t) = F(t) = 1 - e^{\lambda t^{\gamma}}
