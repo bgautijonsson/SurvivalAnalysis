@@ -41,20 +41,28 @@ ui <- fluidPage(theme = shinytheme(theme = "cerulean"),
                 sidebarLayout(
                     sidebarPanel(
                         sliderInput("lambda",
-                                    "Lambda",
+                                    "Lambda / Mu / Rate",
                                     min = 0.1,
                                     max = 10,
                                     value = 1),
                         sliderInput("gamma",
-                                    "Gamma",
+                                    "Gamma / Alpha / Shape",
                                     min = 0.1,
                                     max = 3,
-                                    value = 1)
+                                    value = 1.5)
                     ),
                     
                     # Show a plot of the generated distribution
                     mainPanel(
-                        plotOutput("plot1", height = "400px")
+                        plotOutput("plot1", height = "400px"),
+                        h5("Exponential"),
+                        withMathJax(helpText("$$h(t) = \\lambda$$")),
+                        withMathJax(helpText("$$H(t) = \\lambda t$$")),
+                        withMathJax(helpText("$$S(t) = e^{-\\lambda t}$$")),
+                        h5("Weibull"),
+                        withMathJax(helpText("$$h(t) = \\lambda \\gamma t^{\\gamma -1 } = \\mu\\alpha t^{\\alpha - 1}$$")),
+                        withMathJax(helpText("$$H(t) = \\lambda t^{\\gamma} = \\mu t^\\alpha$$")),
+                        withMathJax(helpText("$$S(t) = e^{-\\lambda t^{\\gamma}} = e^{-\\mu t^\\alpha}$$")),
                     )
                 )
 )

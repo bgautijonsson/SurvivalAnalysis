@@ -25,7 +25,7 @@
 <meta name="author" content="Brynjólfur Gauti Jónsson" />
 
 
-<meta name="date" content="2020-03-06" />
+<meta name="date" content="2020-03-07" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -136,9 +136,14 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li class="chapter" data-level="" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i>Preface</a>
 <ul>
 <li class="chapter" data-level="" data-path="index.html"><a href="index.html#the-book"><i class="fa fa-check"></i>The Book</a></li>
-<li class="chapter" data-level="" data-path="index.html"><a href="index.html#theory"><i class="fa fa-check"></i>Theory</a></li>
 <li class="chapter" data-level="" data-path="index.html"><a href="index.html#software"><i class="fa fa-check"></i>Software</a></li>
 <li class="chapter" data-level="" data-path="index.html"><a href="index.html#setup-in-rstudio"><i class="fa fa-check"></i>Setup in RStudio</a></li>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html#some-probability-distributions"><i class="fa fa-check"></i>Some Probability Distributions</a>
+<ul>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html#discrete"><i class="fa fa-check"></i>Discrete</a></li>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html#continuous"><i class="fa fa-check"></i>Continuous</a></li>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html#weibull"><i class="fa fa-check"></i>Weibull</a></li>
+</ul></li>
 </ul></li>
 <li class="chapter" data-level="1" data-path="introduction-to-survival-analysis.html"><a href="introduction-to-survival-analysis.html"><i class="fa fa-check"></i><b>1</b> Introduction to Survival Analysis</a>
 <ul>
@@ -230,12 +235,12 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
             <section class="normal" id="section-">
 <div id="some-non-parametric-procedures" class="section level1">
 <h1><span class="header-section-number">Chapter 2</span> Some Non-Parametric Procedures</h1>
-<div class="sourceCode" id="cb30"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb30-1"><a href="some-non-parametric-procedures.html#cb30-1"></a><span class="kw">library</span>(tidyverse)</span>
-<span id="cb30-2"><a href="some-non-parametric-procedures.html#cb30-2"></a><span class="kw">library</span>(survival)</span>
-<span id="cb30-3"><a href="some-non-parametric-procedures.html#cb30-3"></a><span class="kw">library</span>(readxl)</span>
-<span id="cb30-4"><a href="some-non-parametric-procedures.html#cb30-4"></a><span class="kw">library</span>(muhaz)</span>
-<span id="cb30-5"><a href="some-non-parametric-procedures.html#cb30-5"></a><span class="kw">library</span>(rms)</span>
-<span id="cb30-6"><a href="some-non-parametric-procedures.html#cb30-6"></a><span class="kw">library</span>(bshazard)</span></code></pre></div>
+<div class="sourceCode" id="cb33"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb33-1"><a href="some-non-parametric-procedures.html#cb33-1"></a><span class="kw">library</span>(tidyverse)</span>
+<span id="cb33-2"><a href="some-non-parametric-procedures.html#cb33-2"></a><span class="kw">library</span>(survival)</span>
+<span id="cb33-3"><a href="some-non-parametric-procedures.html#cb33-3"></a><span class="kw">library</span>(readxl)</span>
+<span id="cb33-4"><a href="some-non-parametric-procedures.html#cb33-4"></a><span class="kw">library</span>(muhaz)</span>
+<span id="cb33-5"><a href="some-non-parametric-procedures.html#cb33-5"></a><span class="kw">library</span>(rms)</span>
+<span id="cb33-6"><a href="some-non-parametric-procedures.html#cb33-6"></a><span class="kw">library</span>(bshazard)</span></code></pre></div>
 <p>Look at the methods at the following pate to estimate S(t) using the actuarial method and the Kaplan Meier method:</p>
 <p><a href="http://sphweb.bumc.bu.edu/otlt/MPH-Modules/BS/BS704_Survival/BS704_Survival_print.html" class="uri">http://sphweb.bumc.bu.edu/otlt/MPH-Modules/BS/BS704_Survival/BS704_Survival_print.html</a></p>
 <div id="section" class="section level2">
@@ -320,20 +325,20 @@ which we estimate by
 <h2><span class="header-section-number">2.4</span> 2.2 Estimating the hazard function</h2>
 <p>We learn a lot about the data by studying the hazard functions.</p>
 <p>But first, let’s look at the survival. We use the data from example 1.3.</p>
-<div class="sourceCode" id="cb31"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb31-1"><a href="some-non-parametric-procedures.html#cb31-1"></a>Survival_of_multiple_myeloma_patients &lt;-<span class="st"> </span><span class="kw">read.table</span>(<span class="st">&quot;Data/Survival of multiple myeloma patients.dat&quot;</span>, <span class="dt">header =</span> T)</span>
-<span id="cb31-2"><a href="some-non-parametric-procedures.html#cb31-2"></a>d &lt;-<span class="st"> </span>Survival_of_multiple_myeloma_patients <span class="op">%&gt;%</span><span class="st"> </span>as_tibble</span></code></pre></div>
-<div class="sourceCode" id="cb32"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb32-1"><a href="some-non-parametric-procedures.html#cb32-1"></a>result.km &lt;-<span class="st"> </span><span class="kw">survfit</span>(<span class="kw">Surv</span>(time, status) <span class="op">~</span><span class="st"> </span><span class="dv">1</span>,<span class="dt">conf.type=</span><span class="st">&quot;log-log&quot;</span>,<span class="dt">data=</span>d)</span>
-<span id="cb32-2"><a href="some-non-parametric-procedures.html#cb32-2"></a></span>
-<span id="cb32-3"><a href="some-non-parametric-procedures.html#cb32-3"></a>result.na &lt;-<span class="st"> </span><span class="kw">survfit</span>(<span class="kw">Surv</span>(time, status) <span class="op">~</span><span class="st"> </span><span class="dv">1</span>,<span class="dt">conf.type=</span><span class="st">&quot;log-log&quot;</span>,<span class="dt">type=</span><span class="st">&quot;fh&quot;</span>,<span class="dt">data=</span>d)</span></code></pre></div>
+<div class="sourceCode" id="cb34"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb34-1"><a href="some-non-parametric-procedures.html#cb34-1"></a>Survival_of_multiple_myeloma_patients &lt;-<span class="st"> </span><span class="kw">read.table</span>(<span class="st">&quot;Data/Survival of multiple myeloma patients.dat&quot;</span>, <span class="dt">header =</span> T)</span>
+<span id="cb34-2"><a href="some-non-parametric-procedures.html#cb34-2"></a>d &lt;-<span class="st"> </span>Survival_of_multiple_myeloma_patients <span class="op">%&gt;%</span><span class="st"> </span>as_tibble</span></code></pre></div>
+<div class="sourceCode" id="cb35"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb35-1"><a href="some-non-parametric-procedures.html#cb35-1"></a>result.km &lt;-<span class="st"> </span><span class="kw">survfit</span>(<span class="kw">Surv</span>(time, status) <span class="op">~</span><span class="st"> </span><span class="dv">1</span>,<span class="dt">conf.type=</span><span class="st">&quot;log-log&quot;</span>,<span class="dt">data=</span>d)</span>
+<span id="cb35-2"><a href="some-non-parametric-procedures.html#cb35-2"></a></span>
+<span id="cb35-3"><a href="some-non-parametric-procedures.html#cb35-3"></a>result.na &lt;-<span class="st"> </span><span class="kw">survfit</span>(<span class="kw">Surv</span>(time, status) <span class="op">~</span><span class="st"> </span><span class="dv">1</span>,<span class="dt">conf.type=</span><span class="st">&quot;log-log&quot;</span>,<span class="dt">type=</span><span class="st">&quot;fh&quot;</span>,<span class="dt">data=</span>d)</span></code></pre></div>
 <p>Kaplan Meier</p>
-<div class="sourceCode" id="cb33"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb33-1"><a href="some-non-parametric-procedures.html#cb33-1"></a><span class="kw">plot</span>(result.km)</span></code></pre></div>
-<p><img src="Survival_Analysis_files/figure-html/unnamed-chunk-24-1.png" width="100%" /></p>
-<div class="sourceCode" id="cb34"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb34-1"><a href="some-non-parametric-procedures.html#cb34-1"></a>result.km</span></code></pre></div>
+<div class="sourceCode" id="cb36"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb36-1"><a href="some-non-parametric-procedures.html#cb36-1"></a><span class="kw">plot</span>(result.km)</span></code></pre></div>
+<p><img src="Survival_Analysis_files/figure-html/unnamed-chunk-27-1.png" width="100%" /></p>
+<div class="sourceCode" id="cb37"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb37-1"><a href="some-non-parametric-procedures.html#cb37-1"></a>result.km</span></code></pre></div>
 <pre><code>## Call: survfit(formula = Surv(time, status) ~ 1, data = d, conf.type = &quot;log-log&quot;)
 ## 
 ##       n  events  median 0.95LCL 0.95UCL 
 ##      48      36      17      12      36</code></pre>
-<div class="sourceCode" id="cb36"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb36-1"><a href="some-non-parametric-procedures.html#cb36-1"></a><span class="kw">summary</span>(result.km)</span></code></pre></div>
+<div class="sourceCode" id="cb39"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb39-1"><a href="some-non-parametric-procedures.html#cb39-1"></a><span class="kw">summary</span>(result.km)</span></code></pre></div>
 <pre><code>## Call: survfit(formula = Surv(time, status) ~ 1, data = d, conf.type = &quot;log-log&quot;)
 ## 
 ##  time n.risk n.event survival std.err lower 95% CI upper 95% CI
@@ -361,15 +366,15 @@ which we estimate by
 ##    88      2       1   0.0674  0.0576      0.00663        0.235
 ##    91      1       1   0.0000     NaN           NA           NA</code></pre>
 <p>Nelson-Aalen</p>
-<div class="sourceCode" id="cb38"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb38-1"><a href="some-non-parametric-procedures.html#cb38-1"></a><span class="kw">plot</span>(result.na)</span></code></pre></div>
-<p><img src="Survival_Analysis_files/figure-html/unnamed-chunk-25-1.png" width="100%" /></p>
-<div class="sourceCode" id="cb39"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb39-1"><a href="some-non-parametric-procedures.html#cb39-1"></a>result.na</span></code></pre></div>
+<div class="sourceCode" id="cb41"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb41-1"><a href="some-non-parametric-procedures.html#cb41-1"></a><span class="kw">plot</span>(result.na)</span></code></pre></div>
+<p><img src="Survival_Analysis_files/figure-html/unnamed-chunk-28-1.png" width="100%" /></p>
+<div class="sourceCode" id="cb42"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb42-1"><a href="some-non-parametric-procedures.html#cb42-1"></a>result.na</span></code></pre></div>
 <pre><code>## Call: survfit(formula = Surv(time, status) ~ 1, data = d, conf.type = &quot;log-log&quot;, 
 ##     type = &quot;fh&quot;)
 ## 
 ##       n  events  median 0.95LCL 0.95UCL 
 ##      48      36      17      12      40</code></pre>
-<div class="sourceCode" id="cb41"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb41-1"><a href="some-non-parametric-procedures.html#cb41-1"></a><span class="kw">summary</span>(result.na)</span></code></pre></div>
+<div class="sourceCode" id="cb44"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb44-1"><a href="some-non-parametric-procedures.html#cb44-1"></a><span class="kw">summary</span>(result.na)</span></code></pre></div>
 <pre><code>## Call: survfit(formula = Surv(time, status) ~ 1, data = d, conf.type = &quot;log-log&quot;, 
 ##     type = &quot;fh&quot;)
 ## 
@@ -398,16 +403,16 @@ which we estimate by
 ##    88      2       1   0.0911  0.0605      0.01617        0.249
 ##    91      1       1   0.0335  0.0402      0.00113        0.183</code></pre>
 <p>In R we have the <em>muhaz</em> and <em>pehaz</em> functions to estimate the hazard.</p>
-<div class="sourceCode" id="cb43"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb43-1"><a href="some-non-parametric-procedures.html#cb43-1"></a><span class="kw">attach</span>(d)</span>
-<span id="cb43-2"><a href="some-non-parametric-procedures.html#cb43-2"></a>result.pe12 &lt;-<span class="st"> </span><span class="kw">pehaz</span>(time, status, <span class="dt">width=</span><span class="dv">12</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb46"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb46-1"><a href="some-non-parametric-procedures.html#cb46-1"></a><span class="kw">attach</span>(d)</span>
+<span id="cb46-2"><a href="some-non-parametric-procedures.html#cb46-2"></a>result.pe12 &lt;-<span class="st"> </span><span class="kw">pehaz</span>(time, status, <span class="dt">width=</span><span class="dv">12</span>)</span></code></pre></div>
 <pre><code>## 
 ## max.time= 91
 ## width= 12
 ## nbins= 8</code></pre>
-<div class="sourceCode" id="cb45"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb45-1"><a href="some-non-parametric-procedures.html#cb45-1"></a>result.smooth &lt;-<span class="st"> </span><span class="kw">muhaz</span>(time, status)</span>
-<span id="cb45-2"><a href="some-non-parametric-procedures.html#cb45-2"></a><span class="kw">detach</span>(d)</span></code></pre></div>
+<div class="sourceCode" id="cb48"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb48-1"><a href="some-non-parametric-procedures.html#cb48-1"></a>result.smooth &lt;-<span class="st"> </span><span class="kw">muhaz</span>(time, status)</span>
+<span id="cb48-2"><a href="some-non-parametric-procedures.html#cb48-2"></a><span class="kw">detach</span>(d)</span></code></pre></div>
 <p>The output from <em>pehaz</em>:</p>
-<div class="sourceCode" id="cb46"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb46-1"><a href="some-non-parametric-procedures.html#cb46-1"></a>result.pe12</span></code></pre></div>
+<div class="sourceCode" id="cb49"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb49-1"><a href="some-non-parametric-procedures.html#cb49-1"></a>result.pe12</span></code></pre></div>
 <pre><code>## 
 ## Call:
 ## pehaz(times = time, delta = status, width = 12)
@@ -432,136 +437,136 @@ which we estimate by
 ## [1] 458 225 156 120  77  47  28  11</code></pre>
 <p>The hazard in interval <span class="math inline">\(i\)</span> is estimated with <span class="math inline">\(d_i / \mathrm{Follow-up}_i\)</span> where <span class="math inline">\(\mathrm{Follow-up}\)</span> is the Total Follow-up Time <span class="math inline">\(i\)</span>.</p>
 <p>If we take 12 months as a fixed time interval, we get on one hand from <span class="math inline">\(d_i/n_i\)</span></p>
-<div class="sourceCode" id="cb48"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb48-1"><a href="some-non-parametric-procedures.html#cb48-1"></a>result.pe12<span class="op">$</span>Events<span class="op">/</span>(result.pe12<span class="op">$</span>At.Risk<span class="op">*</span><span class="dv">12</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb51"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb51-1"><a href="some-non-parametric-procedures.html#cb51-1"></a>result.pe12<span class="op">$</span>Events<span class="op">/</span>(result.pe12<span class="op">$</span>At.Risk<span class="op">*</span><span class="dv">12</span>)</span></code></pre></div>
 <pre><code>## [1] 0.027777778 0.029761905 0.005952381 0.019230769 0.018518519 0.033333333
 ## [7] 0.000000000 0.083333333</code></pre>
 <p>and on the other hand the correct result.</p>
-<div class="sourceCode" id="cb50"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb50-1"><a href="some-non-parametric-procedures.html#cb50-1"></a>result.pe12<span class="op">$</span>Hazard</span></code></pre></div>
+<div class="sourceCode" id="cb53"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb53-1"><a href="some-non-parametric-procedures.html#cb53-1"></a>result.pe12<span class="op">$</span>Hazard</span></code></pre></div>
 <pre><code>## [1] 0.034934498 0.044444444 0.006410256 0.025000000 0.025974026 0.042553191
 ## [7] 0.000000000 0.181818182</code></pre>
-<div class="sourceCode" id="cb52"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb52-1"><a href="some-non-parametric-procedures.html#cb52-1"></a>result.pe12<span class="op">$</span>Events<span class="op">/</span>result.pe12<span class="op">$</span>F.U.Time</span></code></pre></div>
+<div class="sourceCode" id="cb55"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb55-1"><a href="some-non-parametric-procedures.html#cb55-1"></a>result.pe12<span class="op">$</span>Events<span class="op">/</span>result.pe12<span class="op">$</span>F.U.Time</span></code></pre></div>
 <pre><code>## [1] 0.034934498 0.044444444 0.006410256 0.025000000 0.025974026 0.042553191
 ## [7] 0.000000000 0.181818182</code></pre>
 <p>Note that using number at risk times 12 leads to overestimate in the person-years and therefore underestimate in the hazard.</p>
 <p>This difference gets smaller with smaller intervals.</p>
 <p>Graphical comparison</p>
-<div class="sourceCode" id="cb54"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb54-1"><a href="some-non-parametric-procedures.html#cb54-1"></a><span class="kw">attach</span>(d)</span>
-<span id="cb54-2"><a href="some-non-parametric-procedures.html#cb54-2"></a>result.pe6 &lt;-<span class="st"> </span><span class="kw">pehaz</span>(time, status, <span class="dt">width=</span><span class="dv">6</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb57"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb57-1"><a href="some-non-parametric-procedures.html#cb57-1"></a><span class="kw">attach</span>(d)</span>
+<span id="cb57-2"><a href="some-non-parametric-procedures.html#cb57-2"></a>result.pe6 &lt;-<span class="st"> </span><span class="kw">pehaz</span>(time, status, <span class="dt">width=</span><span class="dv">6</span>)</span></code></pre></div>
 <pre><code>## 
 ## max.time= 91
 ## width= 6
 ## nbins= 16</code></pre>
-<div class="sourceCode" id="cb56"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb56-1"><a href="some-non-parametric-procedures.html#cb56-1"></a><span class="kw">detach</span>(d)</span>
-<span id="cb56-2"><a href="some-non-parametric-procedures.html#cb56-2"></a></span>
-<span id="cb56-3"><a href="some-non-parametric-procedures.html#cb56-3"></a><span class="kw">plot</span>(result.pe6,<span class="dt">xlim=</span><span class="kw">c</span>(<span class="dv">0</span>,<span class="dv">80</span>),<span class="dt">ylim=</span><span class="kw">c</span>(<span class="dv">0</span>,<span class="fl">0.1</span>))</span>
-<span id="cb56-4"><a href="some-non-parametric-procedures.html#cb56-4"></a><span class="kw">lines</span>(result.pe12)</span>
-<span id="cb56-5"><a href="some-non-parametric-procedures.html#cb56-5"></a><span class="kw">points</span>(result.pe6<span class="op">$</span>Cuts[<span class="op">-</span><span class="dv">1</span>],result.pe6<span class="op">$</span>Hazard)</span>
-<span id="cb56-6"><a href="some-non-parametric-procedures.html#cb56-6"></a><span class="kw">lines</span>(result.smooth<span class="op">$</span>est.grid,result.smooth<span class="op">$</span>haz.est,<span class="dt">col=</span><span class="st">&quot;blue&quot;</span>)</span></code></pre></div>
-<p><img src="Survival_Analysis_files/figure-html/unnamed-chunk-30-1.png" width="100%" /></p>
+<div class="sourceCode" id="cb59"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb59-1"><a href="some-non-parametric-procedures.html#cb59-1"></a><span class="kw">detach</span>(d)</span>
+<span id="cb59-2"><a href="some-non-parametric-procedures.html#cb59-2"></a></span>
+<span id="cb59-3"><a href="some-non-parametric-procedures.html#cb59-3"></a><span class="kw">plot</span>(result.pe6,<span class="dt">xlim=</span><span class="kw">c</span>(<span class="dv">0</span>,<span class="dv">80</span>),<span class="dt">ylim=</span><span class="kw">c</span>(<span class="dv">0</span>,<span class="fl">0.1</span>))</span>
+<span id="cb59-4"><a href="some-non-parametric-procedures.html#cb59-4"></a><span class="kw">lines</span>(result.pe12)</span>
+<span id="cb59-5"><a href="some-non-parametric-procedures.html#cb59-5"></a><span class="kw">points</span>(result.pe6<span class="op">$</span>Cuts[<span class="op">-</span><span class="dv">1</span>],result.pe6<span class="op">$</span>Hazard)</span>
+<span id="cb59-6"><a href="some-non-parametric-procedures.html#cb59-6"></a><span class="kw">lines</span>(result.smooth<span class="op">$</span>est.grid,result.smooth<span class="op">$</span>haz.est,<span class="dt">col=</span><span class="st">&quot;blue&quot;</span>)</span></code></pre></div>
+<p><img src="Survival_Analysis_files/figure-html/unnamed-chunk-33-1.png" width="100%" /></p>
 <p>This is a comparison of the Nelson Aalen estimator (line) with the result from <em>pehaz</em>.</p>
 <p>Note <span class="math inline">\(H(t)=-\log(S)\)</span> is on the y-axis.</p>
-<div class="sourceCode" id="cb57"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb57-1"><a href="some-non-parametric-procedures.html#cb57-1"></a><span class="kw">plot</span>(result.na<span class="op">$</span>time,<span class="op">-</span><span class="kw">log</span>(result.na<span class="op">$</span>surv))</span>
-<span id="cb57-2"><a href="some-non-parametric-procedures.html#cb57-2"></a><span class="kw">lines</span>(result.pe6<span class="op">$</span>Cuts[<span class="op">-</span><span class="dv">1</span>],<span class="kw">cumsum</span>(result.pe6<span class="op">$</span>Hazard)<span class="op">*</span><span class="dv">6</span>)</span></code></pre></div>
-<p><img src="Survival_Analysis_files/figure-html/unnamed-chunk-31-1.png" width="100%" /></p>
-<p>Comparison using the Kaplan-Meier results and transformations based pehaz (blue line).</p>
-<div class="sourceCode" id="cb58"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb58-1"><a href="some-non-parametric-procedures.html#cb58-1"></a><span class="kw">plot</span>(result.km,<span class="dt">xlim=</span><span class="kw">c</span>(<span class="dv">0</span>,<span class="dv">90</span>))</span>
-<span id="cb58-2"><a href="some-non-parametric-procedures.html#cb58-2"></a><span class="kw">lines</span>(result.pe6<span class="op">$</span>Cuts[<span class="op">-</span><span class="dv">1</span>],<span class="kw">exp</span>(<span class="op">-</span><span class="kw">cumsum</span>(result.pe6<span class="op">$</span>Hazard)<span class="op">*</span><span class="dv">6</span>),<span class="dt">col=</span><span class="st">&quot;blue&quot;</span>)</span></code></pre></div>
-<p><img src="Survival_Analysis_files/figure-html/unnamed-chunk-32-1.png" width="100%" /></p>
-<p>Results from the <em>rms</em> package</p>
-<div class="sourceCode" id="cb59"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb59-1"><a href="some-non-parametric-procedures.html#cb59-1"></a>rms1 &lt;-<span class="st"> </span><span class="kw">npsurv</span>(<span class="kw">Surv</span>(time, status) <span class="op">~</span><span class="st"> </span><span class="dv">1</span>,<span class="dt">data=</span>d)</span></code></pre></div>
-<div class="sourceCode" id="cb60"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb60-1"><a href="some-non-parametric-procedures.html#cb60-1"></a><span class="kw">survplot</span>(rms1,<span class="dt">what=</span><span class="kw">c</span>(<span class="st">&quot;survival&quot;</span>),<span class="dt">n.risk =</span> T)</span></code></pre></div>
+<div class="sourceCode" id="cb60"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb60-1"><a href="some-non-parametric-procedures.html#cb60-1"></a><span class="kw">plot</span>(result.na<span class="op">$</span>time,<span class="op">-</span><span class="kw">log</span>(result.na<span class="op">$</span>surv))</span>
+<span id="cb60-2"><a href="some-non-parametric-procedures.html#cb60-2"></a><span class="kw">lines</span>(result.pe6<span class="op">$</span>Cuts[<span class="op">-</span><span class="dv">1</span>],<span class="kw">cumsum</span>(result.pe6<span class="op">$</span>Hazard)<span class="op">*</span><span class="dv">6</span>)</span></code></pre></div>
 <p><img src="Survival_Analysis_files/figure-html/unnamed-chunk-34-1.png" width="100%" /></p>
-<div class="sourceCode" id="cb61"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb61-1"><a href="some-non-parametric-procedures.html#cb61-1"></a><span class="kw">library</span>(tidyverse)</span>
-<span id="cb61-2"><a href="some-non-parametric-procedures.html#cb61-2"></a><span class="kw">library</span>(cowplot)</span>
-<span id="cb61-3"><a href="some-non-parametric-procedures.html#cb61-3"></a><span class="kw">theme_set</span>(<span class="kw">theme_cowplot</span>() <span class="op">+</span><span class="st">  </span></span>
-<span id="cb61-4"><a href="some-non-parametric-procedures.html#cb61-4"></a><span class="st">              </span><span class="kw">background_grid</span>(<span class="dt">major =</span> <span class="st">&quot;xy&quot;</span>, </span>
-<span id="cb61-5"><a href="some-non-parametric-procedures.html#cb61-5"></a>                              <span class="dt">minor =</span> <span class="st">&quot;xy&quot;</span>,</span>
-<span id="cb61-6"><a href="some-non-parametric-procedures.html#cb61-6"></a>                              <span class="dt">size.major =</span> <span class="fl">0.25</span>,</span>
-<span id="cb61-7"><a href="some-non-parametric-procedures.html#cb61-7"></a>                              <span class="dt">size.minor =</span> <span class="fl">0.1</span>) <span class="op">+</span></span>
-<span id="cb61-8"><a href="some-non-parametric-procedures.html#cb61-8"></a><span class="st">              </span><span class="kw">theme</span>(<span class="dt">legend.position =</span> <span class="st">&quot;top&quot;</span>,</span>
-<span id="cb61-9"><a href="some-non-parametric-procedures.html#cb61-9"></a>                    <span class="dt">plot.margin =</span> <span class="kw">margin</span>(<span class="dv">10</span>, <span class="dv">10</span>, <span class="dv">10</span>, <span class="dv">10</span>)))</span></code></pre></div>
+<p>Comparison using the Kaplan-Meier results and transformations based pehaz (blue line).</p>
+<div class="sourceCode" id="cb61"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb61-1"><a href="some-non-parametric-procedures.html#cb61-1"></a><span class="kw">plot</span>(result.km,<span class="dt">xlim=</span><span class="kw">c</span>(<span class="dv">0</span>,<span class="dv">90</span>))</span>
+<span id="cb61-2"><a href="some-non-parametric-procedures.html#cb61-2"></a><span class="kw">lines</span>(result.pe6<span class="op">$</span>Cuts[<span class="op">-</span><span class="dv">1</span>],<span class="kw">exp</span>(<span class="op">-</span><span class="kw">cumsum</span>(result.pe6<span class="op">$</span>Hazard)<span class="op">*</span><span class="dv">6</span>),<span class="dt">col=</span><span class="st">&quot;blue&quot;</span>)</span></code></pre></div>
+<p><img src="Survival_Analysis_files/figure-html/unnamed-chunk-35-1.png" width="100%" /></p>
+<p>Results from the <em>rms</em> package</p>
+<div class="sourceCode" id="cb62"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb62-1"><a href="some-non-parametric-procedures.html#cb62-1"></a>rms1 &lt;-<span class="st"> </span><span class="kw">npsurv</span>(<span class="kw">Surv</span>(time, status) <span class="op">~</span><span class="st"> </span><span class="dv">1</span>,<span class="dt">data=</span>d)</span></code></pre></div>
+<div class="sourceCode" id="cb63"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb63-1"><a href="some-non-parametric-procedures.html#cb63-1"></a><span class="kw">survplot</span>(rms1,<span class="dt">what=</span><span class="kw">c</span>(<span class="st">&quot;survival&quot;</span>),<span class="dt">n.risk =</span> T)</span></code></pre></div>
+<p><img src="Survival_Analysis_files/figure-html/unnamed-chunk-37-1.png" width="100%" /></p>
+<div class="sourceCode" id="cb64"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb64-1"><a href="some-non-parametric-procedures.html#cb64-1"></a><span class="kw">library</span>(tidyverse)</span>
+<span id="cb64-2"><a href="some-non-parametric-procedures.html#cb64-2"></a><span class="kw">library</span>(cowplot)</span>
+<span id="cb64-3"><a href="some-non-parametric-procedures.html#cb64-3"></a><span class="kw">theme_set</span>(<span class="kw">theme_cowplot</span>() <span class="op">+</span><span class="st">  </span></span>
+<span id="cb64-4"><a href="some-non-parametric-procedures.html#cb64-4"></a><span class="st">              </span><span class="kw">background_grid</span>(<span class="dt">major =</span> <span class="st">&quot;xy&quot;</span>, </span>
+<span id="cb64-5"><a href="some-non-parametric-procedures.html#cb64-5"></a>                              <span class="dt">minor =</span> <span class="st">&quot;xy&quot;</span>,</span>
+<span id="cb64-6"><a href="some-non-parametric-procedures.html#cb64-6"></a>                              <span class="dt">size.major =</span> <span class="fl">0.25</span>,</span>
+<span id="cb64-7"><a href="some-non-parametric-procedures.html#cb64-7"></a>                              <span class="dt">size.minor =</span> <span class="fl">0.1</span>) <span class="op">+</span></span>
+<span id="cb64-8"><a href="some-non-parametric-procedures.html#cb64-8"></a><span class="st">              </span><span class="kw">theme</span>(<span class="dt">legend.position =</span> <span class="st">&quot;top&quot;</span>,</span>
+<span id="cb64-9"><a href="some-non-parametric-procedures.html#cb64-9"></a>                    <span class="dt">plot.margin =</span> <span class="kw">margin</span>(<span class="dv">10</span>, <span class="dv">10</span>, <span class="dv">10</span>, <span class="dv">10</span>)))</span></code></pre></div>
 </div>
 <div id="an-application-to-cat-adoptions" class="section level2">
 <h2><span class="header-section-number">2.5</span> An Application to Cat Adoptions</h2>
 <div id="data" class="section level3">
 <h3><span class="header-section-number">2.5.1</span> Data</h3>
 <p>We’ll work with the <code>AustinCats</code> data from the <code>rethinking</code> package, the companion package to the book <em>Statistical Rethinking</em> by Richard McElreath.</p>
-<div class="sourceCode" id="cb62"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb62-1"><a href="some-non-parametric-procedures.html#cb62-1"></a><span class="kw">data</span>(<span class="st">&quot;AustinCats&quot;</span>, <span class="dt">package =</span> <span class="st">&quot;rethinking&quot;</span>)</span>
-<span id="cb62-2"><a href="some-non-parametric-procedures.html#cb62-2"></a>d &lt;-<span class="st"> </span>AustinCats <span class="op">%&gt;%</span><span class="st"> </span></span>
-<span id="cb62-3"><a href="some-non-parametric-procedures.html#cb62-3"></a><span class="st">  </span>as_tibble <span class="op">%&gt;%</span><span class="st"> </span></span>
-<span id="cb62-4"><a href="some-non-parametric-procedures.html#cb62-4"></a><span class="st">  </span><span class="kw">filter</span>(out_event <span class="op">%in%</span><span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;Adoption&quot;</span>, <span class="st">&quot;Censored&quot;</span>)) <span class="op">%&gt;%</span><span class="st"> </span></span>
-<span id="cb62-5"><a href="some-non-parametric-procedures.html#cb62-5"></a><span class="st">  </span><span class="kw">select</span>(days_to_event, out_event)</span>
-<span id="cb62-6"><a href="some-non-parametric-procedures.html#cb62-6"></a><span class="kw">rm</span>(AustinCats)</span></code></pre></div>
+<div class="sourceCode" id="cb65"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb65-1"><a href="some-non-parametric-procedures.html#cb65-1"></a><span class="kw">data</span>(<span class="st">&quot;AustinCats&quot;</span>, <span class="dt">package =</span> <span class="st">&quot;rethinking&quot;</span>)</span>
+<span id="cb65-2"><a href="some-non-parametric-procedures.html#cb65-2"></a>d &lt;-<span class="st"> </span>AustinCats <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb65-3"><a href="some-non-parametric-procedures.html#cb65-3"></a><span class="st">  </span>as_tibble <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb65-4"><a href="some-non-parametric-procedures.html#cb65-4"></a><span class="st">  </span><span class="kw">filter</span>(out_event <span class="op">%in%</span><span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;Adoption&quot;</span>, <span class="st">&quot;Censored&quot;</span>)) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb65-5"><a href="some-non-parametric-procedures.html#cb65-5"></a><span class="st">  </span><span class="kw">select</span>(days_to_event, out_event)</span>
+<span id="cb65-6"><a href="some-non-parametric-procedures.html#cb65-6"></a><span class="kw">rm</span>(AustinCats)</span></code></pre></div>
 </div>
 <div id="kaplan-meier" class="section level3">
 <h3><span class="header-section-number">2.5.2</span> Kaplan-Meier</h3>
 <p>In the <em>Kaplan-Meier</em> estimate, the survivor function is estimated and then transformed to the hazard function.</p>
-<div class="sourceCode" id="cb63"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb63-1"><a href="some-non-parametric-procedures.html#cb63-1"></a>km &lt;-<span class="st"> </span>d <span class="op">%&gt;%</span><span class="st"> </span></span>
-<span id="cb63-2"><a href="some-non-parametric-procedures.html#cb63-2"></a><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">n =</span> <span class="kw">n</span>()) <span class="op">%&gt;%</span><span class="st"> </span></span>
-<span id="cb63-3"><a href="some-non-parametric-procedures.html#cb63-3"></a><span class="st">  </span><span class="kw">group_by</span>(days_to_event, n) <span class="op">%&gt;%</span><span class="st"> </span></span>
-<span id="cb63-4"><a href="some-non-parametric-procedures.html#cb63-4"></a><span class="st">  </span><span class="kw">summarise</span>(<span class="dt">events =</span> <span class="kw">sum</span>(out_event <span class="op">==</span><span class="st"> &quot;Adoption&quot;</span>),</span>
-<span id="cb63-5"><a href="some-non-parametric-procedures.html#cb63-5"></a>            <span class="dt">censored =</span> <span class="kw">n</span>() <span class="op">-</span><span class="st"> </span>events,</span>
-<span id="cb63-6"><a href="some-non-parametric-procedures.html#cb63-6"></a>            <span class="dt">lost =</span> events <span class="op">+</span><span class="st"> </span>censored) <span class="op">%&gt;%</span><span class="st"> </span></span>
-<span id="cb63-7"><a href="some-non-parametric-procedures.html#cb63-7"></a><span class="st">  </span>ungroup <span class="op">%&gt;%</span><span class="st"> </span></span>
-<span id="cb63-8"><a href="some-non-parametric-procedures.html#cb63-8"></a><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">total_lost =</span> <span class="kw">cumsum</span>(lost),</span>
-<span id="cb63-9"><a href="some-non-parametric-procedures.html#cb63-9"></a>         <span class="dt">n =</span> n <span class="op">-</span><span class="st"> </span><span class="kw">lag</span>(total_lost, <span class="dt">default =</span> <span class="dv">0</span>),</span>
-<span id="cb63-10"><a href="some-non-parametric-procedures.html#cb63-10"></a>         <span class="dt">conditional_survival =</span> (n <span class="op">-</span><span class="st"> </span>events) <span class="op">/</span><span class="st"> </span>n,</span>
-<span id="cb63-11"><a href="some-non-parametric-procedures.html#cb63-11"></a>         <span class="dt">surv =</span> <span class="kw">cumprod</span>(conditional_survival),</span>
-<span id="cb63-12"><a href="some-non-parametric-procedures.html#cb63-12"></a>         <span class="dt">cumulative_hazard =</span> <span class="op">-</span><span class="kw">log</span>(surv),</span>
-<span id="cb63-13"><a href="some-non-parametric-procedures.html#cb63-13"></a>         <span class="dt">hazard =</span> cumulative_hazard <span class="op">-</span><span class="st"> </span><span class="kw">lag</span>(cumulative_hazard, <span class="dt">default =</span> <span class="dv">0</span>)) <span class="op">%&gt;%</span><span class="st"> </span></span>
-<span id="cb63-14"><a href="some-non-parametric-procedures.html#cb63-14"></a><span class="st">  </span><span class="kw">rename</span>(<span class="dt">Hazard =</span> hazard, <span class="st">&quot;Cumulative Hazard&quot;</span> =<span class="st"> </span>cumulative_hazard, <span class="st">&quot;Survival&quot;</span> =<span class="st"> </span>surv) <span class="op">%&gt;%</span><span class="st"> </span></span>
-<span id="cb63-15"><a href="some-non-parametric-procedures.html#cb63-15"></a><span class="st">  </span><span class="kw">pivot_longer</span>(<span class="kw">c</span>(Hazard, <span class="st">&quot;Cumulative Hazard&quot;</span>, Survival)) <span class="op">%&gt;%</span><span class="st"> </span></span>
-<span id="cb63-16"><a href="some-non-parametric-procedures.html#cb63-16"></a><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">type =</span> <span class="st">&quot;Kaplan-Meier&quot;</span>) </span>
-<span id="cb63-17"><a href="some-non-parametric-procedures.html#cb63-17"></a></span>
-<span id="cb63-18"><a href="some-non-parametric-procedures.html#cb63-18"></a>km <span class="op">%&gt;%</span><span class="st"> </span></span>
-<span id="cb63-19"><a href="some-non-parametric-procedures.html#cb63-19"></a><span class="st">  </span><span class="kw">ggplot</span>(<span class="kw">aes</span>(days_to_event, value)) <span class="op">+</span></span>
-<span id="cb63-20"><a href="some-non-parametric-procedures.html#cb63-20"></a><span class="st">  </span><span class="kw">geom_step</span>() <span class="op">+</span></span>
-<span id="cb63-21"><a href="some-non-parametric-procedures.html#cb63-21"></a><span class="st">  </span><span class="kw">facet_wrap</span>(<span class="st">&quot;name&quot;</span>, <span class="dt">scales =</span> <span class="st">&quot;free&quot;</span>) <span class="op">+</span></span>
-<span id="cb63-22"><a href="some-non-parametric-procedures.html#cb63-22"></a><span class="st">  </span><span class="kw">labs</span>(<span class="dt">x =</span> <span class="st">&quot;Time (days)&quot;</span>,</span>
-<span id="cb63-23"><a href="some-non-parametric-procedures.html#cb63-23"></a>       <span class="dt">title =</span> <span class="st">&quot;Kaplan-Meier estimates for cat adoptions&quot;</span>) <span class="op">+</span></span>
-<span id="cb63-24"><a href="some-non-parametric-procedures.html#cb63-24"></a><span class="st">  </span><span class="kw">theme</span>(<span class="dt">axis.title.y =</span> <span class="kw">element_blank</span>())</span></code></pre></div>
-<p><img src="Survival_Analysis_files/figure-html/unnamed-chunk-37-1.png" width="100%" /></p>
+<div class="sourceCode" id="cb66"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb66-1"><a href="some-non-parametric-procedures.html#cb66-1"></a>km &lt;-<span class="st"> </span>d <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb66-2"><a href="some-non-parametric-procedures.html#cb66-2"></a><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">n =</span> <span class="kw">n</span>()) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb66-3"><a href="some-non-parametric-procedures.html#cb66-3"></a><span class="st">  </span><span class="kw">group_by</span>(days_to_event, n) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb66-4"><a href="some-non-parametric-procedures.html#cb66-4"></a><span class="st">  </span><span class="kw">summarise</span>(<span class="dt">events =</span> <span class="kw">sum</span>(out_event <span class="op">==</span><span class="st"> &quot;Adoption&quot;</span>),</span>
+<span id="cb66-5"><a href="some-non-parametric-procedures.html#cb66-5"></a>            <span class="dt">censored =</span> <span class="kw">n</span>() <span class="op">-</span><span class="st"> </span>events,</span>
+<span id="cb66-6"><a href="some-non-parametric-procedures.html#cb66-6"></a>            <span class="dt">lost =</span> events <span class="op">+</span><span class="st"> </span>censored) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb66-7"><a href="some-non-parametric-procedures.html#cb66-7"></a><span class="st">  </span>ungroup <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb66-8"><a href="some-non-parametric-procedures.html#cb66-8"></a><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">total_lost =</span> <span class="kw">cumsum</span>(lost),</span>
+<span id="cb66-9"><a href="some-non-parametric-procedures.html#cb66-9"></a>         <span class="dt">n =</span> n <span class="op">-</span><span class="st"> </span><span class="kw">lag</span>(total_lost, <span class="dt">default =</span> <span class="dv">0</span>),</span>
+<span id="cb66-10"><a href="some-non-parametric-procedures.html#cb66-10"></a>         <span class="dt">conditional_survival =</span> (n <span class="op">-</span><span class="st"> </span>events) <span class="op">/</span><span class="st"> </span>n,</span>
+<span id="cb66-11"><a href="some-non-parametric-procedures.html#cb66-11"></a>         <span class="dt">surv =</span> <span class="kw">cumprod</span>(conditional_survival),</span>
+<span id="cb66-12"><a href="some-non-parametric-procedures.html#cb66-12"></a>         <span class="dt">cumulative_hazard =</span> <span class="op">-</span><span class="kw">log</span>(surv),</span>
+<span id="cb66-13"><a href="some-non-parametric-procedures.html#cb66-13"></a>         <span class="dt">hazard =</span> cumulative_hazard <span class="op">-</span><span class="st"> </span><span class="kw">lag</span>(cumulative_hazard, <span class="dt">default =</span> <span class="dv">0</span>)) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb66-14"><a href="some-non-parametric-procedures.html#cb66-14"></a><span class="st">  </span><span class="kw">rename</span>(<span class="dt">Hazard =</span> hazard, <span class="st">&quot;Cumulative Hazard&quot;</span> =<span class="st"> </span>cumulative_hazard, <span class="st">&quot;Survival&quot;</span> =<span class="st"> </span>surv) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb66-15"><a href="some-non-parametric-procedures.html#cb66-15"></a><span class="st">  </span><span class="kw">pivot_longer</span>(<span class="kw">c</span>(Hazard, <span class="st">&quot;Cumulative Hazard&quot;</span>, Survival)) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb66-16"><a href="some-non-parametric-procedures.html#cb66-16"></a><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">type =</span> <span class="st">&quot;Kaplan-Meier&quot;</span>) </span>
+<span id="cb66-17"><a href="some-non-parametric-procedures.html#cb66-17"></a></span>
+<span id="cb66-18"><a href="some-non-parametric-procedures.html#cb66-18"></a>km <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb66-19"><a href="some-non-parametric-procedures.html#cb66-19"></a><span class="st">  </span><span class="kw">ggplot</span>(<span class="kw">aes</span>(days_to_event, value)) <span class="op">+</span></span>
+<span id="cb66-20"><a href="some-non-parametric-procedures.html#cb66-20"></a><span class="st">  </span><span class="kw">geom_step</span>() <span class="op">+</span></span>
+<span id="cb66-21"><a href="some-non-parametric-procedures.html#cb66-21"></a><span class="st">  </span><span class="kw">facet_wrap</span>(<span class="st">&quot;name&quot;</span>, <span class="dt">scales =</span> <span class="st">&quot;free&quot;</span>) <span class="op">+</span></span>
+<span id="cb66-22"><a href="some-non-parametric-procedures.html#cb66-22"></a><span class="st">  </span><span class="kw">labs</span>(<span class="dt">x =</span> <span class="st">&quot;Time (days)&quot;</span>,</span>
+<span id="cb66-23"><a href="some-non-parametric-procedures.html#cb66-23"></a>       <span class="dt">title =</span> <span class="st">&quot;Kaplan-Meier estimates for cat adoptions&quot;</span>) <span class="op">+</span></span>
+<span id="cb66-24"><a href="some-non-parametric-procedures.html#cb66-24"></a><span class="st">  </span><span class="kw">theme</span>(<span class="dt">axis.title.y =</span> <span class="kw">element_blank</span>())</span></code></pre></div>
+<p><img src="Survival_Analysis_files/figure-html/unnamed-chunk-40-1.png" width="100%" /></p>
 </div>
 <div id="nelson-aalen" class="section level3">
 <h3><span class="header-section-number">2.5.3</span> Nelson-Aalen</h3>
 <p>In the <em>Nelson-Aalen</em> estimate, the hazard function is estimated and then transformed to the survivor function.</p>
-<div class="sourceCode" id="cb64"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb64-1"><a href="some-non-parametric-procedures.html#cb64-1"></a>na &lt;-<span class="st"> </span>d <span class="op">%&gt;%</span><span class="st"> </span></span>
-<span id="cb64-2"><a href="some-non-parametric-procedures.html#cb64-2"></a><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">n =</span> <span class="kw">n</span>()) <span class="op">%&gt;%</span><span class="st"> </span></span>
-<span id="cb64-3"><a href="some-non-parametric-procedures.html#cb64-3"></a><span class="st">  </span><span class="kw">group_by</span>(days_to_event, n) <span class="op">%&gt;%</span><span class="st"> </span></span>
-<span id="cb64-4"><a href="some-non-parametric-procedures.html#cb64-4"></a><span class="st">  </span><span class="kw">summarise</span>(<span class="dt">events =</span> <span class="kw">sum</span>(out_event <span class="op">==</span><span class="st"> &quot;Adoption&quot;</span>),</span>
-<span id="cb64-5"><a href="some-non-parametric-procedures.html#cb64-5"></a>            <span class="dt">censored =</span> <span class="kw">n</span>() <span class="op">-</span><span class="st"> </span>events,</span>
-<span id="cb64-6"><a href="some-non-parametric-procedures.html#cb64-6"></a>            <span class="dt">lost =</span> events <span class="op">+</span><span class="st"> </span>censored) <span class="op">%&gt;%</span><span class="st"> </span></span>
-<span id="cb64-7"><a href="some-non-parametric-procedures.html#cb64-7"></a><span class="st">  </span>ungroup <span class="op">%&gt;%</span><span class="st"> </span></span>
-<span id="cb64-8"><a href="some-non-parametric-procedures.html#cb64-8"></a><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">total_lost =</span> <span class="kw">cumsum</span>(lost),</span>
-<span id="cb64-9"><a href="some-non-parametric-procedures.html#cb64-9"></a>         <span class="dt">n =</span> n <span class="op">-</span><span class="st"> </span><span class="kw">lag</span>(total_lost, <span class="dt">default =</span> <span class="dv">0</span>),</span>
-<span id="cb64-10"><a href="some-non-parametric-procedures.html#cb64-10"></a>         <span class="dt">hazard =</span> events <span class="op">/</span><span class="st"> </span>n,</span>
-<span id="cb64-11"><a href="some-non-parametric-procedures.html#cb64-11"></a>         <span class="dt">cumulative_hazard =</span> <span class="kw">cumsum</span>(hazard),</span>
-<span id="cb64-12"><a href="some-non-parametric-procedures.html#cb64-12"></a>         <span class="dt">surv =</span> <span class="kw">exp</span>(<span class="op">-</span>cumulative_hazard)) <span class="op">%&gt;%</span><span class="st"> </span></span>
-<span id="cb64-13"><a href="some-non-parametric-procedures.html#cb64-13"></a><span class="st">  </span><span class="kw">rename</span>(<span class="dt">Hazard =</span> hazard, <span class="st">&quot;Cumulative Hazard&quot;</span> =<span class="st"> </span>cumulative_hazard, <span class="st">&quot;Survival&quot;</span> =<span class="st"> </span>surv) <span class="op">%&gt;%</span><span class="st"> </span></span>
-<span id="cb64-14"><a href="some-non-parametric-procedures.html#cb64-14"></a><span class="st">  </span><span class="kw">pivot_longer</span>(<span class="kw">c</span>(Hazard, <span class="st">&quot;Cumulative Hazard&quot;</span>, Survival)) <span class="op">%&gt;%</span><span class="st"> </span></span>
-<span id="cb64-15"><a href="some-non-parametric-procedures.html#cb64-15"></a><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">type =</span> <span class="st">&quot;Nelson-Aalen&quot;</span>)</span>
-<span id="cb64-16"><a href="some-non-parametric-procedures.html#cb64-16"></a></span>
-<span id="cb64-17"><a href="some-non-parametric-procedures.html#cb64-17"></a>na <span class="op">%&gt;%</span><span class="st">   </span></span>
-<span id="cb64-18"><a href="some-non-parametric-procedures.html#cb64-18"></a><span class="st">  </span><span class="kw">ggplot</span>(<span class="kw">aes</span>(days_to_event, value)) <span class="op">+</span></span>
-<span id="cb64-19"><a href="some-non-parametric-procedures.html#cb64-19"></a><span class="st">  </span><span class="kw">geom_step</span>() <span class="op">+</span></span>
-<span id="cb64-20"><a href="some-non-parametric-procedures.html#cb64-20"></a><span class="st">  </span><span class="kw">facet_wrap</span>(<span class="st">&quot;name&quot;</span>, <span class="dt">scales =</span> <span class="st">&quot;free&quot;</span>) <span class="op">+</span></span>
-<span id="cb64-21"><a href="some-non-parametric-procedures.html#cb64-21"></a><span class="st">  </span><span class="kw">labs</span>(<span class="dt">x =</span> <span class="st">&quot;Time (days)&quot;</span>,</span>
-<span id="cb64-22"><a href="some-non-parametric-procedures.html#cb64-22"></a>       <span class="dt">title =</span> <span class="st">&quot;Nelson-Aalen estimates for cat adoptions&quot;</span>) <span class="op">+</span></span>
-<span id="cb64-23"><a href="some-non-parametric-procedures.html#cb64-23"></a><span class="st">  </span><span class="kw">theme</span>(<span class="dt">axis.title.y =</span> <span class="kw">element_blank</span>())</span></code></pre></div>
-<p><img src="Survival_Analysis_files/figure-html/unnamed-chunk-38-1.png" width="100%" /></p>
+<div class="sourceCode" id="cb67"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb67-1"><a href="some-non-parametric-procedures.html#cb67-1"></a>na &lt;-<span class="st"> </span>d <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb67-2"><a href="some-non-parametric-procedures.html#cb67-2"></a><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">n =</span> <span class="kw">n</span>()) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb67-3"><a href="some-non-parametric-procedures.html#cb67-3"></a><span class="st">  </span><span class="kw">group_by</span>(days_to_event, n) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb67-4"><a href="some-non-parametric-procedures.html#cb67-4"></a><span class="st">  </span><span class="kw">summarise</span>(<span class="dt">events =</span> <span class="kw">sum</span>(out_event <span class="op">==</span><span class="st"> &quot;Adoption&quot;</span>),</span>
+<span id="cb67-5"><a href="some-non-parametric-procedures.html#cb67-5"></a>            <span class="dt">censored =</span> <span class="kw">n</span>() <span class="op">-</span><span class="st"> </span>events,</span>
+<span id="cb67-6"><a href="some-non-parametric-procedures.html#cb67-6"></a>            <span class="dt">lost =</span> events <span class="op">+</span><span class="st"> </span>censored) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb67-7"><a href="some-non-parametric-procedures.html#cb67-7"></a><span class="st">  </span>ungroup <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb67-8"><a href="some-non-parametric-procedures.html#cb67-8"></a><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">total_lost =</span> <span class="kw">cumsum</span>(lost),</span>
+<span id="cb67-9"><a href="some-non-parametric-procedures.html#cb67-9"></a>         <span class="dt">n =</span> n <span class="op">-</span><span class="st"> </span><span class="kw">lag</span>(total_lost, <span class="dt">default =</span> <span class="dv">0</span>),</span>
+<span id="cb67-10"><a href="some-non-parametric-procedures.html#cb67-10"></a>         <span class="dt">hazard =</span> events <span class="op">/</span><span class="st"> </span>n,</span>
+<span id="cb67-11"><a href="some-non-parametric-procedures.html#cb67-11"></a>         <span class="dt">cumulative_hazard =</span> <span class="kw">cumsum</span>(hazard),</span>
+<span id="cb67-12"><a href="some-non-parametric-procedures.html#cb67-12"></a>         <span class="dt">surv =</span> <span class="kw">exp</span>(<span class="op">-</span>cumulative_hazard)) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb67-13"><a href="some-non-parametric-procedures.html#cb67-13"></a><span class="st">  </span><span class="kw">rename</span>(<span class="dt">Hazard =</span> hazard, <span class="st">&quot;Cumulative Hazard&quot;</span> =<span class="st"> </span>cumulative_hazard, <span class="st">&quot;Survival&quot;</span> =<span class="st"> </span>surv) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb67-14"><a href="some-non-parametric-procedures.html#cb67-14"></a><span class="st">  </span><span class="kw">pivot_longer</span>(<span class="kw">c</span>(Hazard, <span class="st">&quot;Cumulative Hazard&quot;</span>, Survival)) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb67-15"><a href="some-non-parametric-procedures.html#cb67-15"></a><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">type =</span> <span class="st">&quot;Nelson-Aalen&quot;</span>)</span>
+<span id="cb67-16"><a href="some-non-parametric-procedures.html#cb67-16"></a></span>
+<span id="cb67-17"><a href="some-non-parametric-procedures.html#cb67-17"></a>na <span class="op">%&gt;%</span><span class="st">   </span></span>
+<span id="cb67-18"><a href="some-non-parametric-procedures.html#cb67-18"></a><span class="st">  </span><span class="kw">ggplot</span>(<span class="kw">aes</span>(days_to_event, value)) <span class="op">+</span></span>
+<span id="cb67-19"><a href="some-non-parametric-procedures.html#cb67-19"></a><span class="st">  </span><span class="kw">geom_step</span>() <span class="op">+</span></span>
+<span id="cb67-20"><a href="some-non-parametric-procedures.html#cb67-20"></a><span class="st">  </span><span class="kw">facet_wrap</span>(<span class="st">&quot;name&quot;</span>, <span class="dt">scales =</span> <span class="st">&quot;free&quot;</span>) <span class="op">+</span></span>
+<span id="cb67-21"><a href="some-non-parametric-procedures.html#cb67-21"></a><span class="st">  </span><span class="kw">labs</span>(<span class="dt">x =</span> <span class="st">&quot;Time (days)&quot;</span>,</span>
+<span id="cb67-22"><a href="some-non-parametric-procedures.html#cb67-22"></a>       <span class="dt">title =</span> <span class="st">&quot;Nelson-Aalen estimates for cat adoptions&quot;</span>) <span class="op">+</span></span>
+<span id="cb67-23"><a href="some-non-parametric-procedures.html#cb67-23"></a><span class="st">  </span><span class="kw">theme</span>(<span class="dt">axis.title.y =</span> <span class="kw">element_blank</span>())</span></code></pre></div>
+<p><img src="Survival_Analysis_files/figure-html/unnamed-chunk-41-1.png" width="100%" /></p>
 </div>
 <div id="compare" class="section level3">
 <h3><span class="header-section-number">2.5.4</span> Compare</h3>
-<div class="sourceCode" id="cb65"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb65-1"><a href="some-non-parametric-procedures.html#cb65-1"></a>km <span class="op">%&gt;%</span><span class="st"> </span></span>
-<span id="cb65-2"><a href="some-non-parametric-procedures.html#cb65-2"></a><span class="st">  </span><span class="kw">bind_rows</span>(na) <span class="op">%&gt;%</span><span class="st"> </span></span>
-<span id="cb65-3"><a href="some-non-parametric-procedures.html#cb65-3"></a><span class="st">  </span><span class="kw">ggplot</span>(<span class="kw">aes</span>(days_to_event, value)) <span class="op">+</span></span>
-<span id="cb65-4"><a href="some-non-parametric-procedures.html#cb65-4"></a><span class="st">  </span><span class="kw">geom_step</span>() <span class="op">+</span></span>
-<span id="cb65-5"><a href="some-non-parametric-procedures.html#cb65-5"></a><span class="st">  </span><span class="kw">facet_grid</span>(name <span class="op">~</span><span class="st"> </span>type, <span class="dt">scales =</span> <span class="st">&quot;free&quot;</span>) <span class="op">+</span></span>
-<span id="cb65-6"><a href="some-non-parametric-procedures.html#cb65-6"></a><span class="st">  </span><span class="kw">labs</span>(<span class="dt">x =</span> <span class="st">&quot;Time (days)&quot;</span>,</span>
-<span id="cb65-7"><a href="some-non-parametric-procedures.html#cb65-7"></a>       <span class="dt">title =</span> <span class="st">&quot;Comparison of Kaplan-Meier and Nelson-Aalen estimates&quot;</span>,</span>
-<span id="cb65-8"><a href="some-non-parametric-procedures.html#cb65-8"></a>       <span class="dt">subtitle =</span> <span class="st">&quot;Based on cat adoption data from Statistical Rethinking by Richard McElreath&quot;</span>) <span class="op">+</span></span>
-<span id="cb65-9"><a href="some-non-parametric-procedures.html#cb65-9"></a><span class="st">  </span><span class="kw">theme</span>(<span class="dt">axis.title.y =</span> <span class="kw">element_blank</span>())</span></code></pre></div>
-<p><img src="Survival_Analysis_files/figure-html/unnamed-chunk-39-1.png" width="100%" /></p>
+<div class="sourceCode" id="cb68"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb68-1"><a href="some-non-parametric-procedures.html#cb68-1"></a>km <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb68-2"><a href="some-non-parametric-procedures.html#cb68-2"></a><span class="st">  </span><span class="kw">bind_rows</span>(na) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb68-3"><a href="some-non-parametric-procedures.html#cb68-3"></a><span class="st">  </span><span class="kw">ggplot</span>(<span class="kw">aes</span>(days_to_event, value)) <span class="op">+</span></span>
+<span id="cb68-4"><a href="some-non-parametric-procedures.html#cb68-4"></a><span class="st">  </span><span class="kw">geom_step</span>() <span class="op">+</span></span>
+<span id="cb68-5"><a href="some-non-parametric-procedures.html#cb68-5"></a><span class="st">  </span><span class="kw">facet_grid</span>(name <span class="op">~</span><span class="st"> </span>type, <span class="dt">scales =</span> <span class="st">&quot;free&quot;</span>) <span class="op">+</span></span>
+<span id="cb68-6"><a href="some-non-parametric-procedures.html#cb68-6"></a><span class="st">  </span><span class="kw">labs</span>(<span class="dt">x =</span> <span class="st">&quot;Time (days)&quot;</span>,</span>
+<span id="cb68-7"><a href="some-non-parametric-procedures.html#cb68-7"></a>       <span class="dt">title =</span> <span class="st">&quot;Comparison of Kaplan-Meier and Nelson-Aalen estimates&quot;</span>,</span>
+<span id="cb68-8"><a href="some-non-parametric-procedures.html#cb68-8"></a>       <span class="dt">subtitle =</span> <span class="st">&quot;Based on cat adoption data from Statistical Rethinking by Richard McElreath&quot;</span>) <span class="op">+</span></span>
+<span id="cb68-9"><a href="some-non-parametric-procedures.html#cb68-9"></a><span class="st">  </span><span class="kw">theme</span>(<span class="dt">axis.title.y =</span> <span class="kw">element_blank</span>())</span></code></pre></div>
+<p><img src="Survival_Analysis_files/figure-html/unnamed-chunk-42-1.png" width="100%" /></p>
 
 </div>
 </div>

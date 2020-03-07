@@ -23,14 +23,6 @@ These lecture notes are based on the book [Modelling Survival Data in Medical Re
 
 ![](https://images.tandf.co.uk/common/jackets/amazon/978143985/9781439856789.jpg)
 
-## Theory {-}
-
-Before you start you should be familiar with:
-
-* Coffee
-* Etc
-* Etc
-
 ## Software {-}
 
 We will primarily be writing R code using the RStudio GUI.
@@ -54,3 +46,113 @@ theme_set(theme_cowplot() +
               theme(legend.position = "top",
                     plot.margin = margin(10, 10, 10, 10)))
 ```
+
+## Some Probability Distributions {-}
+
+### Discrete {-}
+
+#### Bernoulli {-}
+
+A random variable $X$ is said to have the *Bernoulli distribution* with parameter $p$ if
+
+$$
+\begin{aligned}
+P(X=1) &= p, \quad \text{and} \\
+P(X=0) &= 1 - p, \quad \text{where } 0 < p < 1.
+\end{aligned}
+$$
+
+We write this as $X \sim \mathrm{Bern}(p)$. All random variables whose possible values are $0$ and $1$ have a this distribution. 
+
+```{r}
+p <- 0.3
+success <- p
+failure <- 1 - p
+tibble(outcome = c("Success", "Failure"),
+       probability = c(success, failure)) %>% 
+    ggplot(aes(outcome, probability)) +
+    geom_col() +
+    scale_y_continuous(labels = percent) +
+    labs(title = "Example Bernoulli variable") +
+    theme(axis.title = element_blank())
+```
+
+
+#### Binomial {-}
+
+Suppose that we have *n independent* Bernoulli random variables sampled from an experiment, each with the same probability, $p$, of success. Let $X$ be the number of successes. Then $X$ has a *Binomial distribution* with parameters $n$ and $p$. We write $X \sim \mathrm{Bin}(n, p)$. Thus the $\mathrm{Bern}(p)$ distribution is the same as $\mathrm{Bin}(1, p)$.
+
+```{r}
+coin_tosses <- 100
+possible_outcomes <- seq(0, 100)
+probability_of_outcomes <- dbinom(x = possible_outcomes, size = coin_tosses, prob = 0.5)
+
+tibble(outcome = possible_outcomes,
+       probability = probability_of_outcomes) %>% 
+    ggplot(aes(outcome, probability)) +
+    geom_col() +
+    scale_y_continuous(labels = percent) +
+    labs(title = "Coin toss experiment",
+         subtitle = "Probability of obtaining X heads in 100 tosses") +
+    theme(axis.title = element_blank())
+```
+
+
+#### Geometric {-}
+
+Conside a sequence of independent Bernoulli trials, each with th same success probability, $p$, and imagine performing trials untill a success occurs. Let $X$ be the number of *failures* before the first successful trial. Then $X$ has the *Geometric distribution* with parameter $p$, denoted by $X \sim \mathrm{Geom}(p)$.
+
+This is an important distribution for survival analysis. Imagine that on each day there is a probability, $p$, which remains constant. Then the number of days before the event have a $\mathrm{Geom}(p)$ distribution.
+
+Textbooks and statistical software differ in whether the *Geometric distribution* models the trials *before* the success or the number of trials *including* the success. The number of trials *including* the success is sometimes called the *First Success distribution*.
+
+```{r}
+risk <- 0.05
+possible_times <- seq(0, 100)
+probability_of_times <- dgeom(possible_times, risk)
+
+tibble(time = possible_times,
+       probability = probability_of_times) %>% 
+    ggplot(aes(time, probability)) +
+    geom_col() +
+    scale_y_continuous(labels = percent) +
+    labs(title = "Geometic experiment",
+         subtitle = "Probability of waiting X days untill event happens with risk 5%") +
+    theme(axis.title = element_blank())
+```
+
+
+### Continuous {-}
+
+#### Exponential {-}
+
+The Exponential distribution is the continuous counterpart to the Geometric distribution. Instead of waiting for events in discrete days we are now waiting in continuous time for successes that occurs with rate $\lambda$ per unit of time. The average number of successes in a time inteval of length $t$ is $\lambda t$, though the actual number of successes varies. If $X$ has an *Exponential distribution* we write $X \sim \mathrm{Expo}(\lambda)$, and the probability that an event occures within $x$ units of time is
+
+$$
+P(X \leq x) =F(x) = 1 - e^{-\lambda x}.
+$$
+
+In survival snalysis this is often called the *risk function*. The *survivor function* is the probability that an event has *not occurred* within $x$ units of time, and for an *Exponential random variable* it is written
+
+$$
+P(X > x) = S(x) = 1 - (1 - e^{-\lambda x}) = e^{-\lambda x}.
+$$
+
+The *Exponential distribution* is unique in that it is *memoryless*. This means that the time untill an event occurs is independent of how long you have been waiting for it to happen. It is obvious that the time untill your bus arrives is not *exponentially* distributed since the waiting time is not the same whether you have waited $0$, $5$ or $15$ minutes *(although sometimes it may feel that way!)*. Waiting times that are not memoryless are better modelled with other distributions.
+
+### Weibull {-}
+
+Remarkably, simply raising an exponential random variable to a power dramatically improves the flexibility and applicability of the distribution. Let $X \sim \mathrm{Expo}(\lambda)$ and $T = X^{1\gamma}$ with $\lambda > 0$, $\gamma > 0$. The distribution of $T$ is called the *Weibull distribution* and we denote this by $T \sim \mathrm{Weib}(\lambda, \gamma)$. We see that if $\gamma = 1$ then $T\sim \mathrm{Weib}(\lambda, 1) = \mathrm{Expo}(\lambda)$. The *risk function* for a *Weibull* random variable is
+
+$$
+P(T \leq t) = F(t) = 1 - e^{\lambda t^{\gamma}}
+$$
+
+and the *survivor function* is 
+
+$$
+P(T > t) = S(t) = e^{\lambda t^\gamma}.
+$$
+
+The *Weibull distribution* is not *memoryless*.
+

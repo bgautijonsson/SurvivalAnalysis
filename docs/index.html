@@ -25,7 +25,7 @@
 <meta name="author" content="Brynjólfur Gauti Jónsson" />
 
 
-<meta name="date" content="2020-03-06" />
+<meta name="date" content="2020-03-07" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -136,9 +136,14 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li class="chapter" data-level="" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i>Preface</a>
 <ul>
 <li class="chapter" data-level="" data-path="index.html"><a href="index.html#the-book"><i class="fa fa-check"></i>The Book</a></li>
-<li class="chapter" data-level="" data-path="index.html"><a href="index.html#theory"><i class="fa fa-check"></i>Theory</a></li>
 <li class="chapter" data-level="" data-path="index.html"><a href="index.html#software"><i class="fa fa-check"></i>Software</a></li>
 <li class="chapter" data-level="" data-path="index.html"><a href="index.html#setup-in-rstudio"><i class="fa fa-check"></i>Setup in RStudio</a></li>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html#some-probability-distributions"><i class="fa fa-check"></i>Some Probability Distributions</a>
+<ul>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html#discrete"><i class="fa fa-check"></i>Discrete</a></li>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html#continuous"><i class="fa fa-check"></i>Continuous</a></li>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html#weibull"><i class="fa fa-check"></i>Weibull</a></li>
+</ul></li>
 </ul></li>
 <li class="chapter" data-level="1" data-path="introduction-to-survival-analysis.html"><a href="introduction-to-survival-analysis.html"><i class="fa fa-check"></i><b>1</b> Introduction to Survival Analysis</a>
 <ul>
@@ -233,7 +238,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <h2 class="subtitle"><em>Course taught at the University of Iceland</em></h2>
 <p class="author"><em>Thor Aspelund</em></p>
 <p class="author"><em>Brynjólfur Gauti Jónsson</em></p>
-<p class="date"><em>2020-03-06</em></p>
+<p class="date"><em>2020-03-07</em></p>
 </div>
 <div id="preface" class="section level1">
 <h1>Preface</h1>
@@ -242,15 +247,6 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <h2>The Book</h2>
 <p>These lecture notes are based on the book <a href="https://www.crcpress.com/Modelling-Survival-Data-in-Medical-Research/Collett/p/book/9781439856789">Modelling Survival Data in Medical Research by David Collett</a></p>
 <p><img src="https://images.tandf.co.uk/common/jackets/amazon/978143985/9781439856789.jpg" /></p>
-</div>
-<div id="theory" class="section level2">
-<h2>Theory</h2>
-<p>Before you start you should be familiar with:</p>
-<ul>
-<li>Coffee</li>
-<li>Etc</li>
-<li>Etc</li>
-</ul>
 </div>
 <div id="software" class="section level2">
 <h2>Software</h2>
@@ -267,7 +263,98 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb1-6"><a href="index.html#cb1-6"></a>                              <span class="dt">size.minor =</span> <span class="fl">0.1</span>) <span class="op">+</span></span>
 <span id="cb1-7"><a href="index.html#cb1-7"></a><span class="st">              </span><span class="kw">theme</span>(<span class="dt">legend.position =</span> <span class="st">&quot;top&quot;</span>,</span>
 <span id="cb1-8"><a href="index.html#cb1-8"></a>                    <span class="dt">plot.margin =</span> <span class="kw">margin</span>(<span class="dv">10</span>, <span class="dv">10</span>, <span class="dv">10</span>, <span class="dv">10</span>)))</span></code></pre></div>
+</div>
+<div id="some-probability-distributions" class="section level2">
+<h2>Some Probability Distributions</h2>
+<div id="discrete" class="section level3">
+<h3>Discrete</h3>
+<div id="bernoulli" class="section level4">
+<h4>Bernoulli</h4>
+<p>A random variable <span class="math inline">\(X\)</span> is said to have the <em>Bernoulli distribution</em> with parameter <span class="math inline">\(p\)</span> if</p>
+<p><span class="math display">\[
+\begin{aligned}
+P(X=1) &amp;= p, \quad \text{and} \\
+P(X=0) &amp;= 1 - p, \quad \text{where } 0 &lt; p &lt; 1.
+\end{aligned}
+\]</span></p>
+<p>We write this as <span class="math inline">\(X \sim \mathrm{Bern}(p)\)</span>. All random variables whose possible values are <span class="math inline">\(0\)</span> and <span class="math inline">\(1\)</span> have a this distribution.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="index.html#cb2-1"></a>p &lt;-<span class="st"> </span><span class="fl">0.3</span></span>
+<span id="cb2-2"><a href="index.html#cb2-2"></a>success &lt;-<span class="st"> </span>p</span>
+<span id="cb2-3"><a href="index.html#cb2-3"></a>failure &lt;-<span class="st"> </span><span class="dv">1</span> <span class="op">-</span><span class="st"> </span>p</span>
+<span id="cb2-4"><a href="index.html#cb2-4"></a><span class="kw">tibble</span>(<span class="dt">outcome =</span> <span class="kw">c</span>(<span class="st">&quot;Success&quot;</span>, <span class="st">&quot;Failure&quot;</span>),</span>
+<span id="cb2-5"><a href="index.html#cb2-5"></a>       <span class="dt">probability =</span> <span class="kw">c</span>(success, failure)) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb2-6"><a href="index.html#cb2-6"></a><span class="st">    </span><span class="kw">ggplot</span>(<span class="kw">aes</span>(outcome, probability)) <span class="op">+</span></span>
+<span id="cb2-7"><a href="index.html#cb2-7"></a><span class="st">    </span><span class="kw">geom_col</span>() <span class="op">+</span></span>
+<span id="cb2-8"><a href="index.html#cb2-8"></a><span class="st">    </span><span class="kw">scale_y_continuous</span>(<span class="dt">labels =</span> percent) <span class="op">+</span></span>
+<span id="cb2-9"><a href="index.html#cb2-9"></a><span class="st">    </span><span class="kw">labs</span>(<span class="dt">title =</span> <span class="st">&quot;Example Bernoulli variable&quot;</span>) <span class="op">+</span></span>
+<span id="cb2-10"><a href="index.html#cb2-10"></a><span class="st">    </span><span class="kw">theme</span>(<span class="dt">axis.title =</span> <span class="kw">element_blank</span>())</span></code></pre></div>
+<p><img src="Survival_Analysis_files/figure-html/unnamed-chunk-2-1.png" width="100%" /></p>
+</div>
+<div id="binomial" class="section level4">
+<h4>Binomial</h4>
+<p>Suppose that we have <em>n independent</em> Bernoulli random variables sampled from an experiment, each with the same probability, <span class="math inline">\(p\)</span>, of success. Let <span class="math inline">\(X\)</span> be the number of successes. Then <span class="math inline">\(X\)</span> has a <em>Binomial distribution</em> with parameters <span class="math inline">\(n\)</span> and <span class="math inline">\(p\)</span>. We write <span class="math inline">\(X \sim \mathrm{Bin}(n, p)\)</span>. Thus the <span class="math inline">\(\mathrm{Bern}(p)\)</span> distribution is the same as <span class="math inline">\(\mathrm{Bin}(1, p)\)</span>.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="index.html#cb3-1"></a>coin_tosses &lt;-<span class="st"> </span><span class="dv">100</span></span>
+<span id="cb3-2"><a href="index.html#cb3-2"></a>possible_outcomes &lt;-<span class="st"> </span><span class="kw">seq</span>(<span class="dv">0</span>, <span class="dv">100</span>)</span>
+<span id="cb3-3"><a href="index.html#cb3-3"></a>probability_of_outcomes &lt;-<span class="st"> </span><span class="kw">dbinom</span>(<span class="dt">x =</span> possible_outcomes, <span class="dt">size =</span> coin_tosses, <span class="dt">prob =</span> <span class="fl">0.5</span>)</span>
+<span id="cb3-4"><a href="index.html#cb3-4"></a></span>
+<span id="cb3-5"><a href="index.html#cb3-5"></a><span class="kw">tibble</span>(<span class="dt">outcome =</span> possible_outcomes,</span>
+<span id="cb3-6"><a href="index.html#cb3-6"></a>       <span class="dt">probability =</span> probability_of_outcomes) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb3-7"><a href="index.html#cb3-7"></a><span class="st">    </span><span class="kw">ggplot</span>(<span class="kw">aes</span>(outcome, probability)) <span class="op">+</span></span>
+<span id="cb3-8"><a href="index.html#cb3-8"></a><span class="st">    </span><span class="kw">geom_col</span>() <span class="op">+</span></span>
+<span id="cb3-9"><a href="index.html#cb3-9"></a><span class="st">    </span><span class="kw">scale_y_continuous</span>(<span class="dt">labels =</span> percent) <span class="op">+</span></span>
+<span id="cb3-10"><a href="index.html#cb3-10"></a><span class="st">    </span><span class="kw">labs</span>(<span class="dt">title =</span> <span class="st">&quot;Coin toss experiment&quot;</span>,</span>
+<span id="cb3-11"><a href="index.html#cb3-11"></a>         <span class="dt">subtitle =</span> <span class="st">&quot;Probability of obtaining X heads in 100 tosses&quot;</span>) <span class="op">+</span></span>
+<span id="cb3-12"><a href="index.html#cb3-12"></a><span class="st">    </span><span class="kw">theme</span>(<span class="dt">axis.title =</span> <span class="kw">element_blank</span>())</span></code></pre></div>
+<p><img src="Survival_Analysis_files/figure-html/unnamed-chunk-3-1.png" width="100%" /></p>
+</div>
+<div id="geometric" class="section level4">
+<h4>Geometric</h4>
+<p>Conside a sequence of independent Bernoulli trials, each with th same success probability, <span class="math inline">\(p\)</span>, and imagine performing trials untill a success occurs. Let <span class="math inline">\(X\)</span> be the number of <em>failures</em> before the first successful trial. Then <span class="math inline">\(X\)</span> has the <em>Geometric distribution</em> with parameter <span class="math inline">\(p\)</span>, denoted by <span class="math inline">\(X \sim \mathrm{Geom}(p)\)</span>.</p>
+<p>This is an important distribution for survival analysis. Imagine that on each day there is a probability, <span class="math inline">\(p\)</span>, which remains constant. Then the number of days before the event have a <span class="math inline">\(\mathrm{Geom}(p)\)</span> distribution.</p>
+<p>Textbooks and statistical software differ in whether the <em>Geometric distribution</em> models the trials <em>before</em> the success or the number of trials <em>including</em> the success. The number of trials <em>including</em> the success is sometimes called the <em>First Success distribution</em>.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="index.html#cb4-1"></a>risk &lt;-<span class="st"> </span><span class="fl">0.05</span></span>
+<span id="cb4-2"><a href="index.html#cb4-2"></a>possible_times &lt;-<span class="st"> </span><span class="kw">seq</span>(<span class="dv">0</span>, <span class="dv">100</span>)</span>
+<span id="cb4-3"><a href="index.html#cb4-3"></a>probability_of_times &lt;-<span class="st"> </span><span class="kw">dgeom</span>(possible_times, risk)</span>
+<span id="cb4-4"><a href="index.html#cb4-4"></a></span>
+<span id="cb4-5"><a href="index.html#cb4-5"></a><span class="kw">tibble</span>(<span class="dt">time =</span> possible_times,</span>
+<span id="cb4-6"><a href="index.html#cb4-6"></a>       <span class="dt">probability =</span> probability_of_times) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb4-7"><a href="index.html#cb4-7"></a><span class="st">    </span><span class="kw">ggplot</span>(<span class="kw">aes</span>(time, probability)) <span class="op">+</span></span>
+<span id="cb4-8"><a href="index.html#cb4-8"></a><span class="st">    </span><span class="kw">geom_col</span>() <span class="op">+</span></span>
+<span id="cb4-9"><a href="index.html#cb4-9"></a><span class="st">    </span><span class="kw">scale_y_continuous</span>(<span class="dt">labels =</span> percent) <span class="op">+</span></span>
+<span id="cb4-10"><a href="index.html#cb4-10"></a><span class="st">    </span><span class="kw">labs</span>(<span class="dt">title =</span> <span class="st">&quot;Geometic experiment&quot;</span>,</span>
+<span id="cb4-11"><a href="index.html#cb4-11"></a>         <span class="dt">subtitle =</span> <span class="st">&quot;Probability of waiting X days untill event happens with risk 5%&quot;</span>) <span class="op">+</span></span>
+<span id="cb4-12"><a href="index.html#cb4-12"></a><span class="st">    </span><span class="kw">theme</span>(<span class="dt">axis.title =</span> <span class="kw">element_blank</span>())</span></code></pre></div>
+<p><img src="Survival_Analysis_files/figure-html/unnamed-chunk-4-1.png" width="100%" /></p>
+</div>
+</div>
+<div id="continuous" class="section level3">
+<h3>Continuous</h3>
+<div id="exponential" class="section level4">
+<h4>Exponential</h4>
+<p>The Exponential distribution is the continuous counterpart to the Geometric distribution. Instead of waiting for events in discrete days we are now waiting in continuous time for successes that occurs with rate <span class="math inline">\(\lambda\)</span> per unit of time. The average number of successes in a time inteval of length <span class="math inline">\(t\)</span> is <span class="math inline">\(\lambda t\)</span>, though the actual number of successes varies. If <span class="math inline">\(X\)</span> has an <em>Exponential distribution</em> we write <span class="math inline">\(X \sim \mathrm{Expo}(\lambda)\)</span>, and the probability that an event occures within <span class="math inline">\(x\)</span> units of time is</p>
+<p><span class="math display">\[
+P(X \leq x) =F(x) = 1 - e^{-\lambda x}.
+\]</span></p>
+<p>In survival snalysis this is often called the <em>risk function</em>. The <em>survivor function</em> is the probability that an event has <em>not occurred</em> within <span class="math inline">\(x\)</span> units of time, and for an <em>Exponential random variable</em> it is written</p>
+<p><span class="math display">\[
+P(X &gt; x) = S(x) = 1 - (1 - e^{-\lambda x}) = e^{-\lambda x}.
+\]</span></p>
+<p>The <em>Exponential distribution</em> is unique in that it is <em>memoryless</em>. This means that the time untill an event occurs is independent of how long you have been waiting for it to happen. It is obvious that the time untill your bus arrives is not <em>exponentially</em> distributed since the waiting time is not the same whether you have waited <span class="math inline">\(0\)</span>, <span class="math inline">\(5\)</span> or <span class="math inline">\(15\)</span> minutes <em>(although sometimes it may feel that way!)</em>. Waiting times that are not memoryless are better modelled with other distributions.</p>
+</div>
+</div>
+<div id="weibull" class="section level3">
+<h3>Weibull</h3>
+<p>Remarkably, simply raising an exponential random variable to a power dramatically improves the flexibility and applicability of the distribution. Let <span class="math inline">\(X \sim \mathrm{Expo}(\lambda)\)</span> and <span class="math inline">\(T = X^{1\gamma}\)</span> with <span class="math inline">\(\lambda &gt; 0\)</span>, <span class="math inline">\(\gamma &gt; 0\)</span>. The distribution of <span class="math inline">\(T\)</span> is called the <em>Weibull distribution</em> and we denote this by <span class="math inline">\(T \sim \mathrm{Weib}(\lambda, \gamma)\)</span>. We see that if <span class="math inline">\(\gamma = 1\)</span> then <span class="math inline">\(T\sim \mathrm{Weib}(\lambda, 1) = \mathrm{Expo}(\lambda)\)</span>. The <em>risk function</em> for a <em>Weibull</em> random variable is</p>
+<p><span class="math display">\[
+P(T \leq t) = F(t) = 1 - e^{\lambda t^{\gamma}}
+\]</span></p>
+<p>and the <em>survivor function</em> is</p>
+<p><span class="math display">\[
+P(T &gt; t) = S(t) = e^{\lambda t^\gamma}.
+\]</span></p>
+<p>The <em>Weibull distribution</em> is not <em>memoryless</em>.</p>
 
+</div>
 </div>
 </div>
             </section>

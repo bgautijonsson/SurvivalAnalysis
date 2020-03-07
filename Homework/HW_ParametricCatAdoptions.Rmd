@@ -1,0 +1,11 @@
+---
+title: "Parametric Cat Adoptions"
+subtitle: "Survival Analysis (LÝÐ079F)"
+author: "Brynjólfur Gauti Jónsson"
+date: "3/6/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
