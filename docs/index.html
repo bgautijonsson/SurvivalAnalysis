@@ -312,8 +312,8 @@ P(X=0) &amp;= 1 - p, \quad \text{where } 0 &lt; p &lt; 1.
 <p>Conside a sequence of independent Bernoulli trials, each with th same success probability, <span class="math inline">\(p\)</span>, and imagine performing trials untill a success occurs. Let <span class="math inline">\(X\)</span> be the number of <em>failures</em> before the first successful trial. Then <span class="math inline">\(X\)</span> has the <em>Geometric distribution</em> with parameter <span class="math inline">\(p\)</span>, denoted by <span class="math inline">\(X \sim \mathrm{Geom}(p)\)</span>.</p>
 <p>This is an important distribution for survival analysis. Imagine that on each day there is a probability, <span class="math inline">\(p\)</span>, which remains constant. Then the number of days before the event have a <span class="math inline">\(\mathrm{Geom}(p)\)</span> distribution.</p>
 <p>Textbooks and statistical software differ in whether the <em>Geometric distribution</em> models the trials <em>before</em> the success or the number of trials <em>including</em> the success. The number of trials <em>including</em> the success is sometimes called the <em>First Success distribution</em>.</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="index.html#cb4-1"></a>risk &lt;-<span class="st"> </span><span class="fl">0.05</span></span>
-<span id="cb4-2"><a href="index.html#cb4-2"></a>possible_times &lt;-<span class="st"> </span><span class="kw">seq</span>(<span class="dv">0</span>, <span class="dv">100</span>)</span>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="index.html#cb4-1"></a>risk &lt;-<span class="st"> </span><span class="fl">0.10</span></span>
+<span id="cb4-2"><a href="index.html#cb4-2"></a>possible_times &lt;-<span class="st"> </span><span class="kw">seq</span>(<span class="dv">0</span>, <span class="dv">50</span>)</span>
 <span id="cb4-3"><a href="index.html#cb4-3"></a>probability_of_times &lt;-<span class="st"> </span><span class="kw">dgeom</span>(possible_times, risk)</span>
 <span id="cb4-4"><a href="index.html#cb4-4"></a></span>
 <span id="cb4-5"><a href="index.html#cb4-5"></a><span class="kw">tibble</span>(<span class="dt">time =</span> possible_times,</span>
@@ -322,13 +322,15 @@ P(X=0) &amp;= 1 - p, \quad \text{where } 0 &lt; p &lt; 1.
 <span id="cb4-8"><a href="index.html#cb4-8"></a><span class="st">    </span><span class="kw">geom_col</span>() <span class="op">+</span></span>
 <span id="cb4-9"><a href="index.html#cb4-9"></a><span class="st">    </span><span class="kw">scale_y_continuous</span>(<span class="dt">labels =</span> percent) <span class="op">+</span></span>
 <span id="cb4-10"><a href="index.html#cb4-10"></a><span class="st">    </span><span class="kw">labs</span>(<span class="dt">title =</span> <span class="st">&quot;Geometic experiment&quot;</span>,</span>
-<span id="cb4-11"><a href="index.html#cb4-11"></a>         <span class="dt">subtitle =</span> <span class="st">&quot;Probability of waiting X days untill event happens with risk 5%&quot;</span>) <span class="op">+</span></span>
+<span id="cb4-11"><a href="index.html#cb4-11"></a>         <span class="dt">subtitle =</span> <span class="st">&quot;Probability of waiting X days until event happens with risk 10%&quot;</span>) <span class="op">+</span></span>
 <span id="cb4-12"><a href="index.html#cb4-12"></a><span class="st">    </span><span class="kw">theme</span>(<span class="dt">axis.title =</span> <span class="kw">element_blank</span>())</span></code></pre></div>
 <p><img src="Survival_Analysis_files/figure-html/unnamed-chunk-4-1.png" width="100%" /></p>
 </div>
 </div>
 <div id="continuous" class="section level3">
 <h3>Continuous</h3>
+<p>For continuous variables it makes no sense to ask <em>what is the probability that X will be equal to x?</em> since that probabity, <span class="math inline">\(P(X = x)\)</span> is always <span class="math inline">\(0\)</span>. Consider the probabity that the temperature outside is 23 degrees celsius. This probability is <span class="math inline">\(0\)</span> since the temperature outside is never exactly 23 degrees, rather it might be 23.01231 or 22.999923, but it is never exactly 23. Instead of the probability of a value we talk of the <em>density</em> of a value.</p>
+<p>On the other hand we <em>can</em> talk about the probability that <span class="math inline">\(X\)</span> is less than or equal to <span class="math inline">\(x\)</span> or <span class="math inline">\(P(X \leq x)\)</span>. Thus we can ask <em>what is the probability that the temporature outside is less than 24?</em> or <span class="math inline">\(P(\mathrm{Temp} \leq 23)\)</span>.</p>
 <div id="exponential" class="section level4">
 <h4>Exponential</h4>
 <p>The Exponential distribution is the continuous counterpart to the Geometric distribution. Instead of waiting for events in discrete days we are now waiting in continuous time for successes that occurs with rate <span class="math inline">\(\lambda\)</span> per unit of time. The average number of successes in a time inteval of length <span class="math inline">\(t\)</span> is <span class="math inline">\(\lambda t\)</span>, though the actual number of successes varies. If <span class="math inline">\(X\)</span> has an <em>Exponential distribution</em> we write <span class="math inline">\(X \sim \mathrm{Expo}(\lambda)\)</span>, and the probability that an event occures within <span class="math inline">\(x\)</span> units of time is</p>
@@ -339,7 +341,45 @@ P(X \leq x) =F(x) = 1 - e^{-\lambda x}.
 <p><span class="math display">\[
 P(X &gt; x) = S(x) = 1 - (1 - e^{-\lambda x}) = e^{-\lambda x}.
 \]</span></p>
-<p>The <em>Exponential distribution</em> is unique in that it is <em>memoryless</em>. This means that the time untill an event occurs is independent of how long you have been waiting for it to happen. It is obvious that the time untill your bus arrives is not <em>exponentially</em> distributed since the waiting time is not the same whether you have waited <span class="math inline">\(0\)</span>, <span class="math inline">\(5\)</span> or <span class="math inline">\(15\)</span> minutes <em>(although sometimes it may feel that way!)</em>. Waiting times that are not memoryless are better modelled with other distributions.</p>
+<p>The <em>Exponential distribution</em> is unique in that it is <em>memoryless</em>. This means that the time untill an event occurs is independent of how long you have been waiting for it to happen. It is obvious that the time untill your bus arrives is not <em>exponentially</em> distributed since the waiting time is not the same whether you have waited <span class="math inline">\(0\)</span>, <span class="math inline">\(5\)</span> or <span class="math inline">\(15\)</span> minutes <em>(although sometimes it may feel that way!)</em>. Waiting times that are not memoryless are better modeled with other distributions.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="index.html#cb5-1"></a>rate &lt;-<span class="st"> </span><span class="fl">0.1</span></span>
+<span id="cb5-2"><a href="index.html#cb5-2"></a>possible_times &lt;-<span class="st"> </span><span class="kw">seq</span>(<span class="dv">0</span>, <span class="dv">50</span>)</span>
+<span id="cb5-3"><a href="index.html#cb5-3"></a>density_of_times &lt;-<span class="st"> </span><span class="kw">dexp</span>(possible_times, rate)</span>
+<span id="cb5-4"><a href="index.html#cb5-4"></a></span>
+<span id="cb5-5"><a href="index.html#cb5-5"></a><span class="kw">tibble</span>(<span class="dt">time =</span> possible_times,</span>
+<span id="cb5-6"><a href="index.html#cb5-6"></a>       <span class="dt">density =</span> density_of_times) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb5-7"><a href="index.html#cb5-7"></a><span class="st">    </span><span class="kw">ggplot</span>(<span class="kw">aes</span>(time, density)) <span class="op">+</span></span>
+<span id="cb5-8"><a href="index.html#cb5-8"></a><span class="st">    </span><span class="kw">geom_area</span>(<span class="dt">fill =</span> <span class="st">&quot;grey30&quot;</span>) <span class="op">+</span></span>
+<span id="cb5-9"><a href="index.html#cb5-9"></a><span class="st">    </span><span class="kw">labs</span>(<span class="dt">title =</span> <span class="st">&quot;Exponential experiment: Density&quot;</span>,</span>
+<span id="cb5-10"><a href="index.html#cb5-10"></a>         <span class="dt">subtitle =</span> <span class="st">&quot;Density of waiting X amount of time until event happens with rate 0.1 per unit of time.</span><span class="ch">\n</span><span class="st">Since an exponential waiting time can take on any values we don&#39;t see a step function but a smooth curve.&quot;</span>) <span class="op">+</span></span>
+<span id="cb5-11"><a href="index.html#cb5-11"></a><span class="st">    </span><span class="kw">theme</span>(<span class="dt">axis.title =</span> <span class="kw">element_blank</span>())</span></code></pre></div>
+<p><img src="Survival_Analysis_files/figure-html/unnamed-chunk-5-1.png" width="100%" /></p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="index.html#cb6-1"></a>rate &lt;-<span class="st"> </span><span class="fl">0.1</span></span>
+<span id="cb6-2"><a href="index.html#cb6-2"></a>possible_times &lt;-<span class="st"> </span><span class="kw">seq</span>(<span class="dv">0</span>, <span class="dv">50</span>)</span>
+<span id="cb6-3"><a href="index.html#cb6-3"></a>risk_function &lt;-<span class="st"> </span><span class="kw">pexp</span>(possible_times, rate)</span>
+<span id="cb6-4"><a href="index.html#cb6-4"></a></span>
+<span id="cb6-5"><a href="index.html#cb6-5"></a><span class="kw">tibble</span>(<span class="dt">time =</span> possible_times,</span>
+<span id="cb6-6"><a href="index.html#cb6-6"></a>       <span class="dt">risk =</span> risk_function) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb6-7"><a href="index.html#cb6-7"></a><span class="st">    </span><span class="kw">ggplot</span>(<span class="kw">aes</span>(time, risk)) <span class="op">+</span></span>
+<span id="cb6-8"><a href="index.html#cb6-8"></a><span class="st">    </span><span class="kw">geom_area</span>(<span class="dt">fill =</span> <span class="st">&quot;grey30&quot;</span>) <span class="op">+</span></span>
+<span id="cb6-9"><a href="index.html#cb6-9"></a><span class="st">    </span><span class="kw">scale_y_continuous</span>(<span class="dt">labels =</span> percent) <span class="op">+</span></span>
+<span id="cb6-10"><a href="index.html#cb6-10"></a><span class="st">    </span><span class="kw">labs</span>(<span class="dt">title =</span> <span class="st">&quot;Exponential experiment: Risk function&quot;</span>,</span>
+<span id="cb6-11"><a href="index.html#cb6-11"></a>         <span class="dt">subtitle =</span> <span class="st">&quot;Probability of waiting X OR LESS amount of time until event happens with rate 0.1 per unit of time.&quot;</span>) <span class="op">+</span></span>
+<span id="cb6-12"><a href="index.html#cb6-12"></a><span class="st">    </span><span class="kw">theme</span>(<span class="dt">axis.title =</span> <span class="kw">element_blank</span>())</span></code></pre></div>
+<p><img src="Survival_Analysis_files/figure-html/unnamed-chunk-6-1.png" width="100%" /></p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="index.html#cb7-1"></a>rate &lt;-<span class="st"> </span><span class="fl">0.1</span></span>
+<span id="cb7-2"><a href="index.html#cb7-2"></a>possible_times &lt;-<span class="st"> </span><span class="kw">seq</span>(<span class="dv">0</span>, <span class="dv">50</span>)</span>
+<span id="cb7-3"><a href="index.html#cb7-3"></a>survival_function &lt;-<span class="st"> </span><span class="dv">1</span> <span class="op">-</span><span class="st"> </span><span class="kw">pexp</span>(possible_times, rate)</span>
+<span id="cb7-4"><a href="index.html#cb7-4"></a></span>
+<span id="cb7-5"><a href="index.html#cb7-5"></a><span class="kw">tibble</span>(<span class="dt">time =</span> possible_times,</span>
+<span id="cb7-6"><a href="index.html#cb7-6"></a>       <span class="dt">survival =</span> survival_function) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb7-7"><a href="index.html#cb7-7"></a><span class="st">    </span><span class="kw">ggplot</span>(<span class="kw">aes</span>(time, survival)) <span class="op">+</span></span>
+<span id="cb7-8"><a href="index.html#cb7-8"></a><span class="st">    </span><span class="kw">geom_area</span>(<span class="dt">fill =</span> <span class="st">&quot;grey30&quot;</span>) <span class="op">+</span></span>
+<span id="cb7-9"><a href="index.html#cb7-9"></a><span class="st">    </span><span class="kw">scale_y_continuous</span>(<span class="dt">labels =</span> percent) <span class="op">+</span></span>
+<span id="cb7-10"><a href="index.html#cb7-10"></a><span class="st">    </span><span class="kw">labs</span>(<span class="dt">title =</span> <span class="st">&quot;Exponential experiment: Survival function&quot;</span>,</span>
+<span id="cb7-11"><a href="index.html#cb7-11"></a>         <span class="dt">subtitle =</span> <span class="st">&quot;Probability of waiting MORE THAN X amount of time until event happens with rate 0.1 per unit of time.&quot;</span>) <span class="op">+</span></span>
+<span id="cb7-12"><a href="index.html#cb7-12"></a><span class="st">    </span><span class="kw">theme</span>(<span class="dt">axis.title =</span> <span class="kw">element_blank</span>())</span></code></pre></div>
+<p><img src="Survival_Analysis_files/figure-html/unnamed-chunk-7-1.png" width="100%" /></p>
 </div>
 </div>
 <div id="weibull" class="section level3">
@@ -353,6 +393,47 @@ P(T \leq t) = F(t) = 1 - e^{\lambda t^{\gamma}}
 P(T &gt; t) = S(t) = e^{\lambda t^\gamma}.
 \]</span></p>
 <p>The <em>Weibull distribution</em> is not <em>memoryless</em>.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="index.html#cb8-1"></a>rate &lt;-<span class="st"> </span><span class="fl">0.1</span></span>
+<span id="cb8-2"><a href="index.html#cb8-2"></a>shape &lt;-<span class="st"> </span><span class="dv">2</span></span>
+<span id="cb8-3"><a href="index.html#cb8-3"></a>possible_times &lt;-<span class="st"> </span><span class="kw">seq</span>(<span class="dv">0</span>, <span class="dv">50</span>, <span class="dt">length.out =</span> <span class="dv">1000</span>)</span>
+<span id="cb8-4"><a href="index.html#cb8-4"></a>density_of_times &lt;-<span class="st"> </span><span class="kw">dweibull</span>(possible_times, <span class="dt">shape =</span> shape, <span class="dt">scale =</span> <span class="dv">1</span> <span class="op">/</span><span class="st"> </span>rate)</span>
+<span id="cb8-5"><a href="index.html#cb8-5"></a></span>
+<span id="cb8-6"><a href="index.html#cb8-6"></a><span class="kw">tibble</span>(<span class="dt">time =</span> possible_times,</span>
+<span id="cb8-7"><a href="index.html#cb8-7"></a>       <span class="dt">density =</span> density_of_times) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb8-8"><a href="index.html#cb8-8"></a><span class="st">    </span><span class="kw">ggplot</span>(<span class="kw">aes</span>(time, density)) <span class="op">+</span></span>
+<span id="cb8-9"><a href="index.html#cb8-9"></a><span class="st">    </span><span class="kw">geom_area</span>(<span class="dt">fill =</span> <span class="st">&quot;grey30&quot;</span>) <span class="op">+</span></span>
+<span id="cb8-10"><a href="index.html#cb8-10"></a><span class="st">    </span><span class="kw">labs</span>(<span class="dt">title =</span> <span class="st">&quot;Weibull experiment: Density&quot;</span>,</span>
+<span id="cb8-11"><a href="index.html#cb8-11"></a>         <span class="dt">subtitle =</span> <span class="st">&quot;Density of waiting X amount of time until event happens with rate 0.1 per unit of time and shape parameter 2.</span><span class="ch">\n</span><span class="st">This means that the square root of the survival time follows an exponential distribution&quot;</span>) <span class="op">+</span></span>
+<span id="cb8-12"><a href="index.html#cb8-12"></a><span class="st">    </span><span class="kw">theme</span>(<span class="dt">axis.title =</span> <span class="kw">element_blank</span>())</span></code></pre></div>
+<p><img src="Survival_Analysis_files/figure-html/unnamed-chunk-8-1.png" width="100%" /></p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="index.html#cb9-1"></a>rate &lt;-<span class="st"> </span><span class="fl">0.1</span></span>
+<span id="cb9-2"><a href="index.html#cb9-2"></a>shape &lt;-<span class="st"> </span><span class="dv">2</span></span>
+<span id="cb9-3"><a href="index.html#cb9-3"></a>possible_times &lt;-<span class="st"> </span><span class="kw">seq</span>(<span class="dv">0</span>, <span class="dv">50</span>, <span class="dt">length.out =</span> <span class="dv">1000</span>)</span>
+<span id="cb9-4"><a href="index.html#cb9-4"></a>density_of_times &lt;-<span class="st"> </span><span class="kw">pweibull</span>(possible_times, <span class="dt">shape =</span> shape, <span class="dt">scale =</span> <span class="dv">1</span> <span class="op">/</span><span class="st"> </span>rate)</span>
+<span id="cb9-5"><a href="index.html#cb9-5"></a></span>
+<span id="cb9-6"><a href="index.html#cb9-6"></a><span class="kw">tibble</span>(<span class="dt">time =</span> possible_times,</span>
+<span id="cb9-7"><a href="index.html#cb9-7"></a>       <span class="dt">density =</span> density_of_times) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb9-8"><a href="index.html#cb9-8"></a><span class="st">    </span><span class="kw">ggplot</span>(<span class="kw">aes</span>(time, density)) <span class="op">+</span></span>
+<span id="cb9-9"><a href="index.html#cb9-9"></a><span class="st">    </span><span class="kw">geom_area</span>(<span class="dt">fill =</span> <span class="st">&quot;grey30&quot;</span>) <span class="op">+</span></span>
+<span id="cb9-10"><a href="index.html#cb9-10"></a><span class="st">    </span><span class="kw">scale_y_continuous</span>(<span class="dt">labels =</span> percent) <span class="op">+</span></span>
+<span id="cb9-11"><a href="index.html#cb9-11"></a><span class="st">    </span><span class="kw">labs</span>(<span class="dt">title =</span> <span class="st">&quot;Weibull experiment: Risk function&quot;</span>,</span>
+<span id="cb9-12"><a href="index.html#cb9-12"></a>         <span class="dt">subtitle =</span> <span class="st">&quot;Probability of waiting X OR LESS amount of time until event happens with rate 0.1 per unit of time and shape parameter 2.</span><span class="ch">\n</span><span class="st">This means that the square root of the survival time follows an exponential distribution&quot;</span>) <span class="op">+</span></span>
+<span id="cb9-13"><a href="index.html#cb9-13"></a><span class="st">    </span><span class="kw">theme</span>(<span class="dt">axis.title =</span> <span class="kw">element_blank</span>())</span></code></pre></div>
+<p><img src="Survival_Analysis_files/figure-html/unnamed-chunk-9-1.png" width="100%" /></p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="index.html#cb10-1"></a>rate &lt;-<span class="st"> </span><span class="fl">0.1</span></span>
+<span id="cb10-2"><a href="index.html#cb10-2"></a>shape &lt;-<span class="st"> </span><span class="dv">2</span></span>
+<span id="cb10-3"><a href="index.html#cb10-3"></a>possible_times &lt;-<span class="st"> </span><span class="kw">seq</span>(<span class="dv">0</span>, <span class="dv">50</span>, <span class="dt">length.out =</span> <span class="dv">1000</span>)</span>
+<span id="cb10-4"><a href="index.html#cb10-4"></a>density_of_times &lt;-<span class="st"> </span><span class="dv">1</span> <span class="op">-</span><span class="st"> </span><span class="kw">pweibull</span>(possible_times, <span class="dt">shape =</span> shape, <span class="dt">scale =</span> <span class="dv">1</span> <span class="op">/</span><span class="st"> </span>rate)</span>
+<span id="cb10-5"><a href="index.html#cb10-5"></a></span>
+<span id="cb10-6"><a href="index.html#cb10-6"></a><span class="kw">tibble</span>(<span class="dt">time =</span> possible_times,</span>
+<span id="cb10-7"><a href="index.html#cb10-7"></a>       <span class="dt">density =</span> density_of_times) <span class="op">%&gt;%</span><span class="st"> </span></span>
+<span id="cb10-8"><a href="index.html#cb10-8"></a><span class="st">    </span><span class="kw">ggplot</span>(<span class="kw">aes</span>(time, density)) <span class="op">+</span></span>
+<span id="cb10-9"><a href="index.html#cb10-9"></a><span class="st">    </span><span class="kw">geom_area</span>(<span class="dt">fill =</span> <span class="st">&quot;grey30&quot;</span>) <span class="op">+</span></span>
+<span id="cb10-10"><a href="index.html#cb10-10"></a><span class="st">    </span><span class="kw">scale_y_continuous</span>(<span class="dt">labels =</span> percent) <span class="op">+</span></span>
+<span id="cb10-11"><a href="index.html#cb10-11"></a><span class="st">    </span><span class="kw">labs</span>(<span class="dt">title =</span> <span class="st">&quot;Weibull experiment: Survivor function&quot;</span>,</span>
+<span id="cb10-12"><a href="index.html#cb10-12"></a>         <span class="dt">subtitle =</span> <span class="st">&quot;Probability of waiting MORE THAN X amount of time until event happens with rate 0.1 per unit of time and shape parameter 2.</span><span class="ch">\n</span><span class="st">This means that the square root of the survival time follows an exponential distribution&quot;</span>) <span class="op">+</span></span>
+<span id="cb10-13"><a href="index.html#cb10-13"></a><span class="st">    </span><span class="kw">theme</span>(<span class="dt">axis.title =</span> <span class="kw">element_blank</span>())</span></code></pre></div>
+<p><img src="Survival_Analysis_files/figure-html/unnamed-chunk-10-1.png" width="100%" /></p>
 
 </div>
 </div>

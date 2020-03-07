@@ -33,7 +33,7 @@ This is our base setup. Further packages will be loaded in the individual lectur
 
 ```{r setup, include=FALSE, echo = TRUE}
 knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE, 
-                      fig.width = 8, fig.asp = 0.62, out.width = "100%")
+                      fig.width = 10, fig.asp = 0.62, out.width = "100%")
 ```
 
 ```{r}
@@ -107,8 +107,8 @@ This is an important distribution for survival analysis. Imagine that on each da
 Textbooks and statistical software differ in whether the *Geometric distribution* models the trials *before* the success or the number of trials *including* the success. The number of trials *including* the success is sometimes called the *First Success distribution*.
 
 ```{r}
-risk <- 0.05
-possible_times <- seq(0, 100)
+risk <- 0.10
+possible_times <- seq(0, 50)
 probability_of_times <- dgeom(possible_times, risk)
 
 tibble(time = possible_times,
@@ -117,12 +117,16 @@ tibble(time = possible_times,
     geom_col() +
     scale_y_continuous(labels = percent) +
     labs(title = "Geometic experiment",
-         subtitle = "Probability of waiting X days untill event happens with risk 5%") +
+         subtitle = "Probability of waiting X days until event happens with risk 10%") +
     theme(axis.title = element_blank())
 ```
 
 
 ### Continuous {-}
+
+For continuous variables it makes no sense to ask *what is the probability that X will be equal to x?* since that probabity, $P(X = x)$ is always $0$. Consider the probabity that the temperature outside is 23 degrees celsius. This probability is $0$ since the temperature outside is never exactly 23 degrees, rather it might be 23.01231 or 22.999923, but it is never exactly 23. Instead of the probability of a value we talk of the *density* of a value.
+
+On the other hand we *can* talk about the probability that $X$ is less than or equal to $x$ or $P(X \leq x)$. Thus we can ask *what is the probability that the temporature outside is less than 24?* or $P(\mathrm{Temp} \leq 23)$.
 
 #### Exponential {-}
 
@@ -138,7 +142,51 @@ $$
 P(X > x) = S(x) = 1 - (1 - e^{-\lambda x}) = e^{-\lambda x}.
 $$
 
-The *Exponential distribution* is unique in that it is *memoryless*. This means that the time untill an event occurs is independent of how long you have been waiting for it to happen. It is obvious that the time untill your bus arrives is not *exponentially* distributed since the waiting time is not the same whether you have waited $0$, $5$ or $15$ minutes *(although sometimes it may feel that way!)*. Waiting times that are not memoryless are better modelled with other distributions.
+The *Exponential distribution* is unique in that it is *memoryless*. This means that the time untill an event occurs is independent of how long you have been waiting for it to happen. It is obvious that the time untill your bus arrives is not *exponentially* distributed since the waiting time is not the same whether you have waited $0$, $5$ or $15$ minutes *(although sometimes it may feel that way!)*. Waiting times that are not memoryless are better modeled with other distributions.
+
+```{r}
+rate <- 0.1
+possible_times <- seq(0, 50)
+density_of_times <- dexp(possible_times, rate)
+
+tibble(time = possible_times,
+       density = density_of_times) %>% 
+    ggplot(aes(time, density)) +
+    geom_area(fill = "grey30") +
+    labs(title = "Exponential experiment: Density",
+         subtitle = "Density of waiting X amount of time until event happens with rate 0.1 per unit of time.\nSince an exponential waiting time can take on any values we don't see a step function but a smooth curve.") +
+    theme(axis.title = element_blank())
+``` 
+
+```{r}
+rate <- 0.1
+possible_times <- seq(0, 50)
+risk_function <- pexp(possible_times, rate)
+
+tibble(time = possible_times,
+       risk = risk_function) %>% 
+    ggplot(aes(time, risk)) +
+    geom_area(fill = "grey30") +
+    scale_y_continuous(labels = percent) +
+    labs(title = "Exponential experiment: Risk function",
+         subtitle = "Probability of waiting X OR LESS amount of time until event happens with rate 0.1 per unit of time.") +
+    theme(axis.title = element_blank())
+``` 
+
+```{r}
+rate <- 0.1
+possible_times <- seq(0, 50)
+survival_function <- 1 - pexp(possible_times, rate)
+
+tibble(time = possible_times,
+       survival = survival_function) %>% 
+    ggplot(aes(time, survival)) +
+    geom_area(fill = "grey30") +
+    scale_y_continuous(labels = percent) +
+    labs(title = "Exponential experiment: Survival function",
+         subtitle = "Probability of waiting MORE THAN X amount of time until event happens with rate 0.1 per unit of time.") +
+    theme(axis.title = element_blank())
+``` 
 
 ### Weibull {-}
 
@@ -156,3 +204,49 @@ $$
 
 The *Weibull distribution* is not *memoryless*.
 
+```{r}
+rate <- 0.1
+shape <- 2
+possible_times <- seq(0, 50, length.out = 1000)
+density_of_times <- dweibull(possible_times, shape = shape, scale = 1 / rate)
+
+tibble(time = possible_times,
+       density = density_of_times) %>% 
+    ggplot(aes(time, density)) +
+    geom_area(fill = "grey30") +
+    labs(title = "Weibull experiment: Density",
+         subtitle = "Density of waiting X amount of time until event happens with rate 0.1 per unit of time and shape parameter 2.\nThis means that the square root of the survival time follows an exponential distribution") +
+    theme(axis.title = element_blank())
+``` 
+
+```{r}
+rate <- 0.1
+shape <- 2
+possible_times <- seq(0, 50, length.out = 1000)
+density_of_times <- pweibull(possible_times, shape = shape, scale = 1 / rate)
+
+tibble(time = possible_times,
+       density = density_of_times) %>% 
+    ggplot(aes(time, density)) +
+    geom_area(fill = "grey30") +
+    scale_y_continuous(labels = percent) +
+    labs(title = "Weibull experiment: Risk function",
+         subtitle = "Probability of waiting X OR LESS amount of time until event happens with rate 0.1 per unit of time and shape parameter 2.\nThis means that the square root of the survival time follows an exponential distribution") +
+    theme(axis.title = element_blank())
+``` 
+
+```{r}
+rate <- 0.1
+shape <- 2
+possible_times <- seq(0, 50, length.out = 1000)
+density_of_times <- 1 - pweibull(possible_times, shape = shape, scale = 1 / rate)
+
+tibble(time = possible_times,
+       density = density_of_times) %>% 
+    ggplot(aes(time, density)) +
+    geom_area(fill = "grey30") +
+    scale_y_continuous(labels = percent) +
+    labs(title = "Weibull experiment: Survivor function",
+         subtitle = "Probability of waiting MORE THAN X amount of time until event happens with rate 0.1 per unit of time and shape parameter 2.\nThis means that the square root of the survival time follows an exponential distribution") +
+    theme(axis.title = element_blank())
+``` 
