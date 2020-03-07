@@ -219,30 +219,6 @@ rms1 <- npsurv(Surv(time, status) ~ 1,data=d)
 survplot(rms1,what=c("survival"),n.risk = T)
 ```
 
-
-
----
-title: "Kaplan-Meier and Nelson-Aalen"
-output: 
-  html_document:
-    toc: true
-    toc_float: true
-    theme: journal
-    code_folding: show
----
-
-```{r}
-library(tidyverse)
-library(cowplot)
-theme_set(theme_cowplot() +  
-              background_grid(major = "xy", 
-                              minor = "xy",
-                              size.major = 0.25,
-                              size.minor = 0.1) +
-              theme(legend.position = "top",
-                    plot.margin = margin(10, 10, 10, 10)))
-```
-
 ## An Application to Cat Adoptions
 
 ### Data
