@@ -190,7 +190,7 @@ tibble(time = possible_times,
     theme(axis.title = element_blank())
 ``` 
 
-### Weibull {-}
+#### Weibull {-}
 
 Remarkably, simply raising an exponential random variable to a power dramatically improves the flexibility and applicability of the distribution. Let $X \sim \mathrm{Expo}(\lambda)$ and $T = X^{1/\gamma}$ with $\lambda > 0$, $\gamma > 0$. 
 

@@ -142,7 +142,6 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <ul>
 <li class="chapter" data-level="" data-path="index.html"><a href="index.html#discrete"><i class="fa fa-check"></i>Discrete</a></li>
 <li class="chapter" data-level="" data-path="index.html"><a href="index.html#continuous"><i class="fa fa-check"></i>Continuous</a></li>
-<li class="chapter" data-level="" data-path="index.html"><a href="index.html#weibull"><i class="fa fa-check"></i>Weibull</a></li>
 </ul></li>
 </ul></li>
 <li class="chapter" data-level="1" data-path="introduction-to-survival-analysis.html"><a href="introduction-to-survival-analysis.html"><i class="fa fa-check"></i><b>1</b> Introduction to Survival Analysis</a>
@@ -382,9 +381,8 @@ P(X &gt; x) = S(x) = 1 - (1 - e^{-\lambda x}) = e^{-\lambda x}.
 <span id="cb7-12"><a href="index.html#cb7-12"></a><span class="st">    </span><span class="kw">theme</span>(<span class="dt">axis.title =</span> <span class="kw">element_blank</span>())</span></code></pre></div>
 <p><img src="Survival_Analysis_files/figure-html/unnamed-chunk-7-1.png" width="100%" /></p>
 </div>
-</div>
-<div id="weibull" class="section level3">
-<h3>Weibull</h3>
+<div id="weibull" class="section level4">
+<h4>Weibull</h4>
 <p>Remarkably, simply raising an exponential random variable to a power dramatically improves the flexibility and applicability of the distribution. Let <span class="math inline">\(X \sim \mathrm{Expo}(\lambda)\)</span> and <span class="math inline">\(T = X^{1/\gamma}\)</span> with <span class="math inline">\(\lambda &gt; 0\)</span>, <span class="math inline">\(\gamma &gt; 0\)</span>.</p>
 <p>The distribution of <span class="math inline">\(T\)</span> is called the <em>Weibull distribution</em> and we denote this by <span class="math inline">\(T \sim \mathrm{Weib}(\lambda, \gamma)\)</span>. We see that if <span class="math inline">\(\gamma = 1\)</span> then <span class="math inline">\(T\sim \mathrm{Weib}(\lambda, 1) = \mathrm{Expo}(\lambda)\)</span>.</p>
 <p>It is interesting to note that if <span class="math inline">\(T = X^{1/\gamma}\)</span> then <span class="math inline">\(X = T^{\gamma}\)</span>. Thus, if you have a random variable <span class="math inline">\(T\sim \mathrm{Weib}(\lambda, \gamma)\)</span>, then <span class="math inline">\(T^\gamma \sim \mathrm{Expo}(\lambda)\)</span>, and so <span class="math inline">\(T^\gamma\)</span> is memoryless, which can be used to examine whether <span class="math inline">\(T\)</span> is actually <em>Weibull</em> distributed.</p>
@@ -439,6 +437,7 @@ P(T &gt; t) = S(t) = e^{\lambda t^\gamma}.
 <span id="cb10-13"><a href="index.html#cb10-13"></a><span class="st">    </span><span class="kw">theme</span>(<span class="dt">axis.title =</span> <span class="kw">element_blank</span>())</span></code></pre></div>
 <p><img src="Survival_Analysis_files/figure-html/unnamed-chunk-10-1.png" width="100%" /></p>
 
+</div>
 </div>
 </div>
 </div>
