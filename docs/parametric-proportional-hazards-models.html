@@ -51,6 +51,555 @@
 
 
 
+<script>
+/* ========================================================================
+ * Bootstrap: transition.js v3.3.7
+ * http://getbootstrap.com/javascript/#transitions
+ * ========================================================================
+ * Copyright 2011-2016 Twitter, Inc.
+ * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
+ * ======================================================================== */
+
+
++function ($) {
+  'use strict';
+
+  // CSS TRANSITION SUPPORT (Shoutout: http://www.modernizr.com/)
+  // ============================================================
+
+  function transitionEnd() {
+    var el = document.createElement('bootstrap')
+
+    var transEndEventNames = {
+      WebkitTransition : 'webkitTransitionEnd',
+      MozTransition    : 'transitionend',
+      OTransition      : 'oTransitionEnd otransitionend',
+      transition       : 'transitionend'
+    }
+
+    for (var name in transEndEventNames) {
+      if (el.style[name] !== undefined) {
+        return { end: transEndEventNames[name] }
+      }
+    }
+
+    return false // explicit for ie8 (  ._.)
+  }
+
+  // http://blog.alexmaccaw.com/css-transitions
+  $.fn.emulateTransitionEnd = function (duration) {
+    var called = false
+    var $el = this
+    $(this).one('bsTransitionEnd', function () { called = true })
+    var callback = function () { if (!called) $($el).trigger($.support.transition.end) }
+    setTimeout(callback, duration)
+    return this
+  }
+
+  $(function () {
+    $.support.transition = transitionEnd()
+
+    if (!$.support.transition) return
+
+    $.event.special.bsTransitionEnd = {
+      bindType: $.support.transition.end,
+      delegateType: $.support.transition.end,
+      handle: function (e) {
+        if ($(e.target).is(this)) return e.handleObj.handler.apply(this, arguments)
+      }
+    }
+  })
+
+}(jQuery);
+</script>
+<script>
+/* ========================================================================
+ * Bootstrap: collapse.js v3.3.7
+ * http://getbootstrap.com/javascript/#collapse
+ * ========================================================================
+ * Copyright 2011-2016 Twitter, Inc.
+ * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
+ * ======================================================================== */
+
+/* jshint latedef: false */
+
++function ($) {
+  'use strict';
+
+  // COLLAPSE PUBLIC CLASS DEFINITION
+  // ================================
+
+  var Collapse = function (element, options) {
+    this.$element      = $(element)
+    this.options       = $.extend({}, Collapse.DEFAULTS, options)
+    this.$trigger      = $('[data-toggle="collapse"][href="#' + element.id + '"],' +
+                           '[data-toggle="collapse"][data-target="#' + element.id + '"]')
+    this.transitioning = null
+
+    if (this.options.parent) {
+      this.$parent = this.getParent()
+    } else {
+      this.addAriaAndCollapsedClass(this.$element, this.$trigger)
+    }
+
+    if (this.options.toggle) this.toggle()
+  }
+
+  Collapse.VERSION  = '3.3.7'
+
+  Collapse.TRANSITION_DURATION = 350
+
+  Collapse.DEFAULTS = {
+    toggle: true
+  }
+
+  Collapse.prototype.dimension = function () {
+    var hasWidth = this.$element.hasClass('width')
+    return hasWidth ? 'width' : 'height'
+  }
+
+  Collapse.prototype.show = function () {
+    if (this.transitioning || this.$element.hasClass('in')) return
+
+    var activesData
+    var actives = this.$parent && this.$parent.children('.panel').children('.in, .collapsing')
+
+    if (actives && actives.length) {
+      activesData = actives.data('bs.collapse')
+      if (activesData && activesData.transitioning) return
+    }
+
+    var startEvent = $.Event('show.bs.collapse')
+    this.$element.trigger(startEvent)
+    if (startEvent.isDefaultPrevented()) return
+
+    if (actives && actives.length) {
+      Plugin.call(actives, 'hide')
+      activesData || actives.data('bs.collapse', null)
+    }
+
+    var dimension = this.dimension()
+
+    this.$element
+      .removeClass('collapse')
+      .addClass('collapsing')[dimension](0)
+      .attr('aria-expanded', true)
+
+    this.$trigger
+      .removeClass('collapsed')
+      .attr('aria-expanded', true)
+
+    this.transitioning = 1
+
+    var complete = function () {
+      this.$element
+        .removeClass('collapsing')
+        .addClass('collapse in')[dimension]('')
+      this.transitioning = 0
+      this.$element
+        .trigger('shown.bs.collapse')
+    }
+
+    if (!$.support.transition) return complete.call(this)
+
+    var scrollSize = $.camelCase(['scroll', dimension].join('-'))
+
+    this.$element
+      .one('bsTransitionEnd', $.proxy(complete, this))
+      .emulateTransitionEnd(Collapse.TRANSITION_DURATION)[dimension](this.$element[0][scrollSize])
+  }
+
+  Collapse.prototype.hide = function () {
+    if (this.transitioning || !this.$element.hasClass('in')) return
+
+    var startEvent = $.Event('hide.bs.collapse')
+    this.$element.trigger(startEvent)
+    if (startEvent.isDefaultPrevented()) return
+
+    var dimension = this.dimension()
+
+    this.$element[dimension](this.$element[dimension]())[0].offsetHeight
+
+    this.$element
+      .addClass('collapsing')
+      .removeClass('collapse in')
+      .attr('aria-expanded', false)
+
+    this.$trigger
+      .addClass('collapsed')
+      .attr('aria-expanded', false)
+
+    this.transitioning = 1
+
+    var complete = function () {
+      this.transitioning = 0
+      this.$element
+        .removeClass('collapsing')
+        .addClass('collapse')
+        .trigger('hidden.bs.collapse')
+    }
+
+    if (!$.support.transition) return complete.call(this)
+
+    this.$element
+      [dimension](0)
+      .one('bsTransitionEnd', $.proxy(complete, this))
+      .emulateTransitionEnd(Collapse.TRANSITION_DURATION)
+  }
+
+  Collapse.prototype.toggle = function () {
+    this[this.$element.hasClass('in') ? 'hide' : 'show']()
+  }
+
+  Collapse.prototype.getParent = function () {
+    return $(this.options.parent)
+      .find('[data-toggle="collapse"][data-parent="' + this.options.parent + '"]')
+      .each($.proxy(function (i, element) {
+        var $element = $(element)
+        this.addAriaAndCollapsedClass(getTargetFromTrigger($element), $element)
+      }, this))
+      .end()
+  }
+
+  Collapse.prototype.addAriaAndCollapsedClass = function ($element, $trigger) {
+    var isOpen = $element.hasClass('in')
+
+    $element.attr('aria-expanded', isOpen)
+    $trigger
+      .toggleClass('collapsed', !isOpen)
+      .attr('aria-expanded', isOpen)
+  }
+
+  function getTargetFromTrigger($trigger) {
+    var href
+    var target = $trigger.attr('data-target')
+      || (href = $trigger.attr('href')) && href.replace(/.*(?=#[^\s]+$)/, '') // strip for ie7
+
+    return $(target)
+  }
+
+
+  // COLLAPSE PLUGIN DEFINITION
+  // ==========================
+
+  function Plugin(option) {
+    return this.each(function () {
+      var $this   = $(this)
+      var data    = $this.data('bs.collapse')
+      var options = $.extend({}, Collapse.DEFAULTS, $this.data(), typeof option == 'object' && option)
+
+      if (!data && options.toggle && /show|hide/.test(option)) options.toggle = false
+      if (!data) $this.data('bs.collapse', (data = new Collapse(this, options)))
+      if (typeof option == 'string') data[option]()
+    })
+  }
+
+  var old = $.fn.collapse
+
+  $.fn.collapse             = Plugin
+  $.fn.collapse.Constructor = Collapse
+
+
+  // COLLAPSE NO CONFLICT
+  // ====================
+
+  $.fn.collapse.noConflict = function () {
+    $.fn.collapse = old
+    return this
+  }
+
+
+  // COLLAPSE DATA-API
+  // =================
+
+  $(document).on('click.bs.collapse.data-api', '[data-toggle="collapse"]', function (e) {
+    var $this   = $(this)
+
+    if (!$this.attr('data-target')) e.preventDefault()
+
+    var $target = getTargetFromTrigger($this)
+    var data    = $target.data('bs.collapse')
+    var option  = data ? 'toggle' : $this.data()
+
+    Plugin.call($target, option)
+  })
+
+}(jQuery);
+</script>
+<script>
+window.initializeCodeFolding = function(show) {
+
+  // handlers for show-all and hide all
+  $("#rmd-show-all-code").click(function() {
+    $('div.r-code-collapse').each(function() {
+      $(this).collapse('show');
+    });
+  });
+  $("#rmd-hide-all-code").click(function() {
+    $('div.r-code-collapse').each(function() {
+      $(this).collapse('hide');
+    });
+  });
+
+  // index for unique code element ids
+  var currentIndex = 1;
+
+  // select all R code blocks
+  var rCodeBlocks = $('pre.sourceCode, pre.r, pre.python, pre.bash, pre.sql, pre.cpp, pre.stan');
+  rCodeBlocks.each(function() {
+
+    // create a collapsable div to wrap the code in
+    var div = $('<div class="collapse r-code-collapse"></div>');
+    if (show)
+      div.addClass('in');
+    var id = 'rcode-643E0F36' + currentIndex++;
+    div.attr('id', id);
+    $(this).before(div);
+    $(this).detach().appendTo(div);
+
+    // add a show code button right above
+    var showCodeText = $('<span>' + (show ? 'Hide' : 'Code') + '</span>');
+    var showCodeButton = $('<button type="button" class="btn btn-default btn-xs code-folding-btn pull-right"></button>');
+    showCodeButton.append(showCodeText);
+    showCodeButton
+        .attr('data-toggle', 'collapse')
+        .attr('data-target', '#' + id)
+        .attr('aria-expanded', show)
+        .attr('aria-controls', id);
+
+    var buttonRow = $('<div class="row"></div>');
+    var buttonCol = $('<div class="col-md-12"></div>');
+
+    buttonCol.append(showCodeButton);
+    buttonRow.append(buttonCol);
+
+    div.before(buttonRow);
+
+    // update state of button on show/hide
+    div.on('hidden.bs.collapse', function () {
+      showCodeText.text('Code');
+    });
+    div.on('show.bs.collapse', function () {
+      showCodeText.text('Hide');
+    });
+  });
+
+}
+</script>
+<script>
+/* ========================================================================
+ * Bootstrap: dropdown.js v3.3.7
+ * http://getbootstrap.com/javascript/#dropdowns
+ * ========================================================================
+ * Copyright 2011-2016 Twitter, Inc.
+ * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
+ * ======================================================================== */
+
+
++function ($) {
+  'use strict';
+
+  // DROPDOWN CLASS DEFINITION
+  // =========================
+
+  var backdrop = '.dropdown-backdrop'
+  var toggle   = '[data-toggle="dropdown"]'
+  var Dropdown = function (element) {
+    $(element).on('click.bs.dropdown', this.toggle)
+  }
+
+  Dropdown.VERSION = '3.3.7'
+
+  function getParent($this) {
+    var selector = $this.attr('data-target')
+
+    if (!selector) {
+      selector = $this.attr('href')
+      selector = selector && /#[A-Za-z]/.test(selector) && selector.replace(/.*(?=#[^\s]*$)/, '') // strip for ie7
+    }
+
+    var $parent = selector && $(selector)
+
+    return $parent && $parent.length ? $parent : $this.parent()
+  }
+
+  function clearMenus(e) {
+    if (e && e.which === 3) return
+    $(backdrop).remove()
+    $(toggle).each(function () {
+      var $this         = $(this)
+      var $parent       = getParent($this)
+      var relatedTarget = { relatedTarget: this }
+
+      if (!$parent.hasClass('open')) return
+
+      if (e && e.type == 'click' && /input|textarea/i.test(e.target.tagName) && $.contains($parent[0], e.target)) return
+
+      $parent.trigger(e = $.Event('hide.bs.dropdown', relatedTarget))
+
+      if (e.isDefaultPrevented()) return
+
+      $this.attr('aria-expanded', 'false')
+      $parent.removeClass('open').trigger($.Event('hidden.bs.dropdown', relatedTarget))
+    })
+  }
+
+  Dropdown.prototype.toggle = function (e) {
+    var $this = $(this)
+
+    if ($this.is('.disabled, :disabled')) return
+
+    var $parent  = getParent($this)
+    var isActive = $parent.hasClass('open')
+
+    clearMenus()
+
+    if (!isActive) {
+      if ('ontouchstart' in document.documentElement && !$parent.closest('.navbar-nav').length) {
+        // if mobile we use a backdrop because click events don't delegate
+        $(document.createElement('div'))
+          .addClass('dropdown-backdrop')
+          .insertAfter($(this))
+          .on('click', clearMenus)
+      }
+
+      var relatedTarget = { relatedTarget: this }
+      $parent.trigger(e = $.Event('show.bs.dropdown', relatedTarget))
+
+      if (e.isDefaultPrevented()) return
+
+      $this
+        .trigger('focus')
+        .attr('aria-expanded', 'true')
+
+      $parent
+        .toggleClass('open')
+        .trigger($.Event('shown.bs.dropdown', relatedTarget))
+    }
+
+    return false
+  }
+
+  Dropdown.prototype.keydown = function (e) {
+    if (!/(38|40|27|32)/.test(e.which) || /input|textarea/i.test(e.target.tagName)) return
+
+    var $this = $(this)
+
+    e.preventDefault()
+    e.stopPropagation()
+
+    if ($this.is('.disabled, :disabled')) return
+
+    var $parent  = getParent($this)
+    var isActive = $parent.hasClass('open')
+
+    if (!isActive && e.which != 27 || isActive && e.which == 27) {
+      if (e.which == 27) $parent.find(toggle).trigger('focus')
+      return $this.trigger('click')
+    }
+
+    var desc = ' li:not(.disabled):visible a'
+    var $items = $parent.find('.dropdown-menu' + desc)
+
+    if (!$items.length) return
+
+    var index = $items.index(e.target)
+
+    if (e.which == 38 && index > 0)                 index--         // up
+    if (e.which == 40 && index < $items.length - 1) index++         // down
+    if (!~index)                                    index = 0
+
+    $items.eq(index).trigger('focus')
+  }
+
+
+  // DROPDOWN PLUGIN DEFINITION
+  // ==========================
+
+  function Plugin(option) {
+    return this.each(function () {
+      var $this = $(this)
+      var data  = $this.data('bs.dropdown')
+
+      if (!data) $this.data('bs.dropdown', (data = new Dropdown(this)))
+      if (typeof option == 'string') data[option].call($this)
+    })
+  }
+
+  var old = $.fn.dropdown
+
+  $.fn.dropdown             = Plugin
+  $.fn.dropdown.Constructor = Dropdown
+
+
+  // DROPDOWN NO CONFLICT
+  // ====================
+
+  $.fn.dropdown.noConflict = function () {
+    $.fn.dropdown = old
+    return this
+  }
+
+
+  // APPLY TO STANDARD DROPDOWN ELEMENTS
+  // ===================================
+
+  $(document)
+    .on('click.bs.dropdown.data-api', clearMenus)
+    .on('click.bs.dropdown.data-api', '.dropdown form', function (e) { e.stopPropagation() })
+    .on('click.bs.dropdown.data-api', toggle, Dropdown.prototype.toggle)
+    .on('keydown.bs.dropdown.data-api', toggle, Dropdown.prototype.keydown)
+    .on('keydown.bs.dropdown.data-api', '.dropdown-menu', Dropdown.prototype.keydown)
+
+}(jQuery);
+</script>
+<style type="text/css">
+.code-folding-btn { margin-bottom: 4px; }
+.row { display: flex; }
+.collapse { display: none; }
+.in { display:block }
+.pull-right > .dropdown-menu {
+    right: 0;
+    left: auto;
+}
+.open > .dropdown-menu {
+    display: block;
+}
+.dropdown-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    z-index: 1000;
+    display: none;
+    float: left;
+    min-width: 160px;
+    padding: 5px 0;
+    margin: 2px 0 0;
+    font-size: 14px;
+    text-align: left;
+    list-style: none;
+    background-color: #fff;
+    -webkit-background-clip: padding-box;
+    background-clip: padding-box;
+    border: 1px solid #ccc;
+    border: 1px solid rgba(0,0,0,.15);
+    border-radius: 4px;
+    -webkit-box-shadow: 0 6px 12px rgba(0,0,0,.175);
+    box-shadow: 0 6px 12px rgba(0,0,0,.175);
+}
+</style>
+<script>
+$(document).ready(function () {
+  window.initializeCodeFolding("show" === "hide");
+});
+</script>
+
+
+<script>
+document.write('<div class="btn-group pull-right" style="position: absolute; top: 20%; right: 2%; z-index: 200"><button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" data-_extension-text-contrast=""><span>Code</span> <span class="caret"></span></button><ul class="dropdown-menu" style="min-width: 50px;"><li><a id="rmd-show-all-code" href="#">Show</a></li><li><a id="rmd-hide-all-code" href="#">Hide</a></li></ul></div>')
+</script>
+
+
 
 <style type="text/css">
 pre > code.sourceCode { white-space: pre; position: relative; }
@@ -129,7 +678,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <nav role="navigation">
 
 <ul class="summary">
-<li><a href="./">University of Iceland</a></li>
+<li><a href="https://english.hi.is">University of Iceland</a></li>
 
 <li class="divider"></li>
 <li class="chapter" data-level="" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i>Preface</a>
@@ -212,7 +761,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li class="chapter" data-level="6" data-path="time-dependent-variables-and-covariates.html"><a href="time-dependent-variables-and-covariates.html"><i class="fa fa-check"></i><b>6</b> Time-Dependent Variables and Covariates</a></li>
 <li class="chapter" data-level="7" data-path="competing-risks.html"><a href="competing-risks.html"><i class="fa fa-check"></i><b>7</b> Competing Risks</a></li>
 <li class="divider"></li>
-<li><a href="https://github.com/rstudio/bookdown" target="blank">Published with bookdown</a></li>
+<li><a href="https://github.com/bgautijonsson/survivalanalysis" target="blank">Published with bookdown</a></li>
 
 </ul>
 
@@ -321,7 +870,7 @@ h(t) = \lambda
 <div class="sourceCode" id="cb177"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb177-1"><a href="parametric-proportional-hazards-models.html#cb177-1"></a>haz.frame &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<span class="dt">x=</span>fitm<span class="op">$</span>time,<span class="dt">y=</span>fitm<span class="op">$</span>hazard)</span>
 <span id="cb177-2"><a href="parametric-proportional-hazards-models.html#cb177-2"></a><span class="kw">ggplot</span>(haz.frame,<span class="kw">aes</span>(x,y))<span class="op">+</span><span class="kw">geom_line</span>()<span class="op">+</span><span class="kw">geom_hline</span>(<span class="dt">yintercept =</span> <span class="kw">exp</span>(<span class="kw">coef</span>(fit0)),<span class="dt">lty=</span><span class="dv">2</span>)<span class="op">+</span></span>
 <span id="cb177-3"><a href="parametric-proportional-hazards-models.html#cb177-3"></a><span class="st">  </span><span class="kw">xlab</span>(<span class="st">&quot;t (years)&quot;</span>) <span class="op">+</span><span class="st"> </span><span class="kw">ylab</span>(<span class="st">&quot;h(t)&quot;</span>)</span></code></pre></div>
-<p><img src="Survival_Analysis_files/figure-html/unnamed-chunk-102-1.png" width="100%" /></p>
+<p><img src="Survival_Analysis_files/figure-html/unnamed-chunk-103-1.png" width="100%" /></p>
 <p>It seems that the rate is increasing along with the duration of the follow up. The cohort is getting older as time passes and there is no renewal of younger men into the cohort.</p>
 <p>The survival function for an exponential distribution is
 <span class="math display">\[
@@ -380,7 +929,7 @@ shows that it is more natural to model the hazard or the cumulative hazard, and 
 <span id="cb182-7"><a href="parametric-proportional-hazards-models.html#cb182-7"></a><span class="st">  </span><span class="kw">xlab</span>(<span class="st">&quot;Time (t)&quot;</span>) <span class="op">+</span></span>
 <span id="cb182-8"><a href="parametric-proportional-hazards-models.html#cb182-8"></a><span class="st">  </span><span class="kw">ylab</span>(<span class="st">&quot;Cumulative Hazard H(t)&quot;</span>) <span class="op">+</span></span>
 <span id="cb182-9"><a href="parametric-proportional-hazards-models.html#cb182-9"></a><span class="st">  </span><span class="kw">scale_colour_manual</span>(<span class="st">&quot;Estimate&quot;</span>,<span class="dt">values =</span> <span class="kw">c</span>(<span class="st">&quot;blue&quot;</span>,<span class="st">&quot;green&quot;</span>),<span class="dt">labels=</span><span class="kw">c</span>(<span class="st">&quot;N-Aalen&quot;</span>,<span class="st">&quot;Exponential&quot;</span>))</span></code></pre></div>
-<p><img src="Survival_Analysis_files/figure-html/unnamed-chunk-105-1.png" width="100%" /></p>
+<p><img src="Survival_Analysis_files/figure-html/unnamed-chunk-106-1.png" width="100%" /></p>
 <p>For completeness we also compare the survival curves based on the Nelson-Aalen estimate (<span class="math inline">\(S(t)=exp(-H(t)\)</span>), the Kaplan Meier estimate, and the exponential estimate (<span class="math inline">\(S(t)=exp(-\lambda t)\)</span>).</p>
 <div class="sourceCode" id="cb183"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb183-1"><a href="parametric-proportional-hazards-models.html#cb183-1"></a>kmfit &lt;-<span class="st"> </span><span class="kw">survfit</span>(<span class="kw">Surv</span>(time169y,chd69)<span class="op">~</span><span class="dv">1</span>,<span class="dt">data=</span>wcgs)</span>
 <span id="cb183-2"><a href="parametric-proportional-hazards-models.html#cb183-2"></a>km.frame &lt;-<span class="st"> </span><span class="kw">as.data.frame</span>(<span class="kw">summary</span>(kmfit)[<span class="dv">2</span><span class="op">:</span><span class="dv">10</span>])</span>
@@ -390,7 +939,7 @@ shows that it is more natural to model the hazard or the cumulative hazard, and 
 <span id="cb183-6"><a href="parametric-proportional-hazards-models.html#cb183-6"></a><span class="st">  </span><span class="kw">xlab</span>(<span class="st">&quot;Time (t)&quot;</span>) <span class="op">+</span></span>
 <span id="cb183-7"><a href="parametric-proportional-hazards-models.html#cb183-7"></a><span class="st">  </span><span class="kw">ylab</span>(<span class="st">&quot;Survival S(t)&quot;</span>) <span class="op">+</span></span>
 <span id="cb183-8"><a href="parametric-proportional-hazards-models.html#cb183-8"></a><span class="st">  </span><span class="kw">scale_colour_manual</span>(<span class="st">&quot;Estimate&quot;</span>,<span class="dt">values =</span> <span class="kw">c</span>(<span class="st">&quot;blue&quot;</span>,<span class="st">&quot;green&quot;</span>,<span class="st">&quot;red&quot;</span>),<span class="dt">labels=</span><span class="kw">c</span>(<span class="st">&quot;N-Aalen&quot;</span>,<span class="st">&quot;Exponential&quot;</span>,<span class="st">&quot;K-M&quot;</span>))</span></code></pre></div>
-<p><img src="Survival_Analysis_files/figure-html/unnamed-chunk-106-1.png" width="100%" /></p>
+<p><img src="Survival_Analysis_files/figure-html/unnamed-chunk-107-1.png" width="100%" /></p>
 </div>
 <div id="the-weibull-survival-function" class="section level2">
 <h2><span class="header-section-number">5.3</span> The Weibull survival function</h2>
@@ -449,7 +998,7 @@ Note that <span class="math inline">\(a\)</span> and <span class="math inline">\
 <span id="cb184-15"><a href="parametric-proportional-hazards-models.html#cb184-15"></a><span class="kw">text</span>(<span class="dv">6</span>,<span class="kw">jitter</span>(<span class="kw">mean</span>(<span class="kw">h</span>(x))),<span class="dt">labels=</span><span class="kw">paste</span>(<span class="st">&quot;a =&quot;</span>,a,<span class="st">&quot; b =&quot;</span>,b))</span>
 <span id="cb184-16"><a href="parametric-proportional-hazards-models.html#cb184-16"></a><span class="kw">plot</span>(x,<span class="kw">H</span>(x),<span class="dt">type=</span><span class="st">&quot;l&quot;</span>,<span class="dt">xlab=</span><span class="st">&quot;t&quot;</span>,<span class="dt">ylab=</span><span class="st">&quot;H(t)=1/b^a * t ^ a&quot;</span>)</span>
 <span id="cb184-17"><a href="parametric-proportional-hazards-models.html#cb184-17"></a><span class="kw">text</span>(<span class="dv">6</span>,<span class="kw">jitter</span>(<span class="kw">mean</span>(<span class="kw">H</span>(x))),<span class="dt">labels=</span><span class="kw">paste</span>(<span class="st">&quot;a =&quot;</span>,a,<span class="st">&quot; b =&quot;</span>,b))</span></code></pre></div>
-<p><img src="Survival_Analysis_files/figure-html/unnamed-chunk-107-1.png" width="100%" /></p>
+<p><img src="Survival_Analysis_files/figure-html/unnamed-chunk-108-1.png" width="100%" /></p>
 <div class="sourceCode" id="cb185"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb185-1"><a href="parametric-proportional-hazards-models.html#cb185-1"></a><span class="kw">par</span>(<span class="dt">mfrow=</span><span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">1</span>))</span></code></pre></div>
 </div>
 </div>
@@ -508,7 +1057,7 @@ H(t) = H_0(t) = \exp(-5.1141) t ^ {\exp(0.2622523)}
 <span id="cb194-5"><a href="parametric-proportional-hazards-models.html#cb194-5"></a>h &lt;-<span class="st"> </span><span class="cf">function</span>(x) {mu<span class="op">*</span>alpha<span class="op">*</span>x<span class="op">^</span>(alpha<span class="dv">-1</span>)}</span>
 <span id="cb194-6"><a href="parametric-proportional-hazards-models.html#cb194-6"></a><span class="kw">lines</span>(x,<span class="kw">h</span>(x),<span class="dt">col=</span><span class="st">&quot;blue&quot;</span>)</span>
 <span id="cb194-7"><a href="parametric-proportional-hazards-models.html#cb194-7"></a><span class="kw">abline</span>(<span class="dt">h=</span><span class="kw">exp</span>(<span class="kw">coef</span>(fit.e.ph)),<span class="dt">lty=</span><span class="dv">2</span>,<span class="dt">col=</span><span class="st">&quot;green&quot;</span>)</span></code></pre></div>
-<p><img src="Survival_Analysis_files/figure-html/unnamed-chunk-110-1.png" width="100%" /></p>
+<p><img src="Survival_Analysis_files/figure-html/unnamed-chunk-111-1.png" width="100%" /></p>
 <p>It is easier to estimate the <em>cumulative hazard</em> or <span class="math inline">\(H(t)\)</span> because it is a smooth function. The hazard function can be unstable when there are few events. Therefore it is more common to compare cumulative hazards function between models.</p>
 <p>We plot the <em>Nelons-Aalen</em> non-parametric estimate of the cumulative hazard. Then we superimpose the Weibull estimate, and the exponential estimate. Here the exponential is <span class="math inline">\(H_E(t) = \lambda t\)</span> and the Weibull is <span class="math inline">\(H_W(t) = \mu t ^ \alpha\)</span>.</p>
 <div class="sourceCode" id="cb195"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb195-1"><a href="parametric-proportional-hazards-models.html#cb195-1"></a>nelson.aalen &lt;-<span class="st"> </span><span class="kw">nelsonaalen</span>(wcgs,time169y,chd69)</span>
@@ -519,7 +1068,7 @@ H(t) = H_0(t) = \exp(-5.1141) t ^ {\exp(0.2622523)}
 <span id="cb195-6"><a href="parametric-proportional-hazards-models.html#cb195-6"></a>H &lt;-<span class="st"> </span><span class="cf">function</span>(x) {mu<span class="op">*</span>x<span class="op">^</span>alpha}</span>
 <span id="cb195-7"><a href="parametric-proportional-hazards-models.html#cb195-7"></a><span class="kw">lines</span>(x,<span class="kw">H</span>(x),<span class="dt">col=</span><span class="st">&quot;green&quot;</span>,<span class="dt">lwd=</span><span class="dv">2</span>)</span>
 <span id="cb195-8"><a href="parametric-proportional-hazards-models.html#cb195-8"></a><span class="kw">lines</span>(x,<span class="kw">exp</span>(<span class="kw">coef</span>(fit.e.ph))<span class="op">*</span>x,<span class="dt">lwd=</span><span class="dv">2</span>,<span class="dt">lty=</span><span class="dv">2</span>,<span class="dt">col=</span><span class="st">&quot;blue&quot;</span>)</span></code></pre></div>
-<p><img src="Survival_Analysis_files/figure-html/unnamed-chunk-111-1.png" width="100%" /></p>
+<p><img src="Survival_Analysis_files/figure-html/unnamed-chunk-112-1.png" width="100%" /></p>
 <p>The Weibull version is much closer to the Nelson-Aalen estimate than the exponential. Note that the exponential is a special case of the Weibull when <span class="math inline">\(\alpha=1\)</span>.</p>
 <p>Therefore if <em>log(shape)=0</em> or <em>shape=1</em>, then the Weibull becomes an exponential. From the output we see the test for <em>log(shape)=0</em>. We can also compare <em>log-likelihood</em> values, and show that below.</p>
 <p>We can use a likelihood ratio test to compare the Weibull and the exponential. The difference is 1 parameter so we compare the 2 times difference in log likelihoods to the chi-square distribution with 1 degree of freedom.</p>
@@ -702,7 +1251,7 @@ HR = h_A(t) / h_B(t) = \exp(\beta_1).
 <span id="cb217-14"><a href="parametric-proportional-hazards-models.html#cb217-14"></a>H0 &lt;-<span class="st"> </span><span class="cf">function</span>(x) {mu<span class="op">*</span>x<span class="op">^</span>alpha}</span>
 <span id="cb217-15"><a href="parametric-proportional-hazards-models.html#cb217-15"></a><span class="kw">lines</span>(x,<span class="kw">H0</span>(x),<span class="dt">col=</span><span class="st">&quot;blue&quot;</span>,<span class="dt">lwd=</span><span class="dv">2</span>)</span>
 <span id="cb217-16"><a href="parametric-proportional-hazards-models.html#cb217-16"></a><span class="kw">lines</span>(x,<span class="kw">H0</span>(x) <span class="op">*</span><span class="st"> </span><span class="kw">exp</span>(<span class="fl">0.857</span>),<span class="dt">col=</span><span class="st">&quot;red&quot;</span>,<span class="dt">lwd=</span><span class="dv">2</span>)</span></code></pre></div>
-<p><img src="Survival_Analysis_files/figure-html/unnamed-chunk-120-1.png" width="100%" /></p>
+<p><img src="Survival_Analysis_files/figure-html/unnamed-chunk-121-1.png" width="100%" /></p>
 <p>Now use age adjustment (with respect to age 46). Then agec=0.</p>
 <div class="sourceCode" id="cb218"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb218-1"><a href="parametric-proportional-hazards-models.html#cb218-1"></a>wcgsA &lt;-<span class="st"> </span><span class="kw">subset</span>(wcgs,dibpat0f<span class="op">==</span><span class="st">&quot;A&quot;</span>)</span>
 <span id="cb218-2"><a href="parametric-proportional-hazards-models.html#cb218-2"></a>wcgsB &lt;-<span class="st"> </span><span class="kw">subset</span>(wcgs,dibpat0f<span class="op">==</span><span class="st">&quot;B&quot;</span>)</span>
@@ -719,7 +1268,7 @@ HR = h_A(t) / h_B(t) = \exp(\beta_1).
 <span id="cb218-13"><a href="parametric-proportional-hazards-models.html#cb218-13"></a>H0 &lt;-<span class="st"> </span><span class="cf">function</span>(x) {mu<span class="op">*</span>x<span class="op">^</span>alpha}</span>
 <span id="cb218-14"><a href="parametric-proportional-hazards-models.html#cb218-14"></a><span class="kw">lines</span>(x,<span class="kw">H0</span>(x) ,<span class="dt">col=</span><span class="st">&quot;blue&quot;</span>,<span class="dt">lwd=</span><span class="dv">2</span>)</span>
 <span id="cb218-15"><a href="parametric-proportional-hazards-models.html#cb218-15"></a><span class="kw">lines</span>(x,<span class="kw">H0</span>(x) <span class="op">*</span><span class="st"> </span><span class="kw">exp</span>(<span class="fl">0.795</span>),<span class="dt">col=</span><span class="st">&quot;red&quot;</span>,<span class="dt">lwd=</span><span class="dv">2</span>)</span></code></pre></div>
-<p><img src="Survival_Analysis_files/figure-html/unnamed-chunk-121-1.png" width="100%" /></p>
+<p><img src="Survival_Analysis_files/figure-html/unnamed-chunk-122-1.png" width="100%" /></p>
 <p>Note that the red line is below the un-adjusted estimate. This is the effect of the age adjustment. The A group was slightly older. The difference between the groups has now been adjusted for age.</p>
 <p>Mean age of the <em>A</em> and <em>B</em> types:</p>
 <div class="sourceCode" id="cb219"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb219-1"><a href="parametric-proportional-hazards-models.html#cb219-1"></a><span class="kw">tapply</span>(wcgs<span class="op">$</span>age0,wcgs<span class="op">$</span>dibpat0f,mean)</span></code></pre></div>
@@ -739,7 +1288,7 @@ HR = h_A(t) / h_B(t) = \exp(\beta_1).
 <span id="cb221-11"><a href="parametric-proportional-hazards-models.html#cb221-11"></a><span class="co">#  H_W(t)</span></span>
 <span id="cb221-12"><a href="parametric-proportional-hazards-models.html#cb221-12"></a><span class="kw">lines</span>(x,<span class="kw">H0</span>(x) <span class="op">*</span><span class="st"> </span><span class="kw">exp</span>(<span class="fl">0.066</span><span class="op">*</span><span class="dv">4</span>),<span class="dt">col=</span><span class="st">&quot;blue&quot;</span>,<span class="dt">lwd=</span><span class="dv">2</span>)</span>
 <span id="cb221-13"><a href="parametric-proportional-hazards-models.html#cb221-13"></a><span class="kw">lines</span>(x,<span class="kw">H0</span>(x) <span class="op">*</span><span class="st"> </span><span class="kw">exp</span>(<span class="fl">0.795</span> <span class="op">+</span><span class="st"> </span><span class="fl">0.066</span><span class="op">*</span><span class="dv">4</span>),<span class="dt">col=</span><span class="st">&quot;red&quot;</span>,<span class="dt">lwd=</span><span class="dv">2</span>)</span></code></pre></div>
-<p><img src="Survival_Analysis_files/figure-html/unnamed-chunk-123-1.png" width="100%" /></p>
+<p><img src="Survival_Analysis_files/figure-html/unnamed-chunk-124-1.png" width="100%" /></p>
 <p>The lines are now above the un-adjusted lines.</p>
 <p>These are so called model based survival curves. We prefer conditional or standardized survival curves. However, this has not been implemented for <em>flexsurvreg</em>.</p>
 </div>
@@ -832,7 +1381,7 @@ HR = h_A(t) / h_B(t) = \exp(\beta_1).
 <span id="cb234-17"><a href="parametric-proportional-hazards-models.html#cb234-17"></a>coxB &lt;-<span class="st"> </span><span class="kw">survfit</span>(fit.cox.ph.m2,<span class="dt">newdata =</span> <span class="kw">data.frame</span>(<span class="dt">agec=</span><span class="dv">0</span>,<span class="dt">dibpat0f=</span><span class="st">&quot;B&quot;</span>))</span>
 <span id="cb234-18"><a href="parametric-proportional-hazards-models.html#cb234-18"></a><span class="kw">lines</span>(coxB<span class="op">$</span>time,coxB<span class="op">$</span>cumhaz,<span class="dt">col=</span><span class="st">&quot;green&quot;</span>)</span>
 <span id="cb234-19"><a href="parametric-proportional-hazards-models.html#cb234-19"></a><span class="kw">lines</span>(coxB<span class="op">$</span>time,coxB<span class="op">$</span>cumhaz<span class="op">*</span><span class="kw">exp</span>(<span class="kw">coef</span>(fit.cox.ph.m2)[<span class="dv">1</span>]),<span class="dt">col=</span><span class="st">&quot;orange&quot;</span>)</span></code></pre></div>
-<p><img src="Survival_Analysis_files/figure-html/unnamed-chunk-130-1.png" width="100%" /></p>
+<p><img src="Survival_Analysis_files/figure-html/unnamed-chunk-131-1.png" width="100%" /></p>
 </div>
 <div id="estimating-risk" class="section level2">
 <h2><span class="header-section-number">5.8</span> Estimating risk</h2>
@@ -952,8 +1501,7 @@ gitbook.start({
 "toc": {
 "collapse": "subsection"
 },
-"code_folding": "hide",
-"theme": "unitedw"
+"code_folding": "hide"
 });
 });
 </script>

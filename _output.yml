@@ -3,12 +3,13 @@ bookdown::gitbook:
   config:
     toc:
       before: |
-        <li><a href="./">University of Iceland</a></li>
+        <li><a href="https://english.hi.is">University of Iceland</a></li>
       after: |
-        <li><a href="https://github.com/rstudio/bookdown" target="blank">Published with bookdown</a></li>
+        <li><a href="https://github.com/bgautijonsson/survivalanalysis" target="blank">Published with bookdown</a></li>
     download: ["pdf", "epub"]
     code_folding: hide
-    theme: unitedw
+  includes:
+      in_header: header.html
 bookdown::pdf_book:
   includes:
     in_header: preamble.tex

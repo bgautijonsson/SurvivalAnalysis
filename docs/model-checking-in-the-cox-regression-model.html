@@ -51,6 +51,555 @@
 
 
 
+<script>
+/* ========================================================================
+ * Bootstrap: transition.js v3.3.7
+ * http://getbootstrap.com/javascript/#transitions
+ * ========================================================================
+ * Copyright 2011-2016 Twitter, Inc.
+ * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
+ * ======================================================================== */
+
+
++function ($) {
+  'use strict';
+
+  // CSS TRANSITION SUPPORT (Shoutout: http://www.modernizr.com/)
+  // ============================================================
+
+  function transitionEnd() {
+    var el = document.createElement('bootstrap')
+
+    var transEndEventNames = {
+      WebkitTransition : 'webkitTransitionEnd',
+      MozTransition    : 'transitionend',
+      OTransition      : 'oTransitionEnd otransitionend',
+      transition       : 'transitionend'
+    }
+
+    for (var name in transEndEventNames) {
+      if (el.style[name] !== undefined) {
+        return { end: transEndEventNames[name] }
+      }
+    }
+
+    return false // explicit for ie8 (  ._.)
+  }
+
+  // http://blog.alexmaccaw.com/css-transitions
+  $.fn.emulateTransitionEnd = function (duration) {
+    var called = false
+    var $el = this
+    $(this).one('bsTransitionEnd', function () { called = true })
+    var callback = function () { if (!called) $($el).trigger($.support.transition.end) }
+    setTimeout(callback, duration)
+    return this
+  }
+
+  $(function () {
+    $.support.transition = transitionEnd()
+
+    if (!$.support.transition) return
+
+    $.event.special.bsTransitionEnd = {
+      bindType: $.support.transition.end,
+      delegateType: $.support.transition.end,
+      handle: function (e) {
+        if ($(e.target).is(this)) return e.handleObj.handler.apply(this, arguments)
+      }
+    }
+  })
+
+}(jQuery);
+</script>
+<script>
+/* ========================================================================
+ * Bootstrap: collapse.js v3.3.7
+ * http://getbootstrap.com/javascript/#collapse
+ * ========================================================================
+ * Copyright 2011-2016 Twitter, Inc.
+ * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
+ * ======================================================================== */
+
+/* jshint latedef: false */
+
++function ($) {
+  'use strict';
+
+  // COLLAPSE PUBLIC CLASS DEFINITION
+  // ================================
+
+  var Collapse = function (element, options) {
+    this.$element      = $(element)
+    this.options       = $.extend({}, Collapse.DEFAULTS, options)
+    this.$trigger      = $('[data-toggle="collapse"][href="#' + element.id + '"],' +
+                           '[data-toggle="collapse"][data-target="#' + element.id + '"]')
+    this.transitioning = null
+
+    if (this.options.parent) {
+      this.$parent = this.getParent()
+    } else {
+      this.addAriaAndCollapsedClass(this.$element, this.$trigger)
+    }
+
+    if (this.options.toggle) this.toggle()
+  }
+
+  Collapse.VERSION  = '3.3.7'
+
+  Collapse.TRANSITION_DURATION = 350
+
+  Collapse.DEFAULTS = {
+    toggle: true
+  }
+
+  Collapse.prototype.dimension = function () {
+    var hasWidth = this.$element.hasClass('width')
+    return hasWidth ? 'width' : 'height'
+  }
+
+  Collapse.prototype.show = function () {
+    if (this.transitioning || this.$element.hasClass('in')) return
+
+    var activesData
+    var actives = this.$parent && this.$parent.children('.panel').children('.in, .collapsing')
+
+    if (actives && actives.length) {
+      activesData = actives.data('bs.collapse')
+      if (activesData && activesData.transitioning) return
+    }
+
+    var startEvent = $.Event('show.bs.collapse')
+    this.$element.trigger(startEvent)
+    if (startEvent.isDefaultPrevented()) return
+
+    if (actives && actives.length) {
+      Plugin.call(actives, 'hide')
+      activesData || actives.data('bs.collapse', null)
+    }
+
+    var dimension = this.dimension()
+
+    this.$element
+      .removeClass('collapse')
+      .addClass('collapsing')[dimension](0)
+      .attr('aria-expanded', true)
+
+    this.$trigger
+      .removeClass('collapsed')
+      .attr('aria-expanded', true)
+
+    this.transitioning = 1
+
+    var complete = function () {
+      this.$element
+        .removeClass('collapsing')
+        .addClass('collapse in')[dimension]('')
+      this.transitioning = 0
+      this.$element
+        .trigger('shown.bs.collapse')
+    }
+
+    if (!$.support.transition) return complete.call(this)
+
+    var scrollSize = $.camelCase(['scroll', dimension].join('-'))
+
+    this.$element
+      .one('bsTransitionEnd', $.proxy(complete, this))
+      .emulateTransitionEnd(Collapse.TRANSITION_DURATION)[dimension](this.$element[0][scrollSize])
+  }
+
+  Collapse.prototype.hide = function () {
+    if (this.transitioning || !this.$element.hasClass('in')) return
+
+    var startEvent = $.Event('hide.bs.collapse')
+    this.$element.trigger(startEvent)
+    if (startEvent.isDefaultPrevented()) return
+
+    var dimension = this.dimension()
+
+    this.$element[dimension](this.$element[dimension]())[0].offsetHeight
+
+    this.$element
+      .addClass('collapsing')
+      .removeClass('collapse in')
+      .attr('aria-expanded', false)
+
+    this.$trigger
+      .addClass('collapsed')
+      .attr('aria-expanded', false)
+
+    this.transitioning = 1
+
+    var complete = function () {
+      this.transitioning = 0
+      this.$element
+        .removeClass('collapsing')
+        .addClass('collapse')
+        .trigger('hidden.bs.collapse')
+    }
+
+    if (!$.support.transition) return complete.call(this)
+
+    this.$element
+      [dimension](0)
+      .one('bsTransitionEnd', $.proxy(complete, this))
+      .emulateTransitionEnd(Collapse.TRANSITION_DURATION)
+  }
+
+  Collapse.prototype.toggle = function () {
+    this[this.$element.hasClass('in') ? 'hide' : 'show']()
+  }
+
+  Collapse.prototype.getParent = function () {
+    return $(this.options.parent)
+      .find('[data-toggle="collapse"][data-parent="' + this.options.parent + '"]')
+      .each($.proxy(function (i, element) {
+        var $element = $(element)
+        this.addAriaAndCollapsedClass(getTargetFromTrigger($element), $element)
+      }, this))
+      .end()
+  }
+
+  Collapse.prototype.addAriaAndCollapsedClass = function ($element, $trigger) {
+    var isOpen = $element.hasClass('in')
+
+    $element.attr('aria-expanded', isOpen)
+    $trigger
+      .toggleClass('collapsed', !isOpen)
+      .attr('aria-expanded', isOpen)
+  }
+
+  function getTargetFromTrigger($trigger) {
+    var href
+    var target = $trigger.attr('data-target')
+      || (href = $trigger.attr('href')) && href.replace(/.*(?=#[^\s]+$)/, '') // strip for ie7
+
+    return $(target)
+  }
+
+
+  // COLLAPSE PLUGIN DEFINITION
+  // ==========================
+
+  function Plugin(option) {
+    return this.each(function () {
+      var $this   = $(this)
+      var data    = $this.data('bs.collapse')
+      var options = $.extend({}, Collapse.DEFAULTS, $this.data(), typeof option == 'object' && option)
+
+      if (!data && options.toggle && /show|hide/.test(option)) options.toggle = false
+      if (!data) $this.data('bs.collapse', (data = new Collapse(this, options)))
+      if (typeof option == 'string') data[option]()
+    })
+  }
+
+  var old = $.fn.collapse
+
+  $.fn.collapse             = Plugin
+  $.fn.collapse.Constructor = Collapse
+
+
+  // COLLAPSE NO CONFLICT
+  // ====================
+
+  $.fn.collapse.noConflict = function () {
+    $.fn.collapse = old
+    return this
+  }
+
+
+  // COLLAPSE DATA-API
+  // =================
+
+  $(document).on('click.bs.collapse.data-api', '[data-toggle="collapse"]', function (e) {
+    var $this   = $(this)
+
+    if (!$this.attr('data-target')) e.preventDefault()
+
+    var $target = getTargetFromTrigger($this)
+    var data    = $target.data('bs.collapse')
+    var option  = data ? 'toggle' : $this.data()
+
+    Plugin.call($target, option)
+  })
+
+}(jQuery);
+</script>
+<script>
+window.initializeCodeFolding = function(show) {
+
+  // handlers for show-all and hide all
+  $("#rmd-show-all-code").click(function() {
+    $('div.r-code-collapse').each(function() {
+      $(this).collapse('show');
+    });
+  });
+  $("#rmd-hide-all-code").click(function() {
+    $('div.r-code-collapse').each(function() {
+      $(this).collapse('hide');
+    });
+  });
+
+  // index for unique code element ids
+  var currentIndex = 1;
+
+  // select all R code blocks
+  var rCodeBlocks = $('pre.sourceCode, pre.r, pre.python, pre.bash, pre.sql, pre.cpp, pre.stan');
+  rCodeBlocks.each(function() {
+
+    // create a collapsable div to wrap the code in
+    var div = $('<div class="collapse r-code-collapse"></div>');
+    if (show)
+      div.addClass('in');
+    var id = 'rcode-643E0F36' + currentIndex++;
+    div.attr('id', id);
+    $(this).before(div);
+    $(this).detach().appendTo(div);
+
+    // add a show code button right above
+    var showCodeText = $('<span>' + (show ? 'Hide' : 'Code') + '</span>');
+    var showCodeButton = $('<button type="button" class="btn btn-default btn-xs code-folding-btn pull-right"></button>');
+    showCodeButton.append(showCodeText);
+    showCodeButton
+        .attr('data-toggle', 'collapse')
+        .attr('data-target', '#' + id)
+        .attr('aria-expanded', show)
+        .attr('aria-controls', id);
+
+    var buttonRow = $('<div class="row"></div>');
+    var buttonCol = $('<div class="col-md-12"></div>');
+
+    buttonCol.append(showCodeButton);
+    buttonRow.append(buttonCol);
+
+    div.before(buttonRow);
+
+    // update state of button on show/hide
+    div.on('hidden.bs.collapse', function () {
+      showCodeText.text('Code');
+    });
+    div.on('show.bs.collapse', function () {
+      showCodeText.text('Hide');
+    });
+  });
+
+}
+</script>
+<script>
+/* ========================================================================
+ * Bootstrap: dropdown.js v3.3.7
+ * http://getbootstrap.com/javascript/#dropdowns
+ * ========================================================================
+ * Copyright 2011-2016 Twitter, Inc.
+ * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
+ * ======================================================================== */
+
+
++function ($) {
+  'use strict';
+
+  // DROPDOWN CLASS DEFINITION
+  // =========================
+
+  var backdrop = '.dropdown-backdrop'
+  var toggle   = '[data-toggle="dropdown"]'
+  var Dropdown = function (element) {
+    $(element).on('click.bs.dropdown', this.toggle)
+  }
+
+  Dropdown.VERSION = '3.3.7'
+
+  function getParent($this) {
+    var selector = $this.attr('data-target')
+
+    if (!selector) {
+      selector = $this.attr('href')
+      selector = selector && /#[A-Za-z]/.test(selector) && selector.replace(/.*(?=#[^\s]*$)/, '') // strip for ie7
+    }
+
+    var $parent = selector && $(selector)
+
+    return $parent && $parent.length ? $parent : $this.parent()
+  }
+
+  function clearMenus(e) {
+    if (e && e.which === 3) return
+    $(backdrop).remove()
+    $(toggle).each(function () {
+      var $this         = $(this)
+      var $parent       = getParent($this)
+      var relatedTarget = { relatedTarget: this }
+
+      if (!$parent.hasClass('open')) return
+
+      if (e && e.type == 'click' && /input|textarea/i.test(e.target.tagName) && $.contains($parent[0], e.target)) return
+
+      $parent.trigger(e = $.Event('hide.bs.dropdown', relatedTarget))
+
+      if (e.isDefaultPrevented()) return
+
+      $this.attr('aria-expanded', 'false')
+      $parent.removeClass('open').trigger($.Event('hidden.bs.dropdown', relatedTarget))
+    })
+  }
+
+  Dropdown.prototype.toggle = function (e) {
+    var $this = $(this)
+
+    if ($this.is('.disabled, :disabled')) return
+
+    var $parent  = getParent($this)
+    var isActive = $parent.hasClass('open')
+
+    clearMenus()
+
+    if (!isActive) {
+      if ('ontouchstart' in document.documentElement && !$parent.closest('.navbar-nav').length) {
+        // if mobile we use a backdrop because click events don't delegate
+        $(document.createElement('div'))
+          .addClass('dropdown-backdrop')
+          .insertAfter($(this))
+          .on('click', clearMenus)
+      }
+
+      var relatedTarget = { relatedTarget: this }
+      $parent.trigger(e = $.Event('show.bs.dropdown', relatedTarget))
+
+      if (e.isDefaultPrevented()) return
+
+      $this
+        .trigger('focus')
+        .attr('aria-expanded', 'true')
+
+      $parent
+        .toggleClass('open')
+        .trigger($.Event('shown.bs.dropdown', relatedTarget))
+    }
+
+    return false
+  }
+
+  Dropdown.prototype.keydown = function (e) {
+    if (!/(38|40|27|32)/.test(e.which) || /input|textarea/i.test(e.target.tagName)) return
+
+    var $this = $(this)
+
+    e.preventDefault()
+    e.stopPropagation()
+
+    if ($this.is('.disabled, :disabled')) return
+
+    var $parent  = getParent($this)
+    var isActive = $parent.hasClass('open')
+
+    if (!isActive && e.which != 27 || isActive && e.which == 27) {
+      if (e.which == 27) $parent.find(toggle).trigger('focus')
+      return $this.trigger('click')
+    }
+
+    var desc = ' li:not(.disabled):visible a'
+    var $items = $parent.find('.dropdown-menu' + desc)
+
+    if (!$items.length) return
+
+    var index = $items.index(e.target)
+
+    if (e.which == 38 && index > 0)                 index--         // up
+    if (e.which == 40 && index < $items.length - 1) index++         // down
+    if (!~index)                                    index = 0
+
+    $items.eq(index).trigger('focus')
+  }
+
+
+  // DROPDOWN PLUGIN DEFINITION
+  // ==========================
+
+  function Plugin(option) {
+    return this.each(function () {
+      var $this = $(this)
+      var data  = $this.data('bs.dropdown')
+
+      if (!data) $this.data('bs.dropdown', (data = new Dropdown(this)))
+      if (typeof option == 'string') data[option].call($this)
+    })
+  }
+
+  var old = $.fn.dropdown
+
+  $.fn.dropdown             = Plugin
+  $.fn.dropdown.Constructor = Dropdown
+
+
+  // DROPDOWN NO CONFLICT
+  // ====================
+
+  $.fn.dropdown.noConflict = function () {
+    $.fn.dropdown = old
+    return this
+  }
+
+
+  // APPLY TO STANDARD DROPDOWN ELEMENTS
+  // ===================================
+
+  $(document)
+    .on('click.bs.dropdown.data-api', clearMenus)
+    .on('click.bs.dropdown.data-api', '.dropdown form', function (e) { e.stopPropagation() })
+    .on('click.bs.dropdown.data-api', toggle, Dropdown.prototype.toggle)
+    .on('keydown.bs.dropdown.data-api', toggle, Dropdown.prototype.keydown)
+    .on('keydown.bs.dropdown.data-api', '.dropdown-menu', Dropdown.prototype.keydown)
+
+}(jQuery);
+</script>
+<style type="text/css">
+.code-folding-btn { margin-bottom: 4px; }
+.row { display: flex; }
+.collapse { display: none; }
+.in { display:block }
+.pull-right > .dropdown-menu {
+    right: 0;
+    left: auto;
+}
+.open > .dropdown-menu {
+    display: block;
+}
+.dropdown-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    z-index: 1000;
+    display: none;
+    float: left;
+    min-width: 160px;
+    padding: 5px 0;
+    margin: 2px 0 0;
+    font-size: 14px;
+    text-align: left;
+    list-style: none;
+    background-color: #fff;
+    -webkit-background-clip: padding-box;
+    background-clip: padding-box;
+    border: 1px solid #ccc;
+    border: 1px solid rgba(0,0,0,.15);
+    border-radius: 4px;
+    -webkit-box-shadow: 0 6px 12px rgba(0,0,0,.175);
+    box-shadow: 0 6px 12px rgba(0,0,0,.175);
+}
+</style>
+<script>
+$(document).ready(function () {
+  window.initializeCodeFolding("show" === "hide");
+});
+</script>
+
+
+<script>
+document.write('<div class="btn-group pull-right" style="position: absolute; top: 20%; right: 2%; z-index: 200"><button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" data-_extension-text-contrast=""><span>Code</span> <span class="caret"></span></button><ul class="dropdown-menu" style="min-width: 50px;"><li><a id="rmd-show-all-code" href="#">Show</a></li><li><a id="rmd-hide-all-code" href="#">Hide</a></li></ul></div>')
+</script>
+
+
 
 <style type="text/css">
 pre > code.sourceCode { white-space: pre; position: relative; }
@@ -129,7 +678,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <nav role="navigation">
 
 <ul class="summary">
-<li><a href="./">University of Iceland</a></li>
+<li><a href="https://english.hi.is">University of Iceland</a></li>
 
 <li class="divider"></li>
 <li class="chapter" data-level="" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i>Preface</a>
@@ -212,7 +761,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li class="chapter" data-level="6" data-path="time-dependent-variables-and-covariates.html"><a href="time-dependent-variables-and-covariates.html"><i class="fa fa-check"></i><b>6</b> Time-Dependent Variables and Covariates</a></li>
 <li class="chapter" data-level="7" data-path="competing-risks.html"><a href="competing-risks.html"><i class="fa fa-check"></i><b>7</b> Competing Risks</a></li>
 <li class="divider"></li>
-<li><a href="https://github.com/rstudio/bookdown" target="blank">Published with bookdown</a></li>
+<li><a href="https://github.com/bgautijonsson/survivalanalysis" target="blank">Published with bookdown</a></li>
 
 </ul>
 
@@ -257,7 +806,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <h2><span class="header-section-number">4.1</span> Einfalt Kaplan Meier</h2>
 <div class="sourceCode" id="cb134"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb134-1"><a href="model-checking-in-the-cox-regression-model.html#cb134-1"></a>m1 &lt;-<span class="st"> </span><span class="kw">survfit</span>(<span class="kw">Surv</span>(time, status) <span class="op">~</span><span class="st"> </span><span class="dv">1</span>, <span class="dt">data =</span> d_<span class="dv">1</span>_<span class="dv">3</span>)</span></code></pre></div>
 <div class="sourceCode" id="cb135"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb135-1"><a href="model-checking-in-the-cox-regression-model.html#cb135-1"></a><span class="kw">plot</span>(m1)</span></code></pre></div>
-<p><img src="Survival_Analysis_files/figure-html/unnamed-chunk-77-1.png" width="100%" /></p>
+<p><img src="Survival_Analysis_files/figure-html/unnamed-chunk-78-1.png" width="100%" /></p>
 <div class="sourceCode" id="cb136"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb136-1"><a href="model-checking-in-the-cox-regression-model.html#cb136-1"></a>total_time &lt;-<span class="st"> </span><span class="kw">sum</span>(d_<span class="dv">1</span>_<span class="dv">3</span><span class="op">$</span>time)</span>
 <span id="cb136-2"><a href="model-checking-in-the-cox-regression-model.html#cb136-2"></a>num_events &lt;-<span class="st"> </span><span class="kw">sum</span>(d_<span class="dv">1</span>_<span class="dv">3</span><span class="op">$</span>status)</span>
 <span id="cb136-3"><a href="model-checking-in-the-cox-regression-model.html#cb136-3"></a>lambda &lt;-<span class="st"> </span>num_events <span class="op">/</span><span class="st"> </span>total_time</span>
@@ -274,10 +823,10 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <pre><code>## [1] 0.5263909</code></pre>
 <div class="sourceCode" id="cb142"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb142-1"><a href="model-checking-in-the-cox-regression-model.html#cb142-1"></a>t &lt;-<span class="st"> </span><span class="kw">seq</span>(<span class="dv">0</span>, <span class="dv">90</span>)</span>
 <span id="cb142-2"><a href="model-checking-in-the-cox-regression-model.html#cb142-2"></a><span class="kw">plot</span>(t, <span class="kw">s</span>(t), <span class="dt">type =</span> <span class="st">&quot;l&quot;</span>)</span></code></pre></div>
-<p><img src="Survival_Analysis_files/figure-html/unnamed-chunk-81-1.png" width="100%" /></p>
+<p><img src="Survival_Analysis_files/figure-html/unnamed-chunk-82-1.png" width="100%" /></p>
 <div class="sourceCode" id="cb143"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb143-1"><a href="model-checking-in-the-cox-regression-model.html#cb143-1"></a><span class="kw">plot</span>(m1)</span>
 <span id="cb143-2"><a href="model-checking-in-the-cox-regression-model.html#cb143-2"></a><span class="kw">lines</span>(<span class="dt">x =</span> t, <span class="dt">y =</span> <span class="kw">s</span>(t), <span class="dt">col =</span> <span class="st">&quot;blue&quot;</span>)</span></code></pre></div>
-<p><img src="Survival_Analysis_files/figure-html/unnamed-chunk-82-1.png" width="100%" /></p>
+<p><img src="Survival_Analysis_files/figure-html/unnamed-chunk-83-1.png" width="100%" /></p>
 <p><span class="math display">\[
 S(t) = e^{-\lambda t}
 \]</span></p>
@@ -289,7 +838,7 @@ H(t) = \int_0^t h(t)dt = \sum_{i=1}^n h(t)(t_{i + 1} - t_i)
 \]</span></p>
 <div class="sourceCode" id="cb144"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb144-1"><a href="model-checking-in-the-cox-regression-model.html#cb144-1"></a><span class="kw">plot</span>(m1, <span class="dt">fun =</span> <span class="st">&quot;cumhaz&quot;</span>)</span>
 <span id="cb144-2"><a href="model-checking-in-the-cox-regression-model.html#cb144-2"></a><span class="kw">lines</span>(t, lambda <span class="op">*</span><span class="st"> </span>t, <span class="dt">col =</span> <span class="st">&quot;blue&quot;</span>)</span></code></pre></div>
-<p><img src="Survival_Analysis_files/figure-html/unnamed-chunk-83-1.png" width="100%" /></p>
+<p><img src="Survival_Analysis_files/figure-html/unnamed-chunk-84-1.png" width="100%" /></p>
 </div>
 <div id="leifar-í-cox" class="section level2">
 <h2><span class="header-section-number">4.3</span> Leifar í Cox</h2>
@@ -322,14 +871,14 @@ H(t) = \int_0^t h(t)dt = \sum_{i=1}^n h(t)(t_{i + 1} - t_i)
 <pre><code>## [1] 1</code></pre>
 <div class="sourceCode" id="cb153"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb153-1"><a href="model-checking-in-the-cox-regression-model.html#cb153-1"></a><span class="kw">plot</span>(m_coxsnell, <span class="dt">fun =</span> <span class="st">&quot;cumhaz&quot;</span>)</span>
 <span id="cb153-2"><a href="model-checking-in-the-cox-regression-model.html#cb153-2"></a><span class="kw">abline</span>(<span class="dt">a =</span> <span class="dv">0</span>, <span class="dt">b =</span> <span class="dv">1</span>, <span class="dt">col =</span> <span class="st">&quot;blue&quot;</span>)</span></code></pre></div>
-<p><img src="Survival_Analysis_files/figure-html/unnamed-chunk-89-1.png" width="100%" /></p>
+<p><img src="Survival_Analysis_files/figure-html/unnamed-chunk-90-1.png" width="100%" /></p>
 </div>
 <div id="survminer" class="section level2">
 <h2><span class="header-section-number">4.4</span> Survminer</h2>
 <div class="sourceCode" id="cb154"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb154-1"><a href="model-checking-in-the-cox-regression-model.html#cb154-1"></a><span class="kw">ggcoxdiagnostics</span>(m_<span class="dv">4</span>_<span class="dv">5</span>)</span></code></pre></div>
-<p><img src="Survival_Analysis_files/figure-html/unnamed-chunk-90-1.png" width="100%" /></p>
-<div class="sourceCode" id="cb155"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb155-1"><a href="model-checking-in-the-cox-regression-model.html#cb155-1"></a><span class="kw">ggcoxfunctional</span>(m_<span class="dv">4</span>_<span class="dv">5</span>)</span></code></pre></div>
 <p><img src="Survival_Analysis_files/figure-html/unnamed-chunk-91-1.png" width="100%" /></p>
+<div class="sourceCode" id="cb155"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb155-1"><a href="model-checking-in-the-cox-regression-model.html#cb155-1"></a><span class="kw">ggcoxfunctional</span>(m_<span class="dv">4</span>_<span class="dv">5</span>)</span></code></pre></div>
+<p><img src="Survival_Analysis_files/figure-html/unnamed-chunk-92-1.png" width="100%" /></p>
 <div class="sourceCode" id="cb156"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb156-1"><a href="model-checking-in-the-cox-regression-model.html#cb156-1"></a>m_null &lt;-<span class="st"> </span><span class="kw">coxph</span>(<span class="kw">Surv</span>(time, status) <span class="op">~</span><span class="st"> </span><span class="dv">1</span>, <span class="dt">data =</span> d_<span class="dv">1</span>_<span class="dv">3</span>)</span>
 <span id="cb156-2"><a href="model-checking-in-the-cox-regression-model.html#cb156-2"></a>resid_martin &lt;-<span class="st"> </span><span class="kw">residuals</span>(m_null, <span class="dt">type =</span> <span class="st">&quot;martingale&quot;</span>)</span>
 <span id="cb156-3"><a href="model-checking-in-the-cox-regression-model.html#cb156-3"></a>d_<span class="dv">1</span>_<span class="dv">3</span><span class="op">$</span>resid_martin &lt;-<span class="st"> </span>resid_martin</span>
@@ -338,7 +887,7 @@ H(t) = \int_0^t h(t)dt = \sum_{i=1}^n h(t)(t_{i + 1} - t_i)
 <span id="cb156-6"><a href="model-checking-in-the-cox-regression-model.html#cb156-6"></a><span class="st">  </span><span class="kw">geom_point</span>() <span class="op">+</span></span>
 <span id="cb156-7"><a href="model-checking-in-the-cox-regression-model.html#cb156-7"></a><span class="st">  </span><span class="kw">geom_smooth</span>(<span class="dt">method =</span> <span class="st">&quot;loess&quot;</span>) <span class="op">+</span></span>
 <span id="cb156-8"><a href="model-checking-in-the-cox-regression-model.html#cb156-8"></a><span class="st">  </span><span class="kw">scale_x_log10</span>()</span></code></pre></div>
-<p><img src="Survival_Analysis_files/figure-html/unnamed-chunk-92-1.png" width="100%" /></p>
+<p><img src="Survival_Analysis_files/figure-html/unnamed-chunk-93-1.png" width="100%" /></p>
 <div class="sourceCode" id="cb157"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb157-1"><a href="model-checking-in-the-cox-regression-model.html#cb157-1"></a>d_<span class="dv">1</span>_<span class="dv">3</span> <span class="op">%&gt;%</span><span class="st"> </span></span>
 <span id="cb157-2"><a href="model-checking-in-the-cox-regression-model.html#cb157-2"></a><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">log_bun =</span> <span class="kw">log</span>(bun)) <span class="op">%&gt;%</span><span class="st"> </span></span>
 <span id="cb157-3"><a href="model-checking-in-the-cox-regression-model.html#cb157-3"></a><span class="st">  </span><span class="kw">gather</span>(variable, value, log_bun, bun, hb) <span class="op">%&gt;%</span><span class="st"> </span></span>
@@ -346,16 +895,16 @@ H(t) = \int_0^t h(t)dt = \sum_{i=1}^n h(t)(t_{i + 1} - t_i)
 <span id="cb157-5"><a href="model-checking-in-the-cox-regression-model.html#cb157-5"></a><span class="st">  </span><span class="kw">geom_point</span>() <span class="op">+</span></span>
 <span id="cb157-6"><a href="model-checking-in-the-cox-regression-model.html#cb157-6"></a><span class="st">  </span><span class="kw">geom_smooth</span>() <span class="op">+</span></span>
 <span id="cb157-7"><a href="model-checking-in-the-cox-regression-model.html#cb157-7"></a><span class="st">  </span><span class="kw">facet_wrap</span>(<span class="st">&quot;variable&quot;</span>, <span class="dt">scales =</span> <span class="st">&quot;free&quot;</span>)</span></code></pre></div>
-<p><img src="Survival_Analysis_files/figure-html/unnamed-chunk-93-1.png" width="100%" /></p>
+<p><img src="Survival_Analysis_files/figure-html/unnamed-chunk-94-1.png" width="100%" /></p>
 <div id="deviance-residuals" class="section level3">
 <h3><span class="header-section-number">4.4.1</span> Deviance residuals</h3>
 <div class="sourceCode" id="cb158"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb158-1"><a href="model-checking-in-the-cox-regression-model.html#cb158-1"></a><span class="kw">ggcoxdiagnostics</span>(m_<span class="dv">4</span>_<span class="dv">5</span>, <span class="dt">type =</span> <span class="st">&quot;deviance&quot;</span>)</span></code></pre></div>
-<p><img src="Survival_Analysis_files/figure-html/unnamed-chunk-94-1.png" width="100%" /></p>
+<p><img src="Survival_Analysis_files/figure-html/unnamed-chunk-95-1.png" width="100%" /></p>
 </div>
 <div id="dfbeta" class="section level3">
 <h3><span class="header-section-number">4.4.2</span> dfbeta</h3>
 <div class="sourceCode" id="cb159"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb159-1"><a href="model-checking-in-the-cox-regression-model.html#cb159-1"></a><span class="kw">ggcoxdiagnostics</span>(m_<span class="dv">4</span>_<span class="dv">5</span>, <span class="dt">type =</span> <span class="st">&quot;dfbeta&quot;</span>)</span></code></pre></div>
-<p><img src="Survival_Analysis_files/figure-html/unnamed-chunk-95-1.png" width="100%" /></p>
+<p><img src="Survival_Analysis_files/figure-html/unnamed-chunk-96-1.png" width="100%" /></p>
 
 </div>
 </div>
@@ -412,8 +961,7 @@ gitbook.start({
 "toc": {
 "collapse": "subsection"
 },
-"code_folding": "hide",
-"theme": "unitedw"
+"code_folding": "hide"
 });
 });
 </script>
