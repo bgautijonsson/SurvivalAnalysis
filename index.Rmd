@@ -1,10 +1,9 @@
 --- 
-title: "Lecture Notes on Survival Analysis"
-subtitle: "Course taught at the University of Iceland"
+title: "Survival Analysis (LÝÐ079F)" 
 author: 
-- "Thor Aspelund"
-- "Brynjólfur Gauti Jónsson"
-date: "`r Sys.Date()`"
+- Thor Aspelund, Brynjólfur Gauti Jónsson
+- University of Iceland
+address: University of Iceland
 site: bookdown::bookdown_site
 documentclass: book
 bibliography: [book.bib, packages.bib]
@@ -14,8 +13,6 @@ description: "This is a collection of lectures notes from the course at Universi
 ---
 
 # Preface {-}
-
-***
 
 ## The Book {-}
 
