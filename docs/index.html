@@ -683,11 +683,12 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li class="divider"></li>
 <li class="chapter" data-level="" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i>Preface</a>
 <ul>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html#about-the-book"><i class="fa fa-check"></i>About the book</a></li>
 <li class="chapter" data-level="" data-path="index.html"><a href="index.html#software"><i class="fa fa-check"></i>Software</a></li>
 <li class="chapter" data-level="" data-path="index.html"><a href="index.html#setup-in-rstudio"><i class="fa fa-check"></i>Setup in RStudio</a></li>
 <li class="chapter" data-level="" data-path="index.html"><a href="index.html#some-probability-distributions"><i class="fa fa-check"></i>Some Probability Distributions</a>
 <ul>
-<li class="chapter" data-level="" data-path="index.html"><a href="index.html#discrete"><i class="fa fa-check"></i>Discrete</a></li>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html#discrete-distributions"><i class="fa fa-check"></i>Discrete Distributions</a></li>
 <li class="chapter" data-level="" data-path="index.html"><a href="index.html#continuous"><i class="fa fa-check"></i>Continuous</a></li>
 </ul></li>
 </ul></li>
@@ -788,6 +789,20 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <h1>Preface</h1>
 <p>These lecture notes are a companion for a course <a href="https://ugla.hi.is/kennsluskra/index.php?tab=nam&amp;chapter=namskeid&amp;id=70762120200">(LÝÐ079F)</a> based on the book <a href="https://www.crcpress.com/Modelling-Survival-Data-in-Medical-Research/Collett/p/book/9781439856789">Modelling Survival Data in Medical Research by David Collett</a></p>
 <p><img src="https://images.tandf.co.uk/common/jackets/amazon/978143985/9781439856789.jpg" style="display: block; margin: auto;" /></p>
+<div id="about-the-book" class="section level2">
+<h2>About the book</h2>
+<div class="rethinking">
+<p>
+In blocks like this you might see text that talks more about intuition and how you can look at things from more than one side.
+</p>
+</div>
+<p><br></p>
+<div class="overthinking">
+<p>
+In these blocks we will write more in-depth info about something. These boxes might be skipped on the first reading.
+</p>
+</div>
+</div>
 <div id="software" class="section level2">
 <h2>Software</h2>
 <p>We will primarily be writing R code using the RStudio GUI.</p>
@@ -807,8 +822,13 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </div>
 <div id="some-probability-distributions" class="section level2">
 <h2>Some Probability Distributions</h2>
-<div id="discrete" class="section level3">
-<h3>Discrete</h3>
+<div id="discrete-distributions" class="section level3">
+<h3>Discrete Distributions</h3>
+<div class="overthinking">
+<p>
+Discrete random variables can only take on a <em>countable</em> set of outcomes. This means that there should be a one-to-one mapping from the positive integers to the possible outcomes. In short, you can count all the possible outcomes <em>(though they might be infinitely many)</em>. Continuous random variables <em>(height for example)</em> can take on uncountably many values. Between any two continuous numbers there exist infinitely many other numbers, this is not true for discrete numbers. There are no other integers between 2 and 3 for example.
+</p>
+</div>
 <div id="bernoulli" class="section level4">
 <h4>Bernoulli</h4>
 <p>A random variable <span class="math inline">\(X\)</span> is said to have the <em>Bernoulli distribution</em> with parameter <span class="math inline">\(p\)</span> if</p>
@@ -829,7 +849,7 @@ P(X=0) &amp;= 1 - p, \quad \text{where } 0 &lt; p &lt; 1.
 <span id="cb2-8"><a href="index.html#cb2-8"></a><span class="st">    </span><span class="kw">scale_y_continuous</span>(<span class="dt">labels =</span> percent) <span class="op">+</span></span>
 <span id="cb2-9"><a href="index.html#cb2-9"></a><span class="st">    </span><span class="kw">labs</span>(<span class="dt">title =</span> <span class="st">&quot;Example Bernoulli variable&quot;</span>) <span class="op">+</span></span>
 <span id="cb2-10"><a href="index.html#cb2-10"></a><span class="st">    </span><span class="kw">theme</span>(<span class="dt">axis.title =</span> <span class="kw">element_blank</span>())</span></code></pre></div>
-<p><img src="Survival_Analysis_files/figure-html/unnamed-chunk-3-1.png" width="100%" /></p>
+<p><img src="Survival_Analysis_files/figure-html/unnamed-chunk-6-1.png" width="100%" /></p>
 </div>
 <div id="binomial" class="section level4">
 <h4>Binomial</h4>
@@ -846,12 +866,16 @@ P(X=0) &amp;= 1 - p, \quad \text{where } 0 &lt; p &lt; 1.
 <span id="cb3-10"><a href="index.html#cb3-10"></a><span class="st">    </span><span class="kw">labs</span>(<span class="dt">title =</span> <span class="st">&quot;Coin toss experiment&quot;</span>,</span>
 <span id="cb3-11"><a href="index.html#cb3-11"></a>         <span class="dt">subtitle =</span> <span class="st">&quot;Probability of obtaining X heads in 100 tosses&quot;</span>) <span class="op">+</span></span>
 <span id="cb3-12"><a href="index.html#cb3-12"></a><span class="st">    </span><span class="kw">theme</span>(<span class="dt">axis.title =</span> <span class="kw">element_blank</span>())</span></code></pre></div>
-<p><img src="Survival_Analysis_files/figure-html/unnamed-chunk-4-1.png" width="100%" /></p>
+<p><img src="Survival_Analysis_files/figure-html/unnamed-chunk-7-1.png" width="100%" /></p>
 </div>
 <div id="geometric" class="section level4">
 <h4>Geometric</h4>
 <p>Consider a sequence of independent Bernoulli trials, each with the same success probability, <span class="math inline">\(p\)</span>, and imagine performing trials until a success occurs. Let <span class="math inline">\(X\)</span> be the number of <em>failures</em> before the first successful trial. Then <span class="math inline">\(X\)</span> has the <em>Geometric distribution</em> with parameter <span class="math inline">\(p\)</span>, denoted by <span class="math inline">\(X \sim \mathrm{Geom}(p)\)</span>.</p>
-<p>This is an important distribution for survival analysis. Imagine that on each day there is a constant probability, <span class="math inline">\(p\)</span>, that some event happens. Then the number of days before the event happens follows a <span class="math inline">\(\mathrm{Geom}(p)\)</span> distribution. Note that the <em>Geometric</em> distribution only models whole numbers, so we cannot wait for <span class="math inline">\(4.5\)</span> days when working with this distribution.</p>
+<div class="rethinking">
+<p>
+This is an important distribution for survival analysis. Imagine that on each day there is a constant probability, <span class="math inline"><span class="math inline">\(p\)</span></span>, that some event happens. Then the number of days before the event happens follows a <span class="math inline"><span class="math inline">\(\mathrm{Geom}(p)\)</span></span> distribution. Note that the <em>Geometric</em> distribution only models whole numbers, so we cannot wait for <span class="math inline"><span class="math inline">\(4.5\)</span></span> days when working with this distribution.
+</p>
+</div>
 <p>Textbooks and statistical software differ in whether the <em>Geometric distribution</em> models the number trials <em>before</em> the success or the number of trials <em>including</em> the success. The number of trials <em>including</em> the success is sometimes called the <em>First Success distribution</em>.</p>
 <div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="index.html#cb4-1"></a>risk &lt;-<span class="st"> </span><span class="fl">0.10</span></span>
 <span id="cb4-2"><a href="index.html#cb4-2"></a>possible_times &lt;-<span class="st"> </span><span class="kw">seq</span>(<span class="dv">0</span>, <span class="dv">50</span>)</span>
@@ -865,7 +889,7 @@ P(X=0) &amp;= 1 - p, \quad \text{where } 0 &lt; p &lt; 1.
 <span id="cb4-10"><a href="index.html#cb4-10"></a><span class="st">    </span><span class="kw">labs</span>(<span class="dt">title =</span> <span class="st">&quot;Geometic experiment&quot;</span>,</span>
 <span id="cb4-11"><a href="index.html#cb4-11"></a>         <span class="dt">subtitle =</span> <span class="st">&quot;Probability of waiting X days until event happens with risk 10%&quot;</span>) <span class="op">+</span></span>
 <span id="cb4-12"><a href="index.html#cb4-12"></a><span class="st">    </span><span class="kw">theme</span>(<span class="dt">axis.title =</span> <span class="kw">element_blank</span>())</span></code></pre></div>
-<p><img src="Survival_Analysis_files/figure-html/unnamed-chunk-5-1.png" width="100%" /></p>
+<p><img src="Survival_Analysis_files/figure-html/unnamed-chunk-9-1.png" width="100%" /></p>
 </div>
 </div>
 <div id="continuous" class="section level3">
@@ -883,7 +907,11 @@ P(X \leq x) =F(x) = 1 - e^{-\lambda x}.
 <p><span class="math display">\[
 P(X &gt; x) = S(x) = 1 - (1 - e^{-\lambda x}) = e^{-\lambda x}.
 \]</span></p>
-<p>The <em>Exponential distribution</em> is unique in that it is <em>memoryless</em>. This means that the time until an event occurs is independent of how long you have been waiting for it to happen. It is obvious that the time until your bus arrives is not <em>exponentially</em> distributed since the waiting time is not the same whether you have waited <span class="math inline">\(0\)</span>, <span class="math inline">\(5\)</span> or <span class="math inline">\(15\)</span> minutes <em>(although sometimes it may feel that way!)</em>. Waiting times that are not memoryless are better modeled with other distributions.</p>
+<div class="rethinking">
+<p>
+The <em>Exponential distribution</em> is unique in that it is <em>memoryless</em>. This means that the time until an event occurs is independent of how long you have been waiting for it to happen. It is obvious that the time until your bus arrives is not <em>exponentially</em> distributed since the waiting time is not the same whether you have waited <span class="math inline"><span class="math inline">\(0\)</span></span>, <span class="math inline"><span class="math inline">\(5\)</span></span> or <span class="math inline"><span class="math inline">\(15\)</span></span> minutes <em>(although sometimes it may feel that way!)</em>. Waiting times that are not memoryless are better modeled with other distributions.
+</p>
+</div>
 <div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="index.html#cb5-1"></a>rate &lt;-<span class="st"> </span><span class="fl">0.1</span></span>
 <span id="cb5-2"><a href="index.html#cb5-2"></a>possible_times &lt;-<span class="st"> </span><span class="kw">seq</span>(<span class="dv">0</span>, <span class="dv">50</span>)</span>
 <span id="cb5-3"><a href="index.html#cb5-3"></a>density_of_times &lt;-<span class="st"> </span><span class="kw">dexp</span>(possible_times, rate)</span>
@@ -895,7 +923,7 @@ P(X &gt; x) = S(x) = 1 - (1 - e^{-\lambda x}) = e^{-\lambda x}.
 <span id="cb5-9"><a href="index.html#cb5-9"></a><span class="st">    </span><span class="kw">labs</span>(<span class="dt">title =</span> <span class="st">&quot;Exponential experiment: Density&quot;</span>,</span>
 <span id="cb5-10"><a href="index.html#cb5-10"></a>         <span class="dt">subtitle =</span> <span class="st">&quot;Density of waiting X amount of time until event happens with rate 0.1 per unit of time.</span><span class="ch">\n</span><span class="st">Since an exponential waiting time can take on any values we don&#39;t see a step function but a smooth curve.&quot;</span>) <span class="op">+</span></span>
 <span id="cb5-11"><a href="index.html#cb5-11"></a><span class="st">    </span><span class="kw">theme</span>(<span class="dt">axis.title =</span> <span class="kw">element_blank</span>())</span></code></pre></div>
-<p><img src="Survival_Analysis_files/figure-html/unnamed-chunk-6-1.png" width="100%" /></p>
+<p><img src="Survival_Analysis_files/figure-html/unnamed-chunk-11-1.png" width="100%" /></p>
 <div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="index.html#cb6-1"></a>rate &lt;-<span class="st"> </span><span class="fl">0.1</span></span>
 <span id="cb6-2"><a href="index.html#cb6-2"></a>possible_times &lt;-<span class="st"> </span><span class="kw">seq</span>(<span class="dv">0</span>, <span class="dv">50</span>)</span>
 <span id="cb6-3"><a href="index.html#cb6-3"></a>risk_function &lt;-<span class="st"> </span><span class="kw">pexp</span>(possible_times, rate)</span>
@@ -908,7 +936,7 @@ P(X &gt; x) = S(x) = 1 - (1 - e^{-\lambda x}) = e^{-\lambda x}.
 <span id="cb6-10"><a href="index.html#cb6-10"></a><span class="st">    </span><span class="kw">labs</span>(<span class="dt">title =</span> <span class="st">&quot;Exponential experiment: Risk function&quot;</span>,</span>
 <span id="cb6-11"><a href="index.html#cb6-11"></a>         <span class="dt">subtitle =</span> <span class="st">&quot;Probability of waiting X OR LESS amount of time until event happens with rate 0.1 per unit of time.&quot;</span>) <span class="op">+</span></span>
 <span id="cb6-12"><a href="index.html#cb6-12"></a><span class="st">    </span><span class="kw">theme</span>(<span class="dt">axis.title =</span> <span class="kw">element_blank</span>())</span></code></pre></div>
-<p><img src="Survival_Analysis_files/figure-html/unnamed-chunk-7-1.png" width="100%" /></p>
+<p><img src="Survival_Analysis_files/figure-html/unnamed-chunk-12-1.png" width="100%" /></p>
 <div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="index.html#cb7-1"></a>rate &lt;-<span class="st"> </span><span class="fl">0.1</span></span>
 <span id="cb7-2"><a href="index.html#cb7-2"></a>possible_times &lt;-<span class="st"> </span><span class="kw">seq</span>(<span class="dv">0</span>, <span class="dv">50</span>)</span>
 <span id="cb7-3"><a href="index.html#cb7-3"></a>survival_function &lt;-<span class="st"> </span><span class="dv">1</span> <span class="op">-</span><span class="st"> </span><span class="kw">pexp</span>(possible_times, rate)</span>
@@ -921,13 +949,17 @@ P(X &gt; x) = S(x) = 1 - (1 - e^{-\lambda x}) = e^{-\lambda x}.
 <span id="cb7-10"><a href="index.html#cb7-10"></a><span class="st">    </span><span class="kw">labs</span>(<span class="dt">title =</span> <span class="st">&quot;Exponential experiment: Survival function&quot;</span>,</span>
 <span id="cb7-11"><a href="index.html#cb7-11"></a>         <span class="dt">subtitle =</span> <span class="st">&quot;Probability of waiting MORE THAN X amount of time until event happens with rate 0.1 per unit of time.&quot;</span>) <span class="op">+</span></span>
 <span id="cb7-12"><a href="index.html#cb7-12"></a><span class="st">    </span><span class="kw">theme</span>(<span class="dt">axis.title =</span> <span class="kw">element_blank</span>())</span></code></pre></div>
-<p><img src="Survival_Analysis_files/figure-html/unnamed-chunk-8-1.png" width="100%" /></p>
+<p><img src="Survival_Analysis_files/figure-html/unnamed-chunk-13-1.png" width="100%" /></p>
 </div>
 <div id="weibull" class="section level4">
 <h4>Weibull</h4>
 <p>Remarkably, simply raising an exponential random variable to a power dramatically improves the flexibility and applicability of the distribution. Let <span class="math inline">\(X \sim \mathrm{Expo}(\lambda)\)</span> and <span class="math inline">\(T = X^{1/\gamma}\)</span> with <span class="math inline">\(\lambda &gt; 0\)</span>, <span class="math inline">\(\gamma &gt; 0\)</span>.</p>
 <p>The distribution of <span class="math inline">\(T\)</span> is called the <em>Weibull distribution</em> and we denote this by <span class="math inline">\(T \sim \mathrm{Weib}(\lambda, \gamma)\)</span>. We see that if <span class="math inline">\(\gamma = 1\)</span> then <span class="math inline">\(T\sim \mathrm{Weib}(\lambda, 1) = \mathrm{Expo}(\lambda)\)</span>.</p>
-<p>It is interesting to note that if <span class="math inline">\(T = X^{1/\gamma}\)</span> then <span class="math inline">\(X = T^{\gamma}\)</span>. Thus, if you have a random variable <span class="math inline">\(T\sim \mathrm{Weib}(\lambda, \gamma)\)</span>, then <span class="math inline">\(T^\gamma \sim \mathrm{Expo}(\lambda)\)</span>, and so <span class="math inline">\(T^\gamma\)</span> is memoryless, which can be used to examine whether <span class="math inline">\(T\)</span> is actually <em>Weibull</em> distributed.</p>
+<div class="rethinking">
+<p>
+It is interesting to note that if <span class="math inline"><span class="math inline">\(T = X^{1/\gamma}\)</span></span> then <span class="math inline"><span class="math inline">\(X = T^{\gamma}\)</span></span>. Thus, if you have a random variable <span class="math inline"><span class="math inline">\(T\sim \mathrm{Weib}(\lambda, \gamma)\)</span></span>, then <span class="math inline"><span class="math inline">\(T^\gamma \sim \mathrm{Expo}(\lambda)\)</span></span>, and so <span class="math inline"><span class="math inline">\(T^\gamma\)</span></span> is memoryless, which can be used to examine whether <span class="math inline"><span class="math inline">\(T\)</span></span> is actually <em>Weibull</em> distributed.
+</p>
+</div>
 <p>The <em>risk function</em> for a <em>Weibull</em> random variable is</p>
 <p><span class="math display">\[
 P(T \leq t) = F(t) = 1 - e^{\lambda t^{\gamma}}
@@ -949,7 +981,7 @@ P(T &gt; t) = S(t) = e^{\lambda t^\gamma}.
 <span id="cb8-10"><a href="index.html#cb8-10"></a><span class="st">    </span><span class="kw">labs</span>(<span class="dt">title =</span> <span class="st">&quot;Weibull experiment: Density&quot;</span>,</span>
 <span id="cb8-11"><a href="index.html#cb8-11"></a>         <span class="dt">subtitle =</span> <span class="st">&quot;Density of waiting X amount of time until event happens with rate 0.1 per unit of time and shape parameter 2.</span><span class="ch">\n</span><span class="st">This means that the square root of the survival time follows an exponential distribution&quot;</span>) <span class="op">+</span></span>
 <span id="cb8-12"><a href="index.html#cb8-12"></a><span class="st">    </span><span class="kw">theme</span>(<span class="dt">axis.title =</span> <span class="kw">element_blank</span>())</span></code></pre></div>
-<p><img src="Survival_Analysis_files/figure-html/unnamed-chunk-9-1.png" width="100%" /></p>
+<p><img src="Survival_Analysis_files/figure-html/unnamed-chunk-15-1.png" width="100%" /></p>
 <div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="index.html#cb9-1"></a>rate &lt;-<span class="st"> </span><span class="fl">0.1</span></span>
 <span id="cb9-2"><a href="index.html#cb9-2"></a>shape &lt;-<span class="st"> </span><span class="dv">2</span></span>
 <span id="cb9-3"><a href="index.html#cb9-3"></a>possible_times &lt;-<span class="st"> </span><span class="kw">seq</span>(<span class="dv">0</span>, <span class="dv">50</span>, <span class="dt">length.out =</span> <span class="dv">1000</span>)</span>
@@ -963,7 +995,7 @@ P(T &gt; t) = S(t) = e^{\lambda t^\gamma}.
 <span id="cb9-11"><a href="index.html#cb9-11"></a><span class="st">    </span><span class="kw">labs</span>(<span class="dt">title =</span> <span class="st">&quot;Weibull experiment: Risk function&quot;</span>,</span>
 <span id="cb9-12"><a href="index.html#cb9-12"></a>         <span class="dt">subtitle =</span> <span class="st">&quot;Probability of waiting X OR LESS amount of time until event happens with rate 0.1 per unit of time and shape parameter 2.</span><span class="ch">\n</span><span class="st">This means that the square root of the survival time follows an exponential distribution&quot;</span>) <span class="op">+</span></span>
 <span id="cb9-13"><a href="index.html#cb9-13"></a><span class="st">    </span><span class="kw">theme</span>(<span class="dt">axis.title =</span> <span class="kw">element_blank</span>())</span></code></pre></div>
-<p><img src="Survival_Analysis_files/figure-html/unnamed-chunk-10-1.png" width="100%" /></p>
+<p><img src="Survival_Analysis_files/figure-html/unnamed-chunk-16-1.png" width="100%" /></p>
 <div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="index.html#cb10-1"></a>rate &lt;-<span class="st"> </span><span class="fl">0.1</span></span>
 <span id="cb10-2"><a href="index.html#cb10-2"></a>shape &lt;-<span class="st"> </span><span class="dv">2</span></span>
 <span id="cb10-3"><a href="index.html#cb10-3"></a>possible_times &lt;-<span class="st"> </span><span class="kw">seq</span>(<span class="dv">0</span>, <span class="dv">50</span>, <span class="dt">length.out =</span> <span class="dv">1000</span>)</span>
@@ -977,7 +1009,7 @@ P(T &gt; t) = S(t) = e^{\lambda t^\gamma}.
 <span id="cb10-11"><a href="index.html#cb10-11"></a><span class="st">    </span><span class="kw">labs</span>(<span class="dt">title =</span> <span class="st">&quot;Weibull experiment: Survivor function&quot;</span>,</span>
 <span id="cb10-12"><a href="index.html#cb10-12"></a>         <span class="dt">subtitle =</span> <span class="st">&quot;Probability of waiting MORE THAN X amount of time until event happens with rate 0.1 per unit of time and shape parameter 2.</span><span class="ch">\n</span><span class="st">This means that the square root of the survival time follows an exponential distribution&quot;</span>) <span class="op">+</span></span>
 <span id="cb10-13"><a href="index.html#cb10-13"></a><span class="st">    </span><span class="kw">theme</span>(<span class="dt">axis.title =</span> <span class="kw">element_blank</span>())</span></code></pre></div>
-<p><img src="Survival_Analysis_files/figure-html/unnamed-chunk-11-1.png" width="100%" /></p>
+<p><img src="Survival_Analysis_files/figure-html/unnamed-chunk-17-1.png" width="100%" /></p>
 
 </div>
 </div>

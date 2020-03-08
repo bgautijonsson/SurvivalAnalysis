@@ -7,7 +7,7 @@
   margin: 0EM;
   padding-left: 20px;
   padding-bottom: 0em;
-  color: #3C738E;
+  color: #464646;
   border-radius: 25px 25px 0px 0px;
   border-bottom: 0px;
   font-size: 36pt;
@@ -22,7 +22,7 @@
   margin: 0;
   padding-left: 20px;
   padding-bottom: 0em;
-  color: #3C738E;
+  color: #464646;
   font-size: 18pt;
   font-style: normal;
   font-weight: normal;
@@ -36,9 +36,13 @@
   font-style: normal;
   border-radius: 0px 0px 25px 25px;
   padding-left: 20px;
-  color: #cccccc;
+  color: #464646;
   background: #3C738E;
   font-family: "Fira Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+.book-body p {
+  text-align: justify;
 }
 
 .book.font-family-0 {
@@ -49,6 +53,7 @@
 }
 
 .book-body p.caption {
+  text-align: justify;
   color: #333333;
   background-color: #eeeeee;
   padding-left: 20px;
@@ -61,20 +66,24 @@
 }
 
 h1, h2 {
-  border-bottom: 2px solid #3C738E;
+  border-bottom: 2px solid #464646;
 }
 
 h1, h2, h3, h4 {
-  color: #3C738E;
+  color: #464646;
   font-family: "Fira Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
+
+h3 {
+  text-align: center;
+}
 a {
-color: #3C738E;
+color: #464646;
 }
 
 dt {
-  color: #3C738E;
+  color: #464646;
 }
 
 dd {
@@ -139,16 +148,18 @@ ol {
 
 .book .book-summary ul.summary li a {
   padding: 5px 5px 5px 5px;
-  color: #ddd;
+  color: #e0e0e0;
 }
 
 .book .book-summary ul.summary li.active>a {
-  color: #9a9a9a;
+  color: #b3b3b3;
+  font-weight: bolder;
 }
 
 .book .book-summary ul.summary li a:hover {
-  background-color: #aaaaaa;
-  color: #3C738E;
+  background-color: #3C738E;
+  color: #9a9a9a;
+  font-weight: bold;
 }
 
 .book .book-summary .book-search {
@@ -198,4 +209,55 @@ ol {
     font-size: 19px;
     line-height: 1.3333333;
     border-radius: 6px;
+}
+
+
+.rethinking {
+  background-color: #e4eff7;
+  padding-left: 2%;
+  padding-right: 2%;
+  display: block;
+  text-align: justify;
+  margin-left: auto;
+  margin-right: auto;
+  width: 98%;
+}
+
+.rethinking:before {
+  content: "Rethinking";
+  font-weight: bolder;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
+  border-bottom: 2px solid #3C738E;
+}
+
+.overthinking {
+  background-color: #ffffff;
+  display: block;
+  text-align: justify;
+  margin-left: auto;
+  margin-right: auto;
+  width: 90%;
+  
+}
+
+.overthinking:before {
+  content: "Overthinking";
+  font-weight: bolder;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
+  border-top: 2px solid #3C738E;
+}
+
+.overthinking:after {
+  content: "";
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
+  border-bottom: 2px solid #3C738E;
 }

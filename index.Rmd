@@ -20,9 +20,22 @@ These lecture notes are a companion for a course [(LÝÐ079F)](https://ugla.hi.i
 knitr::include_graphics("https://images.tandf.co.uk/common/jackets/amazon/978143985/9781439856789.jpg")
 ```
 
+## About the book {-}
+
+```{block, type = "rethinking"}
+In blocks like this you might see text that talks more about intuition and how you can look at things from more than one side.
+```
+
+<br>
+
+```{block, type = "overthinking"}
+In these blocks we will write more in-depth info about something. These boxes might be skipped on the first reading.
+```
+
 ## Software {-}
 
 We will primarily be writing R code using the RStudio GUI.
+
 
 ## Setup in RStudio {-}
 
@@ -120,7 +133,12 @@ theme_set(theme_cowplot() +
 
 ## Some Probability Distributions {-}
 
-### Discrete {-}
+### Discrete Distributions {-}
+
+```{block, type = "overthinking"}
+Discrete random variables can only take on a *countable* set of outcomes. This means that there should be a one-to-one mapping from the positive integers to the possible outcomes. In short, you can count all the possible outcomes *(though they might be infinitely many)*. Continuous random variables *(height for example)* can take on uncountably many values. Between any two continuous numbers there exist infinitely many other numbers, this is not true for discrete numbers. There are no other integers between 2 and 3 for example. 
+```
+
 
 #### Bernoulli {-}
 
@@ -173,7 +191,10 @@ tibble(outcome = possible_outcomes,
 
 Consider a sequence of independent Bernoulli trials, each with the same success probability, $p$, and imagine performing trials until a success occurs. Let $X$ be the number of *failures* before the first successful trial. Then $X$ has the *Geometric distribution* with parameter $p$, denoted by $X \sim \mathrm{Geom}(p)$.
 
+```{block, type = "rethinking"}
 This is an important distribution for survival analysis. Imagine that on each day there is a constant probability, $p$, that some event happens. Then the number of days before the event happens follows a $\mathrm{Geom}(p)$ distribution. Note that the *Geometric* distribution only models whole numbers, so we cannot wait for $4.5$ days when working with this distribution.
+```
+
 
 Textbooks and statistical software differ in whether the *Geometric distribution* models the number trials *before* the success or the number of trials *including* the success. The number of trials *including* the success is sometimes called the *First Success distribution*.
 
@@ -215,7 +236,10 @@ $$
 P(X > x) = S(x) = 1 - (1 - e^{-\lambda x}) = e^{-\lambda x}.
 $$
 
+```{block, type = "rethinking"}
 The *Exponential distribution* is unique in that it is *memoryless*. This means that the time until an event occurs is independent of how long you have been waiting for it to happen. It is obvious that the time until your bus arrives is not *exponentially* distributed since the waiting time is not the same whether you have waited $0$, $5$ or $15$ minutes *(although sometimes it may feel that way!)*. Waiting times that are not memoryless are better modeled with other distributions.
+```
+
 
 ```{r}
 rate <- 0.1
@@ -267,7 +291,9 @@ Remarkably, simply raising an exponential random variable to a power dramaticall
 
 The distribution of $T$ is called the *Weibull distribution* and we denote this by $T \sim \mathrm{Weib}(\lambda, \gamma)$. We see that if $\gamma = 1$ then $T\sim \mathrm{Weib}(\lambda, 1) = \mathrm{Expo}(\lambda)$. 
 
+```{block, type = "rethinking"}
 It is interesting to note that if $T = X^{1/\gamma}$ then $X = T^{\gamma}$. Thus, if you have a random variable $T\sim \mathrm{Weib}(\lambda, \gamma)$, then $T^\gamma \sim \mathrm{Expo}(\lambda)$, and so $T^\gamma$ is memoryless,  which can be used to examine whether $T$ is actually *Weibull* distributed.
+```
 
 The *risk function* for a *Weibull* random variable is
 

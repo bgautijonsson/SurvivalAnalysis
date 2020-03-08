@@ -4,11 +4,11 @@
 
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <title>Lecture Notes on Survival Analysis</title>
+  <title>Survival Analysis (LÝÐ079F)</title>
   <meta name="description" content="This is a collection of lectures notes from the course at University of Iceland" />
   <meta name="generator" content="bookdown 0.17.2 and GitBook 2.6.7" />
 
-  <meta property="og:title" content="Lecture Notes on Survival Analysis" />
+  <meta property="og:title" content="Survival Analysis (LÝÐ079F)" />
   <meta property="og:type" content="book" />
   
   
@@ -16,16 +16,15 @@
   
 
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="Lecture Notes on Survival Analysis" />
+  <meta name="twitter:title" content="Survival Analysis (LÝÐ079F)" />
   
   <meta name="twitter:description" content="This is a collection of lectures notes from the course at University of Iceland" />
   
 
-<meta name="author" content="Thor Aspelund" />
-<meta name="author" content="Brynjólfur Gauti Jónsson" />
+<meta name="author" content="Thor Aspelund, Brynjólfur Gauti Jónsson" />
+<meta name="author" content="University of Iceland" />
 
 
-<meta name="date" content="2020-03-07" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -50,6 +49,555 @@
 
 
 
+
+
+<script>
+/* ========================================================================
+ * Bootstrap: transition.js v3.3.7
+ * http://getbootstrap.com/javascript/#transitions
+ * ========================================================================
+ * Copyright 2011-2016 Twitter, Inc.
+ * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
+ * ======================================================================== */
+
+
++function ($) {
+  'use strict';
+
+  // CSS TRANSITION SUPPORT (Shoutout: http://www.modernizr.com/)
+  // ============================================================
+
+  function transitionEnd() {
+    var el = document.createElement('bootstrap')
+
+    var transEndEventNames = {
+      WebkitTransition : 'webkitTransitionEnd',
+      MozTransition    : 'transitionend',
+      OTransition      : 'oTransitionEnd otransitionend',
+      transition       : 'transitionend'
+    }
+
+    for (var name in transEndEventNames) {
+      if (el.style[name] !== undefined) {
+        return { end: transEndEventNames[name] }
+      }
+    }
+
+    return false // explicit for ie8 (  ._.)
+  }
+
+  // http://blog.alexmaccaw.com/css-transitions
+  $.fn.emulateTransitionEnd = function (duration) {
+    var called = false
+    var $el = this
+    $(this).one('bsTransitionEnd', function () { called = true })
+    var callback = function () { if (!called) $($el).trigger($.support.transition.end) }
+    setTimeout(callback, duration)
+    return this
+  }
+
+  $(function () {
+    $.support.transition = transitionEnd()
+
+    if (!$.support.transition) return
+
+    $.event.special.bsTransitionEnd = {
+      bindType: $.support.transition.end,
+      delegateType: $.support.transition.end,
+      handle: function (e) {
+        if ($(e.target).is(this)) return e.handleObj.handler.apply(this, arguments)
+      }
+    }
+  })
+
+}(jQuery);
+</script>
+<script>
+/* ========================================================================
+ * Bootstrap: collapse.js v3.3.7
+ * http://getbootstrap.com/javascript/#collapse
+ * ========================================================================
+ * Copyright 2011-2016 Twitter, Inc.
+ * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
+ * ======================================================================== */
+
+/* jshint latedef: false */
+
++function ($) {
+  'use strict';
+
+  // COLLAPSE PUBLIC CLASS DEFINITION
+  // ================================
+
+  var Collapse = function (element, options) {
+    this.$element      = $(element)
+    this.options       = $.extend({}, Collapse.DEFAULTS, options)
+    this.$trigger      = $('[data-toggle="collapse"][href="#' + element.id + '"],' +
+                           '[data-toggle="collapse"][data-target="#' + element.id + '"]')
+    this.transitioning = null
+
+    if (this.options.parent) {
+      this.$parent = this.getParent()
+    } else {
+      this.addAriaAndCollapsedClass(this.$element, this.$trigger)
+    }
+
+    if (this.options.toggle) this.toggle()
+  }
+
+  Collapse.VERSION  = '3.3.7'
+
+  Collapse.TRANSITION_DURATION = 350
+
+  Collapse.DEFAULTS = {
+    toggle: true
+  }
+
+  Collapse.prototype.dimension = function () {
+    var hasWidth = this.$element.hasClass('width')
+    return hasWidth ? 'width' : 'height'
+  }
+
+  Collapse.prototype.show = function () {
+    if (this.transitioning || this.$element.hasClass('in')) return
+
+    var activesData
+    var actives = this.$parent && this.$parent.children('.panel').children('.in, .collapsing')
+
+    if (actives && actives.length) {
+      activesData = actives.data('bs.collapse')
+      if (activesData && activesData.transitioning) return
+    }
+
+    var startEvent = $.Event('show.bs.collapse')
+    this.$element.trigger(startEvent)
+    if (startEvent.isDefaultPrevented()) return
+
+    if (actives && actives.length) {
+      Plugin.call(actives, 'hide')
+      activesData || actives.data('bs.collapse', null)
+    }
+
+    var dimension = this.dimension()
+
+    this.$element
+      .removeClass('collapse')
+      .addClass('collapsing')[dimension](0)
+      .attr('aria-expanded', true)
+
+    this.$trigger
+      .removeClass('collapsed')
+      .attr('aria-expanded', true)
+
+    this.transitioning = 1
+
+    var complete = function () {
+      this.$element
+        .removeClass('collapsing')
+        .addClass('collapse in')[dimension]('')
+      this.transitioning = 0
+      this.$element
+        .trigger('shown.bs.collapse')
+    }
+
+    if (!$.support.transition) return complete.call(this)
+
+    var scrollSize = $.camelCase(['scroll', dimension].join('-'))
+
+    this.$element
+      .one('bsTransitionEnd', $.proxy(complete, this))
+      .emulateTransitionEnd(Collapse.TRANSITION_DURATION)[dimension](this.$element[0][scrollSize])
+  }
+
+  Collapse.prototype.hide = function () {
+    if (this.transitioning || !this.$element.hasClass('in')) return
+
+    var startEvent = $.Event('hide.bs.collapse')
+    this.$element.trigger(startEvent)
+    if (startEvent.isDefaultPrevented()) return
+
+    var dimension = this.dimension()
+
+    this.$element[dimension](this.$element[dimension]())[0].offsetHeight
+
+    this.$element
+      .addClass('collapsing')
+      .removeClass('collapse in')
+      .attr('aria-expanded', false)
+
+    this.$trigger
+      .addClass('collapsed')
+      .attr('aria-expanded', false)
+
+    this.transitioning = 1
+
+    var complete = function () {
+      this.transitioning = 0
+      this.$element
+        .removeClass('collapsing')
+        .addClass('collapse')
+        .trigger('hidden.bs.collapse')
+    }
+
+    if (!$.support.transition) return complete.call(this)
+
+    this.$element
+      [dimension](0)
+      .one('bsTransitionEnd', $.proxy(complete, this))
+      .emulateTransitionEnd(Collapse.TRANSITION_DURATION)
+  }
+
+  Collapse.prototype.toggle = function () {
+    this[this.$element.hasClass('in') ? 'hide' : 'show']()
+  }
+
+  Collapse.prototype.getParent = function () {
+    return $(this.options.parent)
+      .find('[data-toggle="collapse"][data-parent="' + this.options.parent + '"]')
+      .each($.proxy(function (i, element) {
+        var $element = $(element)
+        this.addAriaAndCollapsedClass(getTargetFromTrigger($element), $element)
+      }, this))
+      .end()
+  }
+
+  Collapse.prototype.addAriaAndCollapsedClass = function ($element, $trigger) {
+    var isOpen = $element.hasClass('in')
+
+    $element.attr('aria-expanded', isOpen)
+    $trigger
+      .toggleClass('collapsed', !isOpen)
+      .attr('aria-expanded', isOpen)
+  }
+
+  function getTargetFromTrigger($trigger) {
+    var href
+    var target = $trigger.attr('data-target')
+      || (href = $trigger.attr('href')) && href.replace(/.*(?=#[^\s]+$)/, '') // strip for ie7
+
+    return $(target)
+  }
+
+
+  // COLLAPSE PLUGIN DEFINITION
+  // ==========================
+
+  function Plugin(option) {
+    return this.each(function () {
+      var $this   = $(this)
+      var data    = $this.data('bs.collapse')
+      var options = $.extend({}, Collapse.DEFAULTS, $this.data(), typeof option == 'object' && option)
+
+      if (!data && options.toggle && /show|hide/.test(option)) options.toggle = false
+      if (!data) $this.data('bs.collapse', (data = new Collapse(this, options)))
+      if (typeof option == 'string') data[option]()
+    })
+  }
+
+  var old = $.fn.collapse
+
+  $.fn.collapse             = Plugin
+  $.fn.collapse.Constructor = Collapse
+
+
+  // COLLAPSE NO CONFLICT
+  // ====================
+
+  $.fn.collapse.noConflict = function () {
+    $.fn.collapse = old
+    return this
+  }
+
+
+  // COLLAPSE DATA-API
+  // =================
+
+  $(document).on('click.bs.collapse.data-api', '[data-toggle="collapse"]', function (e) {
+    var $this   = $(this)
+
+    if (!$this.attr('data-target')) e.preventDefault()
+
+    var $target = getTargetFromTrigger($this)
+    var data    = $target.data('bs.collapse')
+    var option  = data ? 'toggle' : $this.data()
+
+    Plugin.call($target, option)
+  })
+
+}(jQuery);
+</script>
+<script>
+window.initializeCodeFolding = function(show) {
+
+  // handlers for show-all and hide all
+  $("#rmd-show-all-code").click(function() {
+    $('div.r-code-collapse').each(function() {
+      $(this).collapse('show');
+    });
+  });
+  $("#rmd-hide-all-code").click(function() {
+    $('div.r-code-collapse').each(function() {
+      $(this).collapse('hide');
+    });
+  });
+
+  // index for unique code element ids
+  var currentIndex = 1;
+
+  // select all R code blocks
+  var rCodeBlocks = $('pre.sourceCode, pre.r, pre.python, pre.bash, pre.sql, pre.cpp, pre.stan');
+  rCodeBlocks.each(function() {
+
+    // create a collapsable div to wrap the code in
+    var div = $('<div class="collapse r-code-collapse"></div>');
+    if (show)
+      div.addClass('in');
+    var id = 'rcode-643E0F36' + currentIndex++;
+    div.attr('id', id);
+    $(this).before(div);
+    $(this).detach().appendTo(div);
+
+    // add a show code button right above
+    var showCodeText = $('<span>' + (show ? 'Hide' : 'Code') + '</span>');
+    var showCodeButton = $('<button type="button" class="btn btn-default btn-xs code-folding-btn pull-right"></button>');
+    showCodeButton.append(showCodeText);
+    showCodeButton
+        .attr('data-toggle', 'collapse')
+        .attr('data-target', '#' + id)
+        .attr('aria-expanded', show)
+        .attr('aria-controls', id);
+
+    var buttonRow = $('<div class="row"></div>');
+    var buttonCol = $('<div class="col-md-12"></div>');
+
+    buttonCol.append(showCodeButton);
+    buttonRow.append(buttonCol);
+
+    div.before(buttonRow);
+
+    // update state of button on show/hide
+    div.on('hidden.bs.collapse', function () {
+      showCodeText.text('Code');
+    });
+    div.on('show.bs.collapse', function () {
+      showCodeText.text('Hide');
+    });
+  });
+
+}
+</script>
+<script>
+/* ========================================================================
+ * Bootstrap: dropdown.js v3.3.7
+ * http://getbootstrap.com/javascript/#dropdowns
+ * ========================================================================
+ * Copyright 2011-2016 Twitter, Inc.
+ * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
+ * ======================================================================== */
+
+
++function ($) {
+  'use strict';
+
+  // DROPDOWN CLASS DEFINITION
+  // =========================
+
+  var backdrop = '.dropdown-backdrop'
+  var toggle   = '[data-toggle="dropdown"]'
+  var Dropdown = function (element) {
+    $(element).on('click.bs.dropdown', this.toggle)
+  }
+
+  Dropdown.VERSION = '3.3.7'
+
+  function getParent($this) {
+    var selector = $this.attr('data-target')
+
+    if (!selector) {
+      selector = $this.attr('href')
+      selector = selector && /#[A-Za-z]/.test(selector) && selector.replace(/.*(?=#[^\s]*$)/, '') // strip for ie7
+    }
+
+    var $parent = selector && $(selector)
+
+    return $parent && $parent.length ? $parent : $this.parent()
+  }
+
+  function clearMenus(e) {
+    if (e && e.which === 3) return
+    $(backdrop).remove()
+    $(toggle).each(function () {
+      var $this         = $(this)
+      var $parent       = getParent($this)
+      var relatedTarget = { relatedTarget: this }
+
+      if (!$parent.hasClass('open')) return
+
+      if (e && e.type == 'click' && /input|textarea/i.test(e.target.tagName) && $.contains($parent[0], e.target)) return
+
+      $parent.trigger(e = $.Event('hide.bs.dropdown', relatedTarget))
+
+      if (e.isDefaultPrevented()) return
+
+      $this.attr('aria-expanded', 'false')
+      $parent.removeClass('open').trigger($.Event('hidden.bs.dropdown', relatedTarget))
+    })
+  }
+
+  Dropdown.prototype.toggle = function (e) {
+    var $this = $(this)
+
+    if ($this.is('.disabled, :disabled')) return
+
+    var $parent  = getParent($this)
+    var isActive = $parent.hasClass('open')
+
+    clearMenus()
+
+    if (!isActive) {
+      if ('ontouchstart' in document.documentElement && !$parent.closest('.navbar-nav').length) {
+        // if mobile we use a backdrop because click events don't delegate
+        $(document.createElement('div'))
+          .addClass('dropdown-backdrop')
+          .insertAfter($(this))
+          .on('click', clearMenus)
+      }
+
+      var relatedTarget = { relatedTarget: this }
+      $parent.trigger(e = $.Event('show.bs.dropdown', relatedTarget))
+
+      if (e.isDefaultPrevented()) return
+
+      $this
+        .trigger('focus')
+        .attr('aria-expanded', 'true')
+
+      $parent
+        .toggleClass('open')
+        .trigger($.Event('shown.bs.dropdown', relatedTarget))
+    }
+
+    return false
+  }
+
+  Dropdown.prototype.keydown = function (e) {
+    if (!/(38|40|27|32)/.test(e.which) || /input|textarea/i.test(e.target.tagName)) return
+
+    var $this = $(this)
+
+    e.preventDefault()
+    e.stopPropagation()
+
+    if ($this.is('.disabled, :disabled')) return
+
+    var $parent  = getParent($this)
+    var isActive = $parent.hasClass('open')
+
+    if (!isActive && e.which != 27 || isActive && e.which == 27) {
+      if (e.which == 27) $parent.find(toggle).trigger('focus')
+      return $this.trigger('click')
+    }
+
+    var desc = ' li:not(.disabled):visible a'
+    var $items = $parent.find('.dropdown-menu' + desc)
+
+    if (!$items.length) return
+
+    var index = $items.index(e.target)
+
+    if (e.which == 38 && index > 0)                 index--         // up
+    if (e.which == 40 && index < $items.length - 1) index++         // down
+    if (!~index)                                    index = 0
+
+    $items.eq(index).trigger('focus')
+  }
+
+
+  // DROPDOWN PLUGIN DEFINITION
+  // ==========================
+
+  function Plugin(option) {
+    return this.each(function () {
+      var $this = $(this)
+      var data  = $this.data('bs.dropdown')
+
+      if (!data) $this.data('bs.dropdown', (data = new Dropdown(this)))
+      if (typeof option == 'string') data[option].call($this)
+    })
+  }
+
+  var old = $.fn.dropdown
+
+  $.fn.dropdown             = Plugin
+  $.fn.dropdown.Constructor = Dropdown
+
+
+  // DROPDOWN NO CONFLICT
+  // ====================
+
+  $.fn.dropdown.noConflict = function () {
+    $.fn.dropdown = old
+    return this
+  }
+
+
+  // APPLY TO STANDARD DROPDOWN ELEMENTS
+  // ===================================
+
+  $(document)
+    .on('click.bs.dropdown.data-api', clearMenus)
+    .on('click.bs.dropdown.data-api', '.dropdown form', function (e) { e.stopPropagation() })
+    .on('click.bs.dropdown.data-api', toggle, Dropdown.prototype.toggle)
+    .on('keydown.bs.dropdown.data-api', toggle, Dropdown.prototype.keydown)
+    .on('keydown.bs.dropdown.data-api', '.dropdown-menu', Dropdown.prototype.keydown)
+
+}(jQuery);
+</script>
+<style type="text/css">
+.code-folding-btn { margin-bottom: 4px; }
+.row { display: flex; }
+.collapse { display: none; }
+.in { display:block }
+.pull-right > .dropdown-menu {
+    right: 0;
+    left: auto;
+}
+.open > .dropdown-menu {
+    display: block;
+}
+.dropdown-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    z-index: 1000;
+    display: none;
+    float: left;
+    min-width: 160px;
+    padding: 5px 0;
+    margin: 2px 0 0;
+    font-size: 14px;
+    text-align: left;
+    list-style: none;
+    background-color: #fff;
+    -webkit-background-clip: padding-box;
+    background-clip: padding-box;
+    border: 1px solid #ccc;
+    border: 1px solid rgba(0,0,0,.15);
+    border-radius: 4px;
+    -webkit-box-shadow: 0 6px 12px rgba(0,0,0,.175);
+    box-shadow: 0 6px 12px rgba(0,0,0,.175);
+}
+</style>
+<script>
+$(document).ready(function () {
+  window.initializeCodeFolding("show" === "hide");
+});
+</script>
+
+
+<script>
+document.write('<div class="btn-group pull-right" style="position: absolute; top: 20%; right: 2%; z-index: 200"><button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" data-_extension-text-contrast=""><span>Code</span> <span class="caret"></span></button></div>')
+</script>
 
 
 
@@ -130,23 +678,22 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <nav role="navigation">
 
 <ul class="summary">
-<li><a href="./">University of Iceland</a></li>
+<li><a href="https://english.hi.is" taget="_blank">University of Iceland</a></li>
 
 <li class="divider"></li>
 <li class="chapter" data-level="" data-path=""><a href="#preface"><i class="fa fa-check"></i>Preface</a>
 <ul>
-<li class="chapter" data-level="" data-path=""><a href="#the-book"><i class="fa fa-check"></i>The Book</a></li>
+<li class="chapter" data-level="" data-path=""><a href="#about-the-book"><i class="fa fa-check"></i>About the book</a></li>
 <li class="chapter" data-level="" data-path=""><a href="#software"><i class="fa fa-check"></i>Software</a></li>
 <li class="chapter" data-level="" data-path=""><a href="#setup-in-rstudio"><i class="fa fa-check"></i>Setup in RStudio</a></li>
 <li class="chapter" data-level="" data-path=""><a href="#some-probability-distributions"><i class="fa fa-check"></i>Some Probability Distributions</a>
 <ul>
-<li class="chapter" data-level="" data-path=""><a href="#discrete"><i class="fa fa-check"></i>Discrete</a></li>
+<li class="chapter" data-level="" data-path=""><a href="#discrete-distributions"><i class="fa fa-check"></i>Discrete Distributions</a></li>
 <li class="chapter" data-level="" data-path=""><a href="#continuous"><i class="fa fa-check"></i>Continuous</a></li>
-<li class="chapter" data-level="" data-path=""><a href="#weibull"><i class="fa fa-check"></i>Weibull</a></li>
 </ul></li>
 </ul></li>
 <li class="divider"></li>
-<li><a href="https://github.com/rstudio/bookdown" target="blank">Published with bookdown</a></li>
+<li><a href="https://github.com/bgautijonsson/survivalanalysis" target="_blank">Published with bookdown</a></li>
 
 </ul>
 
@@ -157,7 +704,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <div class="body-inner">
         <div class="book-header" role="navigation">
           <h1>
-            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">Lecture Notes on Survival Analysis</a>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">Survival Analysis (LÝÐ079F)</a>
           </h1>
         </div>
 
@@ -166,19 +713,27 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 
             <section class="normal" id="section-">
 <div id="header">
-<h1 class="title">Lecture Notes on Survival Analysis</h1>
-<h2 class="subtitle"><em>Course taught at the University of Iceland</em></h2>
-<p class="author"><em>Thor Aspelund</em></p>
-<p class="author"><em>Brynjólfur Gauti Jónsson</em></p>
-<p class="date"><em>2020-03-07</em></p>
+<h1 class="title">Survival Analysis (LÝÐ079F)</h1>
+<p class="author"><em>Thor Aspelund, Brynjólfur Gauti Jónsson</em></p>
+<p class="author"><em>University of Iceland</em></p>
 </div>
 <div id="preface" class="section level1">
 <h1>Preface</h1>
-<hr />
-<div id="the-book" class="section level2">
-<h2>The Book</h2>
-<p>These lecture notes are based on the book <a href="https://www.crcpress.com/Modelling-Survival-Data-in-Medical-Research/Collett/p/book/9781439856789">Modelling Survival Data in Medical Research by David Collett</a></p>
-<p><img src="https://images.tandf.co.uk/common/jackets/amazon/978143985/9781439856789.jpg" /></p>
+<p>These lecture notes are a companion for a course <a href="https://ugla.hi.is/kennsluskra/index.php?tab=nam&amp;chapter=namskeid&amp;id=70762120200">(LÝÐ079F)</a> based on the book <a href="https://www.crcpress.com/Modelling-Survival-Data-in-Medical-Research/Collett/p/book/9781439856789">Modelling Survival Data in Medical Research by David Collett</a></p>
+<p><img src="https://images.tandf.co.uk/common/jackets/amazon/978143985/9781439856789.jpg" style="display: block; margin: auto;" /></p>
+<div id="about-the-book" class="section level2">
+<h2>About the book</h2>
+<div class="rethinking">
+<p>
+In blocks like this you might see text that talks more about intuition and how you can look at things from more than one side.
+</p>
+</div>
+<p><br></p>
+<div class="overthinking">
+<p>
+In these blocks we will write more in-depth info about something. These boxes might be skipped on the first reading.
+</p>
+</div>
 </div>
 <div id="software" class="section level2">
 <h2>Software</h2>
@@ -187,19 +742,25 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <div id="setup-in-rstudio" class="section level2">
 <h2>Setup in RStudio</h2>
 <p>This is our base setup. Further packages will be loaded in the individual lectures respectively.</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1"></a><span class="kw">library</span>(tidyverse); <span class="kw">library</span>(kableExtra); <span class="kw">library</span>(cowplot); <span class="kw">library</span>(scales); <span class="kw">library</span>(janitor);</span>
-<span id="cb1-2"><a href="#cb1-2"></a><span class="kw">theme_set</span>(<span class="kw">theme_cowplot</span>() <span class="op">+</span><span class="st">  </span></span>
-<span id="cb1-3"><a href="#cb1-3"></a><span class="st">              </span><span class="kw">background_grid</span>(<span class="dt">major =</span> <span class="st">&quot;xy&quot;</span>, </span>
-<span id="cb1-4"><a href="#cb1-4"></a>                              <span class="dt">minor =</span> <span class="st">&quot;xy&quot;</span>,</span>
-<span id="cb1-5"><a href="#cb1-5"></a>                              <span class="dt">size.major =</span> <span class="fl">0.25</span>,</span>
-<span id="cb1-6"><a href="#cb1-6"></a>                              <span class="dt">size.minor =</span> <span class="fl">0.1</span>) <span class="op">+</span></span>
-<span id="cb1-7"><a href="#cb1-7"></a><span class="st">              </span><span class="kw">theme</span>(<span class="dt">legend.position =</span> <span class="st">&quot;top&quot;</span>,</span>
-<span id="cb1-8"><a href="#cb1-8"></a>                    <span class="dt">plot.margin =</span> <span class="kw">margin</span>(<span class="dv">10</span>, <span class="dv">10</span>, <span class="dv">10</span>, <span class="dv">10</span>)))</span></code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1"></a><span class="kw">library</span>(tidyverse); <span class="kw">library</span>(kableExtra); <span class="kw">library</span>(cowplot); </span>
+<span id="cb1-2"><a href="#cb1-2"></a><span class="kw">library</span>(scales); <span class="kw">library</span>(janitor);</span>
+<span id="cb1-3"><a href="#cb1-3"></a><span class="kw">theme_set</span>(<span class="kw">theme_cowplot</span>() <span class="op">+</span><span class="st">  </span></span>
+<span id="cb1-4"><a href="#cb1-4"></a><span class="st">              </span><span class="kw">background_grid</span>(<span class="dt">major =</span> <span class="st">&quot;xy&quot;</span>, </span>
+<span id="cb1-5"><a href="#cb1-5"></a>                              <span class="dt">minor =</span> <span class="st">&quot;xy&quot;</span>,</span>
+<span id="cb1-6"><a href="#cb1-6"></a>                              <span class="dt">size.major =</span> <span class="fl">0.25</span>,</span>
+<span id="cb1-7"><a href="#cb1-7"></a>                              <span class="dt">size.minor =</span> <span class="fl">0.1</span>) <span class="op">+</span></span>
+<span id="cb1-8"><a href="#cb1-8"></a><span class="st">              </span><span class="kw">theme</span>(<span class="dt">legend.position =</span> <span class="st">&quot;top&quot;</span>,</span>
+<span id="cb1-9"><a href="#cb1-9"></a>                    <span class="dt">plot.margin =</span> <span class="kw">margin</span>(<span class="dv">10</span>, <span class="dv">10</span>, <span class="dv">10</span>, <span class="dv">10</span>)))</span></code></pre></div>
 </div>
 <div id="some-probability-distributions" class="section level2">
 <h2>Some Probability Distributions</h2>
-<div id="discrete" class="section level3">
-<h3>Discrete</h3>
+<div id="discrete-distributions" class="section level3">
+<h3>Discrete Distributions</h3>
+<div class="overthinking">
+<p>
+Discrete random variables can only take on a <em>countable</em> set of outcomes. This means that there should be a one-to-one mapping from the positive integers to the possible outcomes. In short, you can count all the possible outcomes <em>(though they might be infinitely many)</em>. Continuous random variables <em>(height for example)</em> can take on uncountably many values. Between any two continuous numbers there exist infinitely many other numbers, this is not true for discrete numbers. There are no other integers between 2 and 3 for example.
+</p>
+</div>
 <div id="bernoulli" class="section level4">
 <h4>Bernoulli</h4>
 <p>A random variable <span class="math inline">\(X\)</span> is said to have the <em>Bernoulli distribution</em> with parameter <span class="math inline">\(p\)</span> if</p>
@@ -220,7 +781,7 @@ P(X=0) &amp;= 1 - p, \quad \text{where } 0 &lt; p &lt; 1.
 <span id="cb2-8"><a href="#cb2-8"></a><span class="st">    </span><span class="kw">scale_y_continuous</span>(<span class="dt">labels =</span> percent) <span class="op">+</span></span>
 <span id="cb2-9"><a href="#cb2-9"></a><span class="st">    </span><span class="kw">labs</span>(<span class="dt">title =</span> <span class="st">&quot;Example Bernoulli variable&quot;</span>) <span class="op">+</span></span>
 <span id="cb2-10"><a href="#cb2-10"></a><span class="st">    </span><span class="kw">theme</span>(<span class="dt">axis.title =</span> <span class="kw">element_blank</span>())</span></code></pre></div>
-<p><img src="index_files/figure-html/unnamed-chunk-2-1.png" width="100%" /></p>
+<p><img src="index_files/figure-html/unnamed-chunk-6-1.png" width="100%" /></p>
 </div>
 <div id="binomial" class="section level4">
 <h4>Binomial</h4>
@@ -237,12 +798,16 @@ P(X=0) &amp;= 1 - p, \quad \text{where } 0 &lt; p &lt; 1.
 <span id="cb3-10"><a href="#cb3-10"></a><span class="st">    </span><span class="kw">labs</span>(<span class="dt">title =</span> <span class="st">&quot;Coin toss experiment&quot;</span>,</span>
 <span id="cb3-11"><a href="#cb3-11"></a>         <span class="dt">subtitle =</span> <span class="st">&quot;Probability of obtaining X heads in 100 tosses&quot;</span>) <span class="op">+</span></span>
 <span id="cb3-12"><a href="#cb3-12"></a><span class="st">    </span><span class="kw">theme</span>(<span class="dt">axis.title =</span> <span class="kw">element_blank</span>())</span></code></pre></div>
-<p><img src="index_files/figure-html/unnamed-chunk-3-1.png" width="100%" /></p>
+<p><img src="index_files/figure-html/unnamed-chunk-7-1.png" width="100%" /></p>
 </div>
 <div id="geometric" class="section level4">
 <h4>Geometric</h4>
 <p>Consider a sequence of independent Bernoulli trials, each with the same success probability, <span class="math inline">\(p\)</span>, and imagine performing trials until a success occurs. Let <span class="math inline">\(X\)</span> be the number of <em>failures</em> before the first successful trial. Then <span class="math inline">\(X\)</span> has the <em>Geometric distribution</em> with parameter <span class="math inline">\(p\)</span>, denoted by <span class="math inline">\(X \sim \mathrm{Geom}(p)\)</span>.</p>
-<p>This is an important distribution for survival analysis. Imagine that on each day there is a constant probability, <span class="math inline">\(p\)</span>, that some event happens. Then the number of days before the event happens follows a <span class="math inline">\(\mathrm{Geom}(p)\)</span> distribution. Note that the <em>Geometric</em> distribution only models whole numbers, so we cannot wait for <span class="math inline">\(4.5\)</span> days when working with this distribution.</p>
+<div class="rethinking">
+<p>
+This is an important distribution for survival analysis. Imagine that on each day there is a constant probability, <span class="math inline"><span class="math inline">\(p\)</span></span>, that some event happens. Then the number of days before the event happens follows a <span class="math inline"><span class="math inline">\(\mathrm{Geom}(p)\)</span></span> distribution. Note that the <em>Geometric</em> distribution only models whole numbers, so we cannot wait for <span class="math inline"><span class="math inline">\(4.5\)</span></span> days when working with this distribution.
+</p>
+</div>
 <p>Textbooks and statistical software differ in whether the <em>Geometric distribution</em> models the number trials <em>before</em> the success or the number of trials <em>including</em> the success. The number of trials <em>including</em> the success is sometimes called the <em>First Success distribution</em>.</p>
 <div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1"></a>risk &lt;-<span class="st"> </span><span class="fl">0.10</span></span>
 <span id="cb4-2"><a href="#cb4-2"></a>possible_times &lt;-<span class="st"> </span><span class="kw">seq</span>(<span class="dv">0</span>, <span class="dv">50</span>)</span>
@@ -256,7 +821,7 @@ P(X=0) &amp;= 1 - p, \quad \text{where } 0 &lt; p &lt; 1.
 <span id="cb4-10"><a href="#cb4-10"></a><span class="st">    </span><span class="kw">labs</span>(<span class="dt">title =</span> <span class="st">&quot;Geometic experiment&quot;</span>,</span>
 <span id="cb4-11"><a href="#cb4-11"></a>         <span class="dt">subtitle =</span> <span class="st">&quot;Probability of waiting X days until event happens with risk 10%&quot;</span>) <span class="op">+</span></span>
 <span id="cb4-12"><a href="#cb4-12"></a><span class="st">    </span><span class="kw">theme</span>(<span class="dt">axis.title =</span> <span class="kw">element_blank</span>())</span></code></pre></div>
-<p><img src="index_files/figure-html/unnamed-chunk-4-1.png" width="100%" /></p>
+<p><img src="index_files/figure-html/unnamed-chunk-9-1.png" width="100%" /></p>
 </div>
 </div>
 <div id="continuous" class="section level3">
@@ -274,7 +839,11 @@ P(X \leq x) =F(x) = 1 - e^{-\lambda x}.
 <p><span class="math display">\[
 P(X &gt; x) = S(x) = 1 - (1 - e^{-\lambda x}) = e^{-\lambda x}.
 \]</span></p>
-<p>The <em>Exponential distribution</em> is unique in that it is <em>memoryless</em>. This means that the time until an event occurs is independent of how long you have been waiting for it to happen. It is obvious that the time until your bus arrives is not <em>exponentially</em> distributed since the waiting time is not the same whether you have waited <span class="math inline">\(0\)</span>, <span class="math inline">\(5\)</span> or <span class="math inline">\(15\)</span> minutes <em>(although sometimes it may feel that way!)</em>. Waiting times that are not memoryless are better modeled with other distributions.</p>
+<div class="rethinking">
+<p>
+The <em>Exponential distribution</em> is unique in that it is <em>memoryless</em>. This means that the time until an event occurs is independent of how long you have been waiting for it to happen. It is obvious that the time until your bus arrives is not <em>exponentially</em> distributed since the waiting time is not the same whether you have waited <span class="math inline"><span class="math inline">\(0\)</span></span>, <span class="math inline"><span class="math inline">\(5\)</span></span> or <span class="math inline"><span class="math inline">\(15\)</span></span> minutes <em>(although sometimes it may feel that way!)</em>. Waiting times that are not memoryless are better modeled with other distributions.
+</p>
+</div>
 <div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1"></a>rate &lt;-<span class="st"> </span><span class="fl">0.1</span></span>
 <span id="cb5-2"><a href="#cb5-2"></a>possible_times &lt;-<span class="st"> </span><span class="kw">seq</span>(<span class="dv">0</span>, <span class="dv">50</span>)</span>
 <span id="cb5-3"><a href="#cb5-3"></a>density_of_times &lt;-<span class="st"> </span><span class="kw">dexp</span>(possible_times, rate)</span>
@@ -286,7 +855,7 @@ P(X &gt; x) = S(x) = 1 - (1 - e^{-\lambda x}) = e^{-\lambda x}.
 <span id="cb5-9"><a href="#cb5-9"></a><span class="st">    </span><span class="kw">labs</span>(<span class="dt">title =</span> <span class="st">&quot;Exponential experiment: Density&quot;</span>,</span>
 <span id="cb5-10"><a href="#cb5-10"></a>         <span class="dt">subtitle =</span> <span class="st">&quot;Density of waiting X amount of time until event happens with rate 0.1 per unit of time.</span><span class="ch">\n</span><span class="st">Since an exponential waiting time can take on any values we don&#39;t see a step function but a smooth curve.&quot;</span>) <span class="op">+</span></span>
 <span id="cb5-11"><a href="#cb5-11"></a><span class="st">    </span><span class="kw">theme</span>(<span class="dt">axis.title =</span> <span class="kw">element_blank</span>())</span></code></pre></div>
-<p><img src="index_files/figure-html/unnamed-chunk-5-1.png" width="100%" /></p>
+<p><img src="index_files/figure-html/unnamed-chunk-11-1.png" width="100%" /></p>
 <div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1"></a>rate &lt;-<span class="st"> </span><span class="fl">0.1</span></span>
 <span id="cb6-2"><a href="#cb6-2"></a>possible_times &lt;-<span class="st"> </span><span class="kw">seq</span>(<span class="dv">0</span>, <span class="dv">50</span>)</span>
 <span id="cb6-3"><a href="#cb6-3"></a>risk_function &lt;-<span class="st"> </span><span class="kw">pexp</span>(possible_times, rate)</span>
@@ -299,7 +868,7 @@ P(X &gt; x) = S(x) = 1 - (1 - e^{-\lambda x}) = e^{-\lambda x}.
 <span id="cb6-10"><a href="#cb6-10"></a><span class="st">    </span><span class="kw">labs</span>(<span class="dt">title =</span> <span class="st">&quot;Exponential experiment: Risk function&quot;</span>,</span>
 <span id="cb6-11"><a href="#cb6-11"></a>         <span class="dt">subtitle =</span> <span class="st">&quot;Probability of waiting X OR LESS amount of time until event happens with rate 0.1 per unit of time.&quot;</span>) <span class="op">+</span></span>
 <span id="cb6-12"><a href="#cb6-12"></a><span class="st">    </span><span class="kw">theme</span>(<span class="dt">axis.title =</span> <span class="kw">element_blank</span>())</span></code></pre></div>
-<p><img src="index_files/figure-html/unnamed-chunk-6-1.png" width="100%" /></p>
+<p><img src="index_files/figure-html/unnamed-chunk-12-1.png" width="100%" /></p>
 <div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1"></a>rate &lt;-<span class="st"> </span><span class="fl">0.1</span></span>
 <span id="cb7-2"><a href="#cb7-2"></a>possible_times &lt;-<span class="st"> </span><span class="kw">seq</span>(<span class="dv">0</span>, <span class="dv">50</span>)</span>
 <span id="cb7-3"><a href="#cb7-3"></a>survival_function &lt;-<span class="st"> </span><span class="dv">1</span> <span class="op">-</span><span class="st"> </span><span class="kw">pexp</span>(possible_times, rate)</span>
@@ -312,14 +881,17 @@ P(X &gt; x) = S(x) = 1 - (1 - e^{-\lambda x}) = e^{-\lambda x}.
 <span id="cb7-10"><a href="#cb7-10"></a><span class="st">    </span><span class="kw">labs</span>(<span class="dt">title =</span> <span class="st">&quot;Exponential experiment: Survival function&quot;</span>,</span>
 <span id="cb7-11"><a href="#cb7-11"></a>         <span class="dt">subtitle =</span> <span class="st">&quot;Probability of waiting MORE THAN X amount of time until event happens with rate 0.1 per unit of time.&quot;</span>) <span class="op">+</span></span>
 <span id="cb7-12"><a href="#cb7-12"></a><span class="st">    </span><span class="kw">theme</span>(<span class="dt">axis.title =</span> <span class="kw">element_blank</span>())</span></code></pre></div>
-<p><img src="index_files/figure-html/unnamed-chunk-7-1.png" width="100%" /></p>
+<p><img src="index_files/figure-html/unnamed-chunk-13-1.png" width="100%" /></p>
 </div>
-</div>
-<div id="weibull" class="section level3">
-<h3>Weibull</h3>
+<div id="weibull" class="section level4">
+<h4>Weibull</h4>
 <p>Remarkably, simply raising an exponential random variable to a power dramatically improves the flexibility and applicability of the distribution. Let <span class="math inline">\(X \sim \mathrm{Expo}(\lambda)\)</span> and <span class="math inline">\(T = X^{1/\gamma}\)</span> with <span class="math inline">\(\lambda &gt; 0\)</span>, <span class="math inline">\(\gamma &gt; 0\)</span>.</p>
 <p>The distribution of <span class="math inline">\(T\)</span> is called the <em>Weibull distribution</em> and we denote this by <span class="math inline">\(T \sim \mathrm{Weib}(\lambda, \gamma)\)</span>. We see that if <span class="math inline">\(\gamma = 1\)</span> then <span class="math inline">\(T\sim \mathrm{Weib}(\lambda, 1) = \mathrm{Expo}(\lambda)\)</span>.</p>
-<p>It is interesting to note that if <span class="math inline">\(T = X^{1/\gamma}\)</span> then <span class="math inline">\(X = T^{\gamma}\)</span>. Thus, if you have a random variable <span class="math inline">\(T\sim \mathrm{Weib}(\lambda, \gamma)\)</span>, then <span class="math inline">\(T^\gamma \sim \mathrm{Expo}(\lambda)\)</span>, and so <span class="math inline">\(T^\gamma\)</span> is memoryless, which can be used to examine whether <span class="math inline">\(T\)</span> is actually <em>Weibull</em> distributed.</p>
+<div class="rethinking">
+<p>
+It is interesting to note that if <span class="math inline"><span class="math inline">\(T = X^{1/\gamma}\)</span></span> then <span class="math inline"><span class="math inline">\(X = T^{\gamma}\)</span></span>. Thus, if you have a random variable <span class="math inline"><span class="math inline">\(T\sim \mathrm{Weib}(\lambda, \gamma)\)</span></span>, then <span class="math inline"><span class="math inline">\(T^\gamma \sim \mathrm{Expo}(\lambda)\)</span></span>, and so <span class="math inline"><span class="math inline">\(T^\gamma\)</span></span> is memoryless, which can be used to examine whether <span class="math inline"><span class="math inline">\(T\)</span></span> is actually <em>Weibull</em> distributed.
+</p>
+</div>
 <p>The <em>risk function</em> for a <em>Weibull</em> random variable is</p>
 <p><span class="math display">\[
 P(T \leq t) = F(t) = 1 - e^{\lambda t^{\gamma}}
@@ -341,7 +913,7 @@ P(T &gt; t) = S(t) = e^{\lambda t^\gamma}.
 <span id="cb8-10"><a href="#cb8-10"></a><span class="st">    </span><span class="kw">labs</span>(<span class="dt">title =</span> <span class="st">&quot;Weibull experiment: Density&quot;</span>,</span>
 <span id="cb8-11"><a href="#cb8-11"></a>         <span class="dt">subtitle =</span> <span class="st">&quot;Density of waiting X amount of time until event happens with rate 0.1 per unit of time and shape parameter 2.</span><span class="ch">\n</span><span class="st">This means that the square root of the survival time follows an exponential distribution&quot;</span>) <span class="op">+</span></span>
 <span id="cb8-12"><a href="#cb8-12"></a><span class="st">    </span><span class="kw">theme</span>(<span class="dt">axis.title =</span> <span class="kw">element_blank</span>())</span></code></pre></div>
-<p><img src="index_files/figure-html/unnamed-chunk-8-1.png" width="100%" /></p>
+<p><img src="index_files/figure-html/unnamed-chunk-15-1.png" width="100%" /></p>
 <div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1"></a>rate &lt;-<span class="st"> </span><span class="fl">0.1</span></span>
 <span id="cb9-2"><a href="#cb9-2"></a>shape &lt;-<span class="st"> </span><span class="dv">2</span></span>
 <span id="cb9-3"><a href="#cb9-3"></a>possible_times &lt;-<span class="st"> </span><span class="kw">seq</span>(<span class="dv">0</span>, <span class="dv">50</span>, <span class="dt">length.out =</span> <span class="dv">1000</span>)</span>
@@ -355,7 +927,7 @@ P(T &gt; t) = S(t) = e^{\lambda t^\gamma}.
 <span id="cb9-11"><a href="#cb9-11"></a><span class="st">    </span><span class="kw">labs</span>(<span class="dt">title =</span> <span class="st">&quot;Weibull experiment: Risk function&quot;</span>,</span>
 <span id="cb9-12"><a href="#cb9-12"></a>         <span class="dt">subtitle =</span> <span class="st">&quot;Probability of waiting X OR LESS amount of time until event happens with rate 0.1 per unit of time and shape parameter 2.</span><span class="ch">\n</span><span class="st">This means that the square root of the survival time follows an exponential distribution&quot;</span>) <span class="op">+</span></span>
 <span id="cb9-13"><a href="#cb9-13"></a><span class="st">    </span><span class="kw">theme</span>(<span class="dt">axis.title =</span> <span class="kw">element_blank</span>())</span></code></pre></div>
-<p><img src="index_files/figure-html/unnamed-chunk-9-1.png" width="100%" /></p>
+<p><img src="index_files/figure-html/unnamed-chunk-16-1.png" width="100%" /></p>
 <div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1"></a>rate &lt;-<span class="st"> </span><span class="fl">0.1</span></span>
 <span id="cb10-2"><a href="#cb10-2"></a>shape &lt;-<span class="st"> </span><span class="dv">2</span></span>
 <span id="cb10-3"><a href="#cb10-3"></a>possible_times &lt;-<span class="st"> </span><span class="kw">seq</span>(<span class="dv">0</span>, <span class="dv">50</span>, <span class="dt">length.out =</span> <span class="dv">1000</span>)</span>
@@ -369,7 +941,8 @@ P(T &gt; t) = S(t) = e^{\lambda t^\gamma}.
 <span id="cb10-11"><a href="#cb10-11"></a><span class="st">    </span><span class="kw">labs</span>(<span class="dt">title =</span> <span class="st">&quot;Weibull experiment: Survivor function&quot;</span>,</span>
 <span id="cb10-12"><a href="#cb10-12"></a>         <span class="dt">subtitle =</span> <span class="st">&quot;Probability of waiting MORE THAN X amount of time until event happens with rate 0.1 per unit of time and shape parameter 2.</span><span class="ch">\n</span><span class="st">This means that the square root of the survival time follows an exponential distribution&quot;</span>) <span class="op">+</span></span>
 <span id="cb10-13"><a href="#cb10-13"></a><span class="st">    </span><span class="kw">theme</span>(<span class="dt">axis.title =</span> <span class="kw">element_blank</span>())</span></code></pre></div>
-<p><img src="index_files/figure-html/unnamed-chunk-10-1.png" width="100%" /></p>
+<p><img src="index_files/figure-html/unnamed-chunk-17-1.png" width="100%" /></p>
+</div>
 </div>
 </div>
 </div>
