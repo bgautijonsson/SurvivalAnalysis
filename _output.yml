@@ -3,10 +3,10 @@ bookdown::gitbook:
   config:
     toc:
       before: |
-        <li><a href="https://english.hi.is">University of Iceland</a></li>
+        <li><a href="https://english.hi.is" taget="_blank">University of Iceland</a></li>
       after: |
-        <li><a href="https://github.com/bgautijonsson/survivalanalysis" target="blank">Published with bookdown</a></li>
-    download: ["pdf", "epub"]
+        <li><a href="https://github.com/bgautijonsson/survivalanalysis" target="_blank">Published with bookdown</a></li>
+    download: ["pdf"]
     code_folding: hide
   includes:
       in_header: header.html

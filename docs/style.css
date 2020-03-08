@@ -7,7 +7,7 @@
   margin: 0EM;
   padding-left: 20px;
   padding-bottom: 0em;
-  color: #3b556e;
+  color: #3C738E;
   border-radius: 25px 25px 0px 0px;
   border-bottom: 0px;
   font-size: 36pt;
@@ -22,7 +22,7 @@
   margin: 0;
   padding-left: 20px;
   padding-bottom: 0em;
-  color: #3b556e;
+  color: #3C738E;
   font-size: 18pt;
   font-style: normal;
   font-weight: normal;
@@ -37,7 +37,7 @@
   border-radius: 0px 0px 25px 25px;
   padding-left: 20px;
   color: #cccccc;
-  background: #3b556e;
+  background: #3C738E;
   font-family: "Fira Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
@@ -61,20 +61,20 @@
 }
 
 h1, h2 {
-  border-bottom: 2px solid #3b556e;
+  border-bottom: 2px solid #3C738E;
 }
 
 h1, h2, h3, h4 {
-  color: #3b556e;
+  color: #3C738E;
   font-family: "Fira Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
 a {
-color: #3b556e;
+color: #3C738E;
 }
 
 dt {
-  color: #3b556e;
+  color: #3C738E;
 }
 
 dd {
@@ -134,7 +134,7 @@ ol {
 }
 
 .book .book-summary {
-  background-color: #3b556e;
+  background-color: #3C738E;
 }
 
 .book .book-summary ul.summary li a {
@@ -148,7 +148,7 @@ ol {
 
 .book .book-summary ul.summary li a:hover {
   background-color: #aaaaaa;
-  color: #3b556e;
+  color: #3C738E;
 }
 
 .book .book-summary .book-search {

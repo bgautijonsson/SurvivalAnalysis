@@ -14,9 +14,7 @@ description: "This is a collection of lectures notes from the course at Universi
 
 # Preface {-}
 
-## The Book {-}
-
-These lecture notes are a companion for a course based on the book [Modelling Survival Data in Medical Research by David Collett](https://www.crcpress.com/Modelling-Survival-Data-in-Medical-Research/Collett/p/book/9781439856789)
+These lecture notes are a companion for a course [(LÝÐ079F)](https://ugla.hi.is/kennsluskra/index.php?tab=nam&chapter=namskeid&id=70762120200) based on the book [Modelling Survival Data in Medical Research by David Collett](https://www.crcpress.com/Modelling-Survival-Data-in-Medical-Research/Collett/p/book/9781439856789)
 
 ```{r, echo  = FALSE, fig.align='center'}
 knitr::include_graphics("https://images.tandf.co.uk/common/jackets/amazon/978143985/9781439856789.jpg")
@@ -98,7 +96,7 @@ $(document).ready(function () {
 ', sep = "\n"),
   paste0('
 <script>
-document.write(\'<div class="btn-group pull-right" style="position: absolute; top: 20%; right: 2%; z-index: 200"><button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" data-_extension-text-contrast=""><span>Code</span> <span class="caret"></span></button><ul class="dropdown-menu" style="min-width: 50px;"><li><a id="rmd-show-all-code" href="#">Show</a></li><li><a id="rmd-hide-all-code" href="#">Hide</a></li></ul></div>\')
+document.write(\'<div class="btn-group pull-right" style="position: absolute; top: 20%; right: 2%; z-index: 200"><button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" data-_extension-text-contrast=""><span>Code</span> <span class="caret"></span></button></div>\')
 </script>
 ')
 )
