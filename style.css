@@ -214,17 +214,17 @@ ol {
 
 .rethinking {
   background-color: #e4eff7;
-  padding-left: 2%;
-  padding-right: 2%;
+  padding-left: 1%;
+  padding-right: 1%;
   display: block;
   text-align: justify;
   margin-left: auto;
   margin-right: auto;
-  width: 98%;
+  width: 96%;
 }
 
 .rethinking:before {
-  content: "Rethinking";
+  content: "From a certain point of view";
   font-weight: bolder;
   display: block;
   margin-left: auto;
@@ -239,12 +239,12 @@ ol {
   text-align: justify;
   margin-left: auto;
   margin-right: auto;
-  width: 90%;
+  width: 94%;
   
 }
 
 .overthinking:before {
-  content: "Overthinking";
+  content: "In depth";
   font-weight: bolder;
   display: block;
   margin-left: auto;
