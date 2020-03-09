@@ -1,7 +1,9 @@
 bookdown::gitbook:
   css: style.css
   config:
+    highlight: tango
     toc:
+      collapse: section
       before: |
         <li><a href="https://english.hi.is" taget="_blank">University of Iceland</a></li>
       after: |

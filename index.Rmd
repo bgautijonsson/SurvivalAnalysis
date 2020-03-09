@@ -10,6 +10,8 @@ bibliography: [book.bib, packages.bib]
 biblio-style: apalike
 link-citations: yes
 description: "This is a collection of lectures notes from the course at University of Iceland"
+url: "https://bgautijonsson.github.io/SurvivaAnalysis"
+github-repo: "bgautijonsson/SurvivalAnalysis"
 ---
 
 # Preface {-}
